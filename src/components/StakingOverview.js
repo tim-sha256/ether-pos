@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Card, CardContent, TextField, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, useTheme, useMediaQuery, Stepper, Step, StepLabel } from '@mui/material';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Label } from 'recharts';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Box, Card, CardContent, TextField, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, useTheme, useMediaQuery, Stepper, Step, StepLabel, LinearProgress, Tooltip, IconButton } from '@mui/material';
+import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Label } from 'recharts';
 import { sha3_256 } from 'js-sha3';
 import 'katex/dist/katex.min.css';
 import { InlineMath } from 'react-katex';
 import sidebarContent from '../sidebarContent.json';
+import LockIcon from '@mui/icons-material/Lock';
+import SkipNextIcon from '@mui/icons-material/SkipNext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function StakingOverview() {
   const [stake, setStake] = useState('');
@@ -18,6 +21,9 @@ function StakingOverview() {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [activeStep, setActiveStep] = useState(0);
   const steps = ['Overview', 'Staking Input', 'Summary'];
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [showAllSteps, setShowAllSteps] = useState(false);
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF', '#FF67A1', '#FF6D00', '#A2FF67', '#67F7FF', '#FFD700'];
 
@@ -66,17 +72,90 @@ function StakingOverview() {
     setBlocksToValidate(Math.min(Math.max(value, 1), 32));
   };
 
-  const generateRandao = () => {
-    let currentHash = secretPhrase;
-    const steps = [];
+  const generateRandao = useCallback(() => {
+    setIsAnimating(true);
+    setCurrentStep(0);
+    setRandaoSteps([]);
 
-    for (let i = 0; i < blocksToValidate; i++) {
-      currentHash = `0x${sha3_256(currentHash)}`;
-      steps.push({ step: i + 1, hash: currentHash });
-    }
+    const animateStep = (step, previousHash) => {
+      if (step < blocksToValidate) {
+        setTimeout(() => {
+          setCurrentStep(step);
+          const currentHash = step === 0 ? secretPhrase : previousHash;
+          const newHash = `0x${sha3_256(currentHash)}`;
+          setRandaoSteps(prev => [...prev, { step: step + 1, hash: newHash }]);
+          animateStep(step + 1, newHash);
+        }, 1000); // Always animate with a delay for visibility
+      } else {
+        setIsAnimating(false);
+      }
+    };
 
-    setRandaoSteps(steps);
-  };
+    animateStep(0, secretPhrase);
+  }, [secretPhrase, blocksToValidate]);
+
+  const renderRandaoSection = () => (
+    <Card sx={{ width: '100%', mb: 4 }}>
+      <CardContent>
+        <Typography variant="h6" gutterBottom>RANDao Generation</Typography>
+        <TextField
+          label="Secret Phrase (max 16 characters)"
+          value={secretPhrase}
+          onChange={handleSecretPhraseChange}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          label="Number of Blocks to Validate (1-32)"
+          type="number"
+          value={blocksToValidate}
+          onChange={handleBlocksToValidateChange}
+          fullWidth
+          margin="normal"
+          InputProps={{ inputProps: { min: 1, max: 32 } }}
+        />
+        <Button variant="contained" onClick={generateRandao} disabled={isAnimating} sx={{ mt: 2 }}>
+          Generate RANDao
+        </Button>
+        {isAnimating && (
+          <Box sx={{ mt: 2 }}>
+            <LinearProgress variant="determinate" value={(currentStep / blocksToValidate) * 100} />
+          </Box>
+        )}
+        <AnimatePresence>
+          {randaoSteps.map((step, index) => (
+            <motion.div
+              key={step.step}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, mt: 2 }}>
+                <Typography variant="body2" sx={{ mr: 2, minWidth: 60 }}>
+                  Hash {step.step}:
+                </Typography>
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: 0 }}
+                >
+                  <LockIcon color="primary" />
+                </motion.div>
+                <Typography variant="body2" sx={{ ml: 2, wordBreak: 'break-all' }}>
+                  {step.hash}
+                </Typography>
+              </Box>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+        {randaoSteps.length > 0 && (
+          <Typography variant="body1" sx={{ mt: 2, fontWeight: 'bold' }}>
+            Final RANDao Commitment: {randaoSteps[randaoSteps.length - 1].hash}
+          </Typography>
+        )}
+      </CardContent>
+    </Card>
+  );
 
   const generateValidationCode = () => {
     const code = `0x${sha3_256(Math.random().toString()).substring(0, 40)}`;
@@ -240,7 +319,7 @@ function StakingOverview() {
                         }}
                       />
                     </Pie>
-                    <Tooltip />
+                    <RechartsTooltip />
                   </PieChart>
                 </ResponsiveContainer>
               </Box>
@@ -300,51 +379,7 @@ function StakingOverview() {
               </CardContent>
             </Card>
 
-            <Card sx={{ width: '100%', mb: 4 }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Randao Generation
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                  <Box sx={{ flex: 1 }}>
-                    <TextField
-                      label="Secret Phrase (max 16 characters)"
-                      value={secretPhrase}
-                      onChange={handleSecretPhraseChange}
-                      fullWidth
-                      margin="normal"
-                    />
-                    <TextField
-                      label="Number of Blocks to Validate (1-32)"
-                      type="number"
-                      value={blocksToValidate}
-                      onChange={handleBlocksToValidateChange}
-                      fullWidth
-                      margin="normal"
-                      InputProps={{ inputProps: { min: 1, max: 32 } }}
-                    />
-                    <Button variant="contained" onClick={generateRandao} sx={{ mt: 2 }}>
-                      Generate Randao
-                    </Button>
-                  </Box>
-                  <Box sx={{ flex: 1 }}>
-                    {randaoSteps.length > 0 && (
-                      <Box sx={{ mt: 2 }}>
-                        <Typography variant="subtitle1">Randao Generation Steps:</Typography>
-                        {randaoSteps.map((step, index) => (
-                          <Typography key={index} variant="body2">
-                            Hash {step.step}: {step.hash.substring(0, 12)}...
-                          </Typography>
-                        ))}
-                        <Typography variant="body1" sx={{ mt: 1 }}>
-                          Final Randao Commitment: <strong>{randaoSteps[randaoSteps.length - 1].hash}</strong>
-                        </Typography>
-                      </Box>
-                    )}
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
+            {renderRandaoSection()}
 
             <Card sx={{ width: '100%', mb: 4 }}>
               <CardContent>
@@ -429,7 +464,7 @@ function StakingOverview() {
                         }}
                       />
                     </Pie>
-                    <Tooltip />
+                    <RechartsTooltip />
                   </PieChart>
                 </ResponsiveContainer>
               </Box>
