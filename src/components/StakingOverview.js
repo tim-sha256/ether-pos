@@ -171,7 +171,17 @@ function StakingOverview() {
         randaoCommitment: randaoSteps[randaoSteps.length - 1].hash,
         withdrawalAddress: withdrawalAddress
       };
-      setValidators([...validators, newValidator]);
+      const updatedValidators = [...validators, newValidator];
+      setValidators(updatedValidators);
+      
+      // Save to localStorage
+      localStorage.setItem('validators', JSON.stringify(updatedValidators));
+      localStorage.setItem('userValidator', JSON.stringify({
+        secretPhrase,
+        hashSteps: blocksToValidate,
+        ...newValidator
+      }));
+      
       setActiveStep(2); // Move to the summary step after staking
     }
   };

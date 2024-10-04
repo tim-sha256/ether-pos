@@ -11,7 +11,20 @@
           "Validators earn rewards for helping to secure the network."
         ]
       },
-      "In this demo, we've pre-generated 15 validators to show how the network might look. The pie chart and table show the distribution of stakes among these validators."
+      "In this demo, we've pre-generated 15 validators to show how the network might look. The pie chart and table show the distribution of stakes among these validators.",
+      "Reward Calculation:",
+      "The validator's reward is calculated based on several factors:",
+      {
+        "type": "list",
+        "items": [
+          "The validator's effective balance (capped at 32 ETH)",
+          "The total value locked (TVL) in the network",
+          "A base reward rate",
+          "Additional rewards for finality",
+          "Potential penalties for misbehavior"
+        ]
+      },
+      "The actual reward can vary based on network conditions and validator performance. The simulation below gives an estimate of potential earnings over time."
     ]
   },
   "step1": {
@@ -32,7 +45,9 @@
         "type": "formula",
         "content": "R = H^n(\\text{secret phrase})"
       },
-      "Where H is the hash function, and n is the number of blocks to validate."
+      "Where H is the hash function, and n is the number of blocks to validate.",
+      "RANDAO Generation Process:",
+      "The RANDAO commitment is calculated through repeated hashing of your secret phrase. Each step in the animation represents one round of hashing, demonstrating how the final commitment is derived from your initial input."
     ]
   },
   "step2": {
@@ -40,6 +55,57 @@
     "content": [
       "You've successfully become a validator. Your contribution helps secure the Ethereum network and maintain its decentralized nature.",
       "The values you've generated (RANDAO commitment, validation code, etc.) are used in the validation process to ensure the integrity and security of the network."
+    ]
+  },
+  "validatorSelection0": {
+    "title": "RANDao Unrolling",
+    "content": [
+      "RANDao (Random Decentralized Autonomous Organization) is a mechanism used in Ethereum 2.0 to generate randomness for validator selection.",
+      "The process of RANDao unrolling involves:",
+      {
+        "type": "orderedList",
+        "items": [
+          "Starting with a secret phrase provided by the validator",
+          "Repeatedly hashing this phrase a specified number of times",
+          "The final hash becomes the RANDao commitment"
+        ]
+      },
+      "This process ensures that the randomness is unpredictable and cannot be manipulated by validators."
+    ]
+  },
+  "validatorSelection1": {
+    "title": "Global XOR Calculation",
+    "content": [
+      "The Global XOR (eXclusive OR) calculation is a crucial step in combining individual validator randomness with the global randomness of the Ethereum network.",
+      "The process involves:",
+      {
+        "type": "orderedList",
+        "items": [
+          "Taking the final RANDao commitment from the previous step",
+          "XORing it with the current global randomness value",
+          "The result becomes the seed for validator selection"
+        ]
+      },
+      "XOR operation ensures that even if one input is predictable, the output remains random as long as the other input is random.",
+      "For illustration purposes, we're showing the XOR process with shortened hashes. In practice, the full 256-bit (64 hexadecimal characters) hashes are used.",
+      "The color coding in the binary representation shows where the bits match (green) or differ (red). The XOR result has a '1' wherever the inputs differ, and '0' where they match.",
+      "This method of combining randomness sources helps prevent any single validator from manipulating the selection process, as they cannot predict or control the global RANDAO value."
+    ]
+  },
+  "validatorSelection2": {
+    "title": "Validator Selection",
+    "content": [
+      "The final step in the process is selecting a validator based on the random seed generated in the previous steps.",
+      "Key points of this process:",
+      {
+        "type": "list",
+        "items": [
+          "Validators are selected probabilistically based on their stake",
+          "Higher stake increases the chance of selection, but doesn't guarantee it",
+          "This method ensures fairness while also incentivizing higher stakes"
+        ]
+      },
+      "The selection process maintains the security and decentralization of the Ethereum network by preventing any single entity from controlling the validation process."
     ]
   }
 }
