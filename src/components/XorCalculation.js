@@ -106,6 +106,9 @@ function XorCalculation({ randaoResult, globalRandao, onComplete }) {
           <Typography variant="body1" sx={{ mt: 1 }}>
             Full XOR Result: {calculateFullXor(randaoResult, globalRandao)}
           </Typography>
+          <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic' }}>
+            This is the new Global Randao value
+          </Typography>
         </>
       )}
     </Box>

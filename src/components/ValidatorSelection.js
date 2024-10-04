@@ -4,7 +4,7 @@ import { sha3_256 } from 'js-sha3';
 import { useNavigate } from 'react-router-dom';
 import RandaoUnrolling from './RandaoUnrolling';
 import XorCalculation from './XorCalculation';
-import ValidatorSelectionWheel from './ValidatorSelectionWheel';
+import ValidatorSelectionVisualization from './ValidatorSelectionVisualization';
 import sidebarContent from '../sidebarContent.json';
 import { InlineMath } from 'react-katex';
 
@@ -209,7 +209,7 @@ function ValidatorSelection() {
               />
             )}
             {currentStep === 2 && (
-              <ValidatorSelectionWheel 
+              <ValidatorSelectionVisualization 
                 validators={validators}
                 randomValue={xorResult}
                 onSelect={handleValidatorSelection}
