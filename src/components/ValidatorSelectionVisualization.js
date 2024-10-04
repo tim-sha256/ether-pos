@@ -1,8 +1,11 @@
+/* global BigInt */
 import React, { useRef, useEffect, useState } from 'react';
 import { Box, Button, Typography, Paper } from '@mui/material';
 import * as d3 from 'd3';
+import 'katex/dist/katex.min.css';
+import { InlineMath } from 'react-katex';
 
-function ValidatorSelectionVisualization({ validators, randomValue, onSelect }) {
+function ValidatorSelectionVisualization({ validators, xorResult, onSelect }) {
   const [selectedValidator, setSelectedValidator] = useState(null);
   const [pseudoRandomValue, setPseudoRandomValue] = useState(null);
   const [tvl, setTvl] = useState(0);
@@ -11,11 +14,16 @@ function ValidatorSelectionVisualization({ validators, randomValue, onSelect }) 
   useEffect(() => {
     const totalStake = validators.reduce((sum, v) => sum + v.stake, 0);
     setTvl(totalStake);
-    drawChart();
   }, [validators]);
 
+  useEffect(() => {
+    if (tvl > 0) {
+      drawChart();
+    }
+  }, [tvl, validators]);
+
   const drawChart = () => {
-    const margin = { top: 40, right: 120, bottom: 40, left: 120 };
+    const margin = { top: 80, right: 120, bottom: 40, left: 120 }; // Increased top margin
     const width = 1000 - margin.left - margin.right;
     const height = 500 - margin.top - margin.bottom;
 
@@ -53,7 +61,7 @@ function ValidatorSelectionVisualization({ validators, randomValue, onSelect }) 
     validators.forEach((validator, i) => {
       const startX = x(cumulativeSum);
       const barWidth = x(validator.stake) - x(0);
-      const percentage = tvl > 0 ? (validator.stake / tvl) * 100 : 0; // Add this check
+      const percentage = tvl > 0 ? (validator.stake / tvl) * 100 : 0;
       
       svg.append("rect")
         .attr("x", startX)
@@ -95,14 +103,20 @@ function ValidatorSelectionVisualization({ validators, randomValue, onSelect }) 
   };
 
   const selectValidator = () => {
-    // Convert randomValue to a number between 0 and 1
-    const r = parseInt(randomValue, 16) / (2 ** 256 - 1);
-    setPseudoRandomValue(r);
+    // Convert xorResult to a number between 0 and 1
+    const xorNumber = parseInt(xorResult.slice(2), 16);
+    const maxSafeInteger = Number.MAX_SAFE_INTEGER; // 2^53 - 1
+    const r = xorNumber / maxSafeInteger;
+    
+    // Ensure r is a valid number between 0 and 1
+    const validR = isNaN(r) || r < 0 || r > 1 ? Math.random() : r;
+    
+    setPseudoRandomValue(validR * tvl);
 
     let selected = null;
     let cumulativeSum = 0;
     for (let validator of validators) {
-      if (r >= cumulativeSum / tvl && r < (cumulativeSum + validator.stake) / tvl) {
+      if (validR >= cumulativeSum / tvl && validR < (cumulativeSum + validator.stake) / tvl) {
         selected = validator;
         break;
       }
@@ -118,15 +132,15 @@ function ValidatorSelectionVisualization({ validators, randomValue, onSelect }) 
       .range([0, 1000 - 120 - 120]);
 
     svg.append("line")
-      .attr("x1", x(r * tvl))
+      .attr("x1", x(validR * tvl))
       .attr("y1", 0)
-      .attr("x2", x(r * tvl))
-      .attr("y2", 500 - 40 - 40)
+      .attr("x2", x(validR * tvl))
+      .attr("y2", 500 - 80 - 40)
       .attr("stroke", "red")
       .attr("stroke-width", 2);
 
     svg.append("text")
-      .attr("x", x(r * tvl))
+      .attr("x", x(validR * tvl))
       .attr("y", -10)
       .attr("text-anchor", "middle")
       .text("r")
@@ -137,12 +151,24 @@ function ValidatorSelectionVisualization({ validators, randomValue, onSelect }) 
     <Box>
       <Typography variant="h6" gutterBottom>Validator Selection</Typography>
       <Typography variant="body1" gutterBottom>
-        Random Value: {randomValue}
+        XOR Value from the previous step (new Global Randao): {xorResult || 'Not calculated yet'}
       </Typography>
+      <Typography variant="body1" gutterBottom>
+        The random number (r) between 0 and 1 is calculated as:
+      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+        <InlineMath>{`r = \\frac{\\text{parseInt(Global Randao, 16)}}{2^{256} - 1}`}</InlineMath>
+      </Box>
+      <Typography variant="body1" gutterBottom>
+        This number is then multiplied by the TVL to get the pseudorandom value for winner selection:
+      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+        <InlineMath>{`\\text{Pseudorandom Value} = r \\times \\text{TVL}`}</InlineMath>
+      </Box>
       <Typography variant="body1" gutterBottom>
         Total Value Locked (TVL): {tvl} ETH
       </Typography>
-      <Button variant="contained" onClick={selectValidator} disabled={!!selectedValidator}>
+      <Button variant="contained" onClick={selectValidator} disabled={!!selectedValidator || !xorResult}>
         Select Validator
       </Button>
       <Box ref={chartRef} sx={{ mt: 2, overflowX: 'auto' }} />
@@ -151,7 +177,7 @@ function ValidatorSelectionVisualization({ validators, randomValue, onSelect }) 
           <Typography variant="h6">Selected Validator</Typography>
           <Typography variant="body1">ID: <strong>{selectedValidator.id}</strong></Typography>
           <Typography variant="body1">Stake: <strong>{selectedValidator.stake} ETH</strong></Typography>
-          <Typography variant="body1">Pseudorandom value (r): <strong>{(pseudoRandomValue * tvl).toFixed(2)}</strong></Typography>
+          <Typography variant="body1">Pseudorandom value: <strong>{pseudoRandomValue.toFixed(2)} ETH</strong></Typography>
         </Paper>
       )}
     </Box>

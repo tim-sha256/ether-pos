@@ -185,9 +185,9 @@ function ValidatorSelection() {
       <Box sx={{ width: { xs: '100%', md: '75%' } }}>
         <Typography variant="h4" gutterBottom>Validator Selection Process</Typography>
         {userValidator && renderUserValidatorDetails()}
-        <Stepper activeStep={currentStep} alternativeLabel>
-          {steps.map((label) => (
-            <Step key={label}>
+        <Stepper activeStep={currentStep} alternativeLabel sx={{ mb: 4 }}>
+          {steps.map((label, index) => (
+            <Step key={index}>
               <StepLabel>{label}</StepLabel>
             </Step>
           ))}
@@ -211,7 +211,7 @@ function ValidatorSelection() {
             {currentStep === 2 && (
               <ValidatorSelectionVisualization 
                 validators={validators}
-                randomValue={xorResult}
+                xorResult={xorResult}
                 onSelect={handleValidatorSelection}
               />
             )}
