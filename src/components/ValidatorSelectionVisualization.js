@@ -1,74 +1,136 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography, Paper, Tooltip } from '@mui/material';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, ReferenceLine, Label, LabelList, Area, ComposedChart } from 'recharts';
+import React, { useRef, useEffect, useState } from 'react';
+import { Box, Button, Typography, Paper } from '@mui/material';
+import * as d3 from 'd3';
 
 function ValidatorSelectionVisualization({ validators, randomValue, onSelect }) {
   const [selectedValidator, setSelectedValidator] = useState(null);
   const [pseudoRandomValue, setPseudoRandomValue] = useState(null);
-  const [cumulativeData, setCumulativeData] = useState([]);
+  const [tvl, setTvl] = useState(0);
+  const chartRef = useRef(null);
 
   useEffect(() => {
-    let cumulativeSum = 0;
-    const data = validators.map(validator => {
-      const start = cumulativeSum;
-      cumulativeSum += validator.stake;
-      return {
-        id: validator.id,
-        name: `Validator ${validator.id}${validator.id === validators.length ? ' (you)' : ''}`,
-        stake: validator.stake,
-        start,
-        end: cumulativeSum,
-        cumulativeStake: cumulativeSum,
-        isUserCreated: validator.id === validators.length
-      };
-    });
-    setCumulativeData(data);
+    const totalStake = validators.reduce((sum, v) => sum + v.stake, 0);
+    setTvl(totalStake);
+    drawChart();
   }, [validators]);
 
+  const drawChart = () => {
+    const margin = { top: 40, right: 120, bottom: 40, left: 120 };
+    const width = 1000 - margin.left - margin.right;
+    const height = 500 - margin.top - margin.bottom;
+
+    d3.select(chartRef.current).selectAll("*").remove();
+
+    const svg = d3.select(chartRef.current)
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    const x = d3.scaleLinear()
+      .domain([0, tvl])
+      .range([0, width]);
+
+    const y = d3.scaleBand()
+      .range([0, height])
+      .domain(validators.map(d => `Validator ${d.id}`))
+      .padding(0.1);
+
+    svg.append("g")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(x))
+      .selectAll("text")
+      .style("text-anchor", "end")
+      .attr("dx", "-.8em")
+      .attr("dy", ".15em")
+      .attr("transform", "rotate(-65)");
+
+    svg.append("g")
+      .call(d3.axisLeft(y));
+
+    let cumulativeSum = 0;
+    validators.forEach((validator, i) => {
+      const startX = x(cumulativeSum);
+      const barWidth = x(validator.stake) - x(0);
+      const percentage = (validator.stake / tvl) * 100;
+      
+      svg.append("rect")
+        .attr("x", startX)
+        .attr("y", y(`Validator ${validator.id}`))
+        .attr("width", barWidth)
+        .attr("height", y.bandwidth())
+        .attr("fill", d3.schemeCategory10[i % 10])
+        .attr("stroke", validator.id === validators.length ? "black" : "none")
+        .attr("stroke-width", 2);
+
+      svg.append("text")
+        .attr("x", startX + barWidth / 2)
+        .attr("y", y(`Validator ${validator.id}`) + y.bandwidth() / 2)
+        .attr("dy", ".35em")
+        .attr("text-anchor", "middle")
+        .text(`${validator.stake} ETH`)
+        .style("fill", "white")
+        .style("font-size", "12px");
+
+      svg.append("text")
+        .attr("x", width + 10)
+        .attr("y", y(`Validator ${validator.id}`) + y.bandwidth() / 2)
+        .attr("dy", ".35em")
+        .attr("text-anchor", "start")
+        .text(`${percentage.toFixed(2)}%`)
+        .style("fill", "black")
+        .style("font-size", "12px");
+
+      cumulativeSum += validator.stake;
+    });
+
+    svg.append("text")
+      .attr("x", width / 2)
+      .attr("y", -margin.top / 2)
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .style("font-weight", "bold")
+      .text("Validator Stakes and Selection Probabilities");
+  };
+
   const selectValidator = () => {
-    const totalStake = validators.reduce((sum, v) => sum + v.stake, 0);
-    const r = (parseInt(randomValue, 16) / (2 ** 256 - 1)) * totalStake;
+    // Convert randomValue to a number between 0 and 1
+    const r = parseInt(randomValue, 16) / (2 ** 256 - 1);
     setPseudoRandomValue(r);
 
     let selected = null;
-    for (let validator of cumulativeData) {
-      if (r >= validator.start && r < validator.end) {
+    let cumulativeSum = 0;
+    for (let validator of validators) {
+      if (r >= cumulativeSum / tvl && r < (cumulativeSum + validator.stake) / tvl) {
         selected = validator;
         break;
       }
+      cumulativeSum += validator.stake;
     }
 
     setSelectedValidator(selected);
     onSelect(selected);
-  };
 
-  const CustomBar = (props) => {
-    const { x, y, width, height, fill, payload } = props;
-    return (
-      <Tooltip title={`Validator ${payload.id}: ${payload.stake} ETH`}>
-        <g>
-          <rect 
-            x={x} 
-            y={y} 
-            width={width} 
-            height={height} 
-            fill={payload.id === selectedValidator?.id ? '#4CAF50' : fill}
-            stroke={payload.isUserCreated ? '#000' : 'none'}
-            strokeWidth={2}
-          />
-        </g>
-      </Tooltip>
-    );
-  };
+    const svg = d3.select(chartRef.current).select("svg g");
+    const x = d3.scaleLinear()
+      .domain([0, tvl])
+      .range([0, 1000 - 120 - 120]);
 
-  const renderCustomizedLabel = (props) => {
-    const { x, y, width, height, value, name } = props;
-    const fontSize = Math.min(12, width / 5);
-    return (
-      <text x={x + width / 2} y={y + height / 2} fill="#fff" textAnchor="middle" dominantBaseline="central" fontSize={fontSize}>
-        {`${name}: ${value} ETH`}
-      </text>
-    );
+    svg.append("line")
+      .attr("x1", x(r * tvl))
+      .attr("y1", 0)
+      .attr("x2", x(r * tvl))
+      .attr("y2", 500 - 40 - 40)
+      .attr("stroke", "red")
+      .attr("stroke-width", 2);
+
+    svg.append("text")
+      .attr("x", x(r * tvl))
+      .attr("y", -10)
+      .attr("text-anchor", "middle")
+      .text("r")
+      .attr("fill", "red");
   };
 
   return (
@@ -77,68 +139,21 @@ function ValidatorSelectionVisualization({ validators, randomValue, onSelect }) 
       <Typography variant="body1" gutterBottom>
         Random Value: {randomValue}
       </Typography>
+      <Typography variant="body1" gutterBottom>
+        Total Value Locked (TVL): {tvl} ETH
+      </Typography>
       <Button variant="contained" onClick={selectValidator} disabled={!!selectedValidator}>
         Select Validator
       </Button>
-      <Box sx={{ height: 600, mt: 2 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart
-            data={cumulativeData}
-            layout="vertical"
-            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-          >
-            <XAxis type="number" />
-            <YAxis type="category" dataKey="name" width={150} />
-            <Bar dataKey="stake" fill="#8884d8" shape={<CustomBar />}>
-              <LabelList dataKey="stake" content={renderCustomizedLabel} />
-            </Bar>
-            <Area type="stepAfter" dataKey="cumulativeStake" stroke="#82ca9d" fill="#82ca9d" opacity={0.3} />
-            {pseudoRandomValue && (
-              <ReferenceLine
-                x={pseudoRandomValue}
-                stroke="red"
-                strokeWidth={2}
-                label={<Label value="r" position="top" />}
-              />
-            )}
-          </ComposedChart>
-        </ResponsiveContainer>
-      </Box>
+      <Box ref={chartRef} sx={{ mt: 2, overflowX: 'auto' }} />
       {selectedValidator && (
         <Paper elevation={3} sx={{ p: 2, mt: 2 }}>
           <Typography variant="h6">Selected Validator</Typography>
           <Typography variant="body1">ID: <strong>{selectedValidator.id}</strong></Typography>
           <Typography variant="body1">Stake: <strong>{selectedValidator.stake} ETH</strong></Typography>
-          <Typography variant="body1">Cumulative Range: <strong>[{selectedValidator.start.toFixed(2)}, {selectedValidator.end.toFixed(2)}]</strong></Typography>
-          <Typography variant="body1">Pseudorandom value (r): <strong>{pseudoRandomValue.toFixed(2)}</strong></Typography>
-          <Typography variant="body1">
-            Pseudorandom value (r) = <strong>{pseudoRandomValue.toFixed(2)}</strong> falls in Validator {selectedValidator.id}'s range: 
-            <strong>[{selectedValidator.start.toFixed(2)}, {selectedValidator.end.toFixed(2)}]</strong>
-          </Typography>
-          <Typography variant="body1">
-            <strong>Validator {selectedValidator.id} is selected to produce the next block.</strong>
-          </Typography>
+          <Typography variant="body1">Pseudorandom value (r): <strong>{(pseudoRandomValue * tvl).toFixed(2)}</strong></Typography>
         </Paper>
       )}
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="body2">Legend:</Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-          <Box sx={{ width: 20, height: 20, backgroundColor: '#8884d8', mr: 1 }} />
-          <Typography variant="body2">Validator Stake</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-          <Box sx={{ width: 20, height: 20, backgroundColor: '#82ca9d', opacity: 0.3, mr: 1 }} />
-          <Typography variant="body2">Cumulative Stake</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-          <Box sx={{ width: 20, height: 20, backgroundColor: '#4CAF50', mr: 1 }} />
-          <Typography variant="body2">Selected Validator</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-          <Box sx={{ width: 20, height: 20, border: '2px solid #000', mr: 1 }} />
-          <Typography variant="body2">Your Validator</Typography>
-        </Box>
-      </Box>
     </Box>
   );
 }
