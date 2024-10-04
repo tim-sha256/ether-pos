@@ -53,7 +53,7 @@ function ValidatorSelectionVisualization({ validators, randomValue, onSelect }) 
     validators.forEach((validator, i) => {
       const startX = x(cumulativeSum);
       const barWidth = x(validator.stake) - x(0);
-      const percentage = (validator.stake / tvl) * 100;
+      const percentage = tvl > 0 ? (validator.stake / tvl) * 100 : 0; // Add this check
       
       svg.append("rect")
         .attr("x", startX)
