@@ -13,7 +13,6 @@ function ValidatorSelection() {
   const [validators, setValidators] = useState([]);
   const [globalRandao, setGlobalRandao] = useState('');
   const [currentStep, setCurrentStep] = useState(0);
-  const [randaoSteps, setRandaoSteps] = useState([]);
   const [xorResult, setXorResult] = useState('');
   const [selectedValidator, setSelectedValidator] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
@@ -86,6 +85,15 @@ function ValidatorSelection() {
 
   const handleValidatorSelection = (validator) => {
     setSelectedValidator(validator);
+
+    // Save additional data to local storage
+    const selectionData = JSON.parse(localStorage.getItem('validatorSelectionData') || '[]');
+    selectionData.push({
+      selectedValidator: validator,
+      globalRandao: globalRandao,
+      timestamp: new Date().toISOString()
+    });
+    localStorage.setItem('validatorSelectionData', JSON.stringify(selectionData));
   };
 
   const handleAccordionChange = (event, isExpanded) => {
@@ -143,6 +151,7 @@ function ValidatorSelection() {
           </Box>
         );
       }
+      return null; // Add this line to satisfy the array-callback-return rule
     });
   };
 

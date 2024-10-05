@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, Card, CardContent, TextField, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, useTheme, useMediaQuery, Stepper, Step, StepLabel, LinearProgress, Tooltip, IconButton } from '@mui/material';
+import { Box, Card, CardContent, TextField, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, useTheme, useMediaQuery, Stepper, Step, StepLabel, LinearProgress } from '@mui/material';
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Label } from 'recharts';
 import { sha3_256 } from 'js-sha3';
 import 'katex/dist/katex.min.css';
 import { InlineMath } from 'react-katex';
 import sidebarContent from '../sidebarContent.json';
 import LockIcon from '@mui/icons-material/Lock';
-import SkipNextIcon from '@mui/icons-material/SkipNext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 function StakingOverview() {
   const [stake, setStake] = useState('');
@@ -17,13 +16,10 @@ function StakingOverview() {
   const [blocksToValidate, setBlocksToValidate] = useState(1);
   const [randaoSteps, setRandaoSteps] = useState([]);
   const [validationCode, setValidationCode] = useState('');
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [activeStep, setActiveStep] = useState(0);
   const steps = ['Overview', 'Staking Input', 'Summary'];
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [showAllSteps, setShowAllSteps] = useState(false);
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF', '#FF67A1', '#FF6D00', '#A2FF67', '#67F7FF', '#FFD700'];
 
@@ -122,32 +118,30 @@ function StakingOverview() {
             <LinearProgress variant="determinate" value={(currentStep / blocksToValidate) * 100} />
           </Box>
         )}
-        <AnimatePresence>
-          {randaoSteps.map((step, index) => (
-            <motion.div
-              key={step.step}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, mt: 2 }}>
-                <Typography variant="body2" sx={{ mr: 2, minWidth: 60 }}>
-                  Hash {step.step}:
-                </Typography>
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: 0 }}
-                >
-                  <LockIcon color="primary" />
-                </motion.div>
-                <Typography variant="body2" sx={{ ml: 2, wordBreak: 'break-all' }}>
-                  {step.hash}
-                </Typography>
-              </Box>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+        {randaoSteps.map((step) => (
+          <motion.div
+            key={step.step}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, mt: 2 }}>
+              <Typography variant="body2" sx={{ mr: 2, minWidth: 60 }}>
+                Hash {step.step}:
+              </Typography>
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: 0 }}
+              >
+                <LockIcon color="primary" />
+              </motion.div>
+              <Typography variant="body2" sx={{ ml: 2, wordBreak: 'break-all' }}>
+                {step.hash}
+              </Typography>
+            </Box>
+          </motion.div>
+        ))}
         {randaoSteps.length > 0 && (
           <Typography variant="body1" sx={{ mt: 2, fontWeight: 'bold' }}>
             Final RANDao Commitment: {randaoSteps[randaoSteps.length - 1].hash}
@@ -247,6 +241,7 @@ function StakingOverview() {
           </Box>
         );
       }
+      return null; // Add this line to satisfy the array-callback-return rule
     });
   };
 

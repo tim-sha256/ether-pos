@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography, Paper, Grid } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Box, Button, Typography, Paper } from '@mui/material';
+import { motion } from 'framer-motion';
 
 function XorCalculation({ randaoResult, globalRandao, onComplete }) {
   const [xorResult, setXorResult] = useState('');

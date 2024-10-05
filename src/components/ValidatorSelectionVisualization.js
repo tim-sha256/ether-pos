@@ -1,5 +1,4 @@
-/* global BigInt */
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Box, Button, Typography, Paper } from '@mui/material';
 import * as d3 from 'd3';
 import 'katex/dist/katex.min.css';
@@ -11,18 +10,7 @@ function ValidatorSelectionVisualization({ validators, xorResult, onSelect }) {
   const [tvl, setTvl] = useState(0);
   const chartRef = useRef(null);
 
-  useEffect(() => {
-    const totalStake = validators.reduce((sum, v) => sum + v.stake, 0);
-    setTvl(totalStake);
-  }, [validators]);
-
-  useEffect(() => {
-    if (tvl > 0) {
-      drawChart();
-    }
-  }, [tvl, validators]);
-
-  const drawChart = () => {
+  const drawChart = useCallback(() => {
     const margin = { top: 80, right: 120, bottom: 40, left: 180 }; // Increased left margin
     const width = 1000 - margin.left - margin.right;
     const height = 500 - margin.top - margin.bottom;
@@ -91,7 +79,18 @@ function ValidatorSelectionVisualization({ validators, xorResult, onSelect }) {
       .style("font-size", "16px")
       .style("font-weight", "bold")
       .text("Validator Stakes and Selection Probabilities");
-  };
+  }, [validators, tvl]);
+
+  useEffect(() => {
+    const totalStake = validators.reduce((sum, v) => sum + v.stake, 0);
+    setTvl(totalStake);
+  }, [validators]);
+
+  useEffect(() => {
+    if (tvl > 0) {
+      drawChart();
+    }
+  }, [tvl, drawChart]);
 
   const selectValidator = () => {
     // Convert xorResult to a number between 0 and 1
