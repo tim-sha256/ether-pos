@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, Card, CardContent, TextField, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, useTheme, useMediaQuery, Stepper, Step, StepLabel, LinearProgress } from '@mui/material';
+import { Box, Card, CardContent, TextField, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Stepper, Step, StepLabel, LinearProgress } from '@mui/material';
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Label } from 'recharts';
 import { sha3_256 } from 'js-sha3';
 import 'katex/dist/katex.min.css';
 import { InlineMath } from 'react-katex';
 import sidebarContent from '../sidebarContent.json';
 import LockIcon from '@mui/icons-material/Lock';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function StakingOverview() {
   const [stake, setStake] = useState('');

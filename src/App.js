@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 import StakingOverview from './components/StakingOverview';
 import ValidatorSelection from './components/ValidatorSelection';
+import BlockCreation from './components/BlockCreation';
 
 function App() {
   return (
@@ -18,13 +19,17 @@ function App() {
           <Button color="inherit" component={Link} to="/validator-selection">
             Validator Selection
           </Button>
+          <Button color="inherit" component={Link} to="/block-creation">
+            Block Creation
+          </Button>
         </Toolbar>
       </AppBar>
 
-      <Box sx={{ mt: 4, mb: 4 }}> {/* Added mb: 4 for bottom margin */}
+      <Box sx={{ mt: 4, mb: 4 }}>
         <Routes>
           <Route path="/" element={<StakingOverview />} />
           <Route path="/validator-selection" element={<ValidatorSelection />} />
+          <Route path="/block-creation" element={<BlockCreation />} />
         </Routes>
       </Box>
     </Router>
