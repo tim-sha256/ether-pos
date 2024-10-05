@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Card, CardContent, Button, Typography, Stepper, Step, StepLabel, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, Card, CardContent, Button, Typography, Stepper, Step, StepLabel, Dialog, DialogTitle, DialogContent, DialogActions, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { sha3_256 } from 'js-sha3';
 import { useNavigate } from 'react-router-dom';
 import RandaoUnrolling from './RandaoUnrolling';
@@ -18,6 +19,7 @@ function ValidatorSelection() {
   const [openDialog, setOpenDialog] = useState(false);
   const [userValidator, setUserValidator] = useState(null);
   const [randaoResult, setRandaoResult] = useState('');
+  const [expanded, setExpanded] = useState(true);
 
   const navigate = useNavigate();
 
@@ -86,18 +88,28 @@ function ValidatorSelection() {
     setSelectedValidator(validator);
   };
 
+  const handleAccordionChange = (event, isExpanded) => {
+    setExpanded(isExpanded);
+  };
+
   const renderUserValidatorDetails = () => (
-    <Card sx={{ mb: 4 }}>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>Your Validator Details</Typography>
+    <Accordion expanded={expanded} onChange={handleAccordionChange} sx={{ mb: 4 }}>
+      <AccordionSummary
+        expandIcon={<ExpandMoreIcon />}
+        aria-controls="validator-details-content"
+        id="validator-details-header"
+      >
+        <Typography variant="h6">Your Validator Details</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
         <Typography>Stake Amount: {userValidator.stake} ETH</Typography>
         <Typography>Validation Code: {userValidator.validationCode}</Typography>
         <Typography>Randao Commitment: {userValidator.randaoCommitment}</Typography>
         <Typography>Withdrawal Address: {userValidator.withdrawalAddress}</Typography>
         <Typography>Secret Phrase: {userValidator.secretPhrase}</Typography>
         <Typography>Number of Blocks: {userValidator.hashSteps}</Typography>
-      </CardContent>
-    </Card>
+      </AccordionDetails>
+    </Accordion>
   );
 
   const renderSidebarContent = (content) => {

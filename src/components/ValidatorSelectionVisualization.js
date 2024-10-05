@@ -23,7 +23,7 @@ function ValidatorSelectionVisualization({ validators, xorResult, onSelect }) {
   }, [tvl, validators]);
 
   const drawChart = () => {
-    const margin = { top: 80, right: 120, bottom: 40, left: 120 }; // Increased top margin
+    const margin = { top: 80, right: 120, bottom: 40, left: 180 }; // Increased left margin
     const width = 1000 - margin.left - margin.right;
     const height = 500 - margin.top - margin.bottom;
 
@@ -42,7 +42,7 @@ function ValidatorSelectionVisualization({ validators, xorResult, onSelect }) {
 
     const y = d3.scaleBand()
       .range([0, height])
-      .domain(validators.map(d => `Validator ${d.id}`))
+      .domain(validators.map(d => `Validator ${d.id} - ${d.stake} ETH`))
       .padding(0.1);
 
     svg.append("g")
@@ -65,7 +65,7 @@ function ValidatorSelectionVisualization({ validators, xorResult, onSelect }) {
       
       svg.append("rect")
         .attr("x", startX)
-        .attr("y", y(`Validator ${validator.id}`))
+        .attr("y", y(`Validator ${validator.id} - ${validator.stake} ETH`))
         .attr("width", barWidth)
         .attr("height", y.bandwidth())
         .attr("fill", d3.schemeCategory10[i % 10])
@@ -73,17 +73,8 @@ function ValidatorSelectionVisualization({ validators, xorResult, onSelect }) {
         .attr("stroke-width", 2);
 
       svg.append("text")
-        .attr("x", startX + barWidth / 2)
-        .attr("y", y(`Validator ${validator.id}`) + y.bandwidth() / 2)
-        .attr("dy", ".35em")
-        .attr("text-anchor", "middle")
-        .text(`${validator.stake} ETH`)
-        .style("fill", "white")
-        .style("font-size", "12px");
-
-      svg.append("text")
         .attr("x", width + 10)
-        .attr("y", y(`Validator ${validator.id}`) + y.bandwidth() / 2)
+        .attr("y", y(`Validator ${validator.id} - ${validator.stake} ETH`) + y.bandwidth() / 2)
         .attr("dy", ".35em")
         .attr("text-anchor", "start")
         .text(`${percentage.toFixed(2)}%`)
