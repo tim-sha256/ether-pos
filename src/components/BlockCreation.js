@@ -121,7 +121,6 @@ function BlockCreation() {
         {currentStep === 0 && (
           <BlockProposal 
             validator={validatorData?.selectedValidator}
-            transactions={transactions}
             onPropose={setProposedBlock}
           />
         )}
