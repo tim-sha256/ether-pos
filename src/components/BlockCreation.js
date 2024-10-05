@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Stepper, Step, StepLabel, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import sha256 from 'js-sha256';
+import sidebarContent from '../sidebarContent.json';
 
 // Import sub-components (we'll create these next)
 import BlockProposal from './BlockCreation/BlockProposal';
@@ -66,8 +67,28 @@ function BlockCreation() {
   };
 
   const renderSidebar = () => {
-    // Implement sidebar content based on currentStep
-    return null; // Placeholder return
+    const content = sidebarContent[`blockCreation${currentStep}`];
+    return (
+      <Box sx={{ p: 2, fontFamily: 'Inter, sans-serif' }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>{content.title}</Typography>
+        {content.content.map((item, index) => {
+          if (typeof item === 'string') {
+            return <Typography key={index} variant="body1" sx={{ mb: 2 }}>{item}</Typography>;
+          } else if (item.type === 'list') {
+            return (
+              <ul key={index}>
+                {item.items.map((listItem, listIndex) => (
+                  <li key={listIndex}>
+                    <Typography variant="body1">{listItem}</Typography>
+                  </li>
+                ))}
+              </ul>
+            );
+          }
+          return null;
+        })}
+      </Box>
+    );
   };
 
   return (
@@ -81,13 +102,13 @@ function BlockCreation() {
       px: { xs: 2, sm: 3, md: 4 }
     }}>
       <Box sx={{ 
-        width: { xs: '100%', md: '30%' }, 
+        width: { xs: '100%', md: '25%' }, 
         mb: { xs: 4, md: 0 }, 
         mr: { md: 4 } 
       }}>
         {renderSidebar()}
       </Box>
-      <Box sx={{ width: { xs: '100%', md: '70%' } }}>
+      <Box sx={{ width: { xs: '100%', md: '75%' } }}>
         <Typography variant="h4" gutterBottom>Block Creation</Typography>
         <Stepper activeStep={currentStep} alternativeLabel sx={{ mb: 4 }}>
           {steps.map((label, index) => (

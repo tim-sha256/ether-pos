@@ -107,5 +107,68 @@
       },
       "The selection process maintains the security and decentralization of the Ethereum network by preventing any single entity from controlling the validation process."
     ]
+  },
+  "blockCreation0": {
+    "title": "Block Proposal",
+    "content": [
+      "Block proposal is the first step in creating a new block in the Ethereum blockchain. Here's what happens during this phase:",
+      {
+        "type": "list",
+        "items": [
+          "The selected validator prepares a new block.",
+          "Transactions from the mempool are selected and included in the block.",
+          "The validator calculates the new state root after applying these transactions.",
+          "A block header is created, including metadata like the block number, timestamp, and previous block's hash.",
+          "The proposed block is then broadcast to other validators for attestation."
+        ]
+      },
+      "This process ensures that new transactions are added to the blockchain in an orderly and secure manner."
+    ]
+  },
+  "blockCreation1": {
+    "title": "Block Attestation",
+    "content": [
+      "Block attestation is the process where other validators confirm the validity of the proposed block. Key points include:",
+      {
+        "type": "list",
+        "items": [
+          "Validators check that the block proposal follows the protocol rules.",
+          "They verify the transactions and state transitions in the block.",
+          "If valid, validators sign an attestation to the block.",
+          "These attestations are collected and will be included in future blocks."
+        ]
+      }
+    ]
+  },
+  "blockCreation2": {
+    "title": "Block Aggregation",
+    "content": [
+      "Block aggregation involves collecting and combining attestations from multiple validators. This step is crucial for efficiency and scalability:",
+      {
+        "type": "list",
+        "items": [
+          "Attestations from different validators are gathered.",
+          "These attestations are compressed and aggregated into a single signature.",
+          "This aggregation significantly reduces the amount of data that needs to be stored on the blockchain.",
+          "It allows for a large number of validators to participate without overwhelming the network."
+        ]
+      }
+    ]
+  },
+  "blockCreation3": {
+    "title": "Incorporation into Chain",
+    "content": [
+      "The final step is incorporating the new block into the blockchain:",
+      {
+        "type": "list",
+        "items": [
+          "Once a block has received sufficient attestations, it's considered confirmed.",
+          "The block is added to the canonical chain.",
+          "The network state is updated to reflect the new block.",
+          "Validators start working on the next block, building on top of this newly added one."
+        ]
+      },
+      "This process ensures the continuous growth and security of the Ethereum blockchain."
+    ]
   }
 }
