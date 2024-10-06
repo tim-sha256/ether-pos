@@ -4,10 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import sha256 from 'js-sha256';
 import sidebarContent from '../sidebarContent.json';
 
-// Import sub-components (we'll create these next)
+// Import sub-components
 import BlockProposal from './BlockCreation/BlockProposal';
 import BlockAttestation from './BlockCreation/BlockAttestation';
-import BlockAggregation from './BlockCreation/BlockAggregation';
 import IncorporationIntoChain from './BlockCreation/IncorporationIntoChain';
 
 function BlockCreation() {
@@ -15,11 +14,12 @@ function BlockCreation() {
   const [validatorData, setValidatorData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [proposedBlock, setProposedBlock] = useState(null);
+  const [attestedValidators, setAttestedValidators] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   
   const navigate = useNavigate();
   
-  const steps = ['Block Proposal', 'Block Attestation', 'Block Aggregation', 'Incorporation into Chain'];
+  const steps = ['Block Proposal', 'Block Attestation', 'Incorporation into Chain'];
 
   useEffect(() => {
     const storedData = JSON.parse(localStorage.getItem('validatorSelectionData'));
@@ -64,6 +64,11 @@ function BlockCreation() {
 
   const handleBack = () => {
     setCurrentStep((prevStep) => prevStep - 1);
+  };
+
+  const handleAttestationComplete = (validators) => {
+    setAttestedValidators(validators);
+    handleNext();
   };
 
   const renderSidebar = () => {
@@ -127,16 +132,13 @@ function BlockCreation() {
         {currentStep === 1 && (
           <BlockAttestation 
             proposedBlock={proposedBlock}
+            onComplete={handleAttestationComplete}
           />
         )}
         {currentStep === 2 && (
-          <BlockAggregation 
-            proposedBlock={proposedBlock}
-          />
-        )}
-        {currentStep === 3 && (
           <IncorporationIntoChain 
             proposedBlock={proposedBlock}
+            attestedValidators={attestedValidators}
           />
         )}
 

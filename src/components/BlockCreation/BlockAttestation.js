@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, Typography, Paper, List, ListItem, ListItemText, Button } from '@mui/material';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import * as d3 from 'd3';
 import { useSpring, animated, config } from 'react-spring';
+import sha256 from 'js-sha256';
 
 function BlockAttestation({ proposedBlock, onComplete }) {
   const [validators, setValidators] = useState([]);
@@ -12,8 +13,12 @@ function BlockAttestation({ proposedBlock, onComplete }) {
   const [currentValidatorIndex, setCurrentValidatorIndex] = useState(0);
   const [debugInfo, setDebugInfo] = useState({});
   const [statusMessage, setStatusMessage] = useState('');
+  const [showAggregation, setShowAggregation] = useState(false);
+  const [aggregatedHash, setAggregatedHash] = useState('');
+  const [aggregationProgress, setAggregationProgress] = useState(0);
 
   const svgRef = React.useRef(null);
+  const aggregationRef = useRef(null);
 
   useEffect(() => {
     const storedValidators = JSON.parse(localStorage.getItem('validators') || '[]');
@@ -167,8 +172,95 @@ function BlockAttestation({ proposedBlock, onComplete }) {
     config: { ...config.molasses, duration: 2000 }
   });
 
+  const handleAggregateVotes = () => {
+    setShowAggregation(true);
+    simulateAggregation();
+  };
+
+  const simulateAggregation = () => {
+    const totalSteps = validators.length;
+    let currentStep = 0;
+
+    const interval = setInterval(() => {
+      if (currentStep >= totalSteps) {
+        clearInterval(interval);
+        const aggregatedVotes = validators.map(v => ({
+          validator_id: v.id,
+          approved: v.approved,
+          signature: `0x${sha256(v.id.toString() + v.approved.toString()).slice(0, 64)}`
+        }));
+        const aggregatedHash = sha256(JSON.stringify(aggregatedVotes));
+        setAggregatedHash(aggregatedHash);
+        return;
+      }
+
+      setAggregationProgress((currentStep + 1) / totalSteps * 100);
+      currentStep++;
+    }, 100);
+  };
+
+  const renderAggregationSection = () => (
+    <AnimatePresence>
+      {showAggregation && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+        >
+          <Paper elevation={3} sx={{ p: 2, mt: 2, width: '100%' }}>
+            <Typography variant="h6" gutterBottom>Block Aggregation</Typography>
+            <Box ref={aggregationRef} sx={{ height: 300, width: '100%', mb: 2 }}></Box>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              Aggregation Progress: {Math.round(aggregationProgress)}%
+            </Typography>
+            {aggregatedHash && (
+              <>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  Aggregated Attestation Commitment:
+                </Typography>
+                <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
+                  {aggregatedHash}
+                </Typography>
+                <Typography variant="body1" sx={{ mt: 2, fontWeight: 'bold', color: 'green' }}>
+                  Aggregated attestations successfully produced a valid commitment.
+                </Typography>
+              </>
+            )}
+          </Paper>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+  useEffect(() => {
+    if (showAggregation && aggregationRef.current) {
+      const svg = d3.select(aggregationRef.current)
+        .append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%');
+
+      const simulation = d3.forceSimulation(validators)
+        .force('charge', d3.forceManyBody().strength(-10))
+        .force('center', d3.forceCenter(aggregationRef.current.clientWidth / 2, aggregationRef.current.clientHeight / 2))
+        .force('collision', d3.forceCollide().radius(10));
+
+      const nodes = svg.selectAll('circle')
+        .data(validators)
+        .enter()
+        .append('circle')
+        .attr('r', 5)
+        .attr('fill', d => d.approved ? 'green' : 'red');
+
+      simulation.on('tick', () => {
+        nodes
+          .attr('cx', d => d.x)
+          .attr('cy', d => d.y);
+      });
+    }
+  }, [showAggregation, validators]);
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', width: '100%' }}>
       <Typography variant="h5" gutterBottom>Block Attestation</Typography>
       
       {/* Debug Information */}
@@ -252,17 +344,31 @@ function BlockAttestation({ proposedBlock, onComplete }) {
             Total Validators: {validators.length}<br />
             Approved: {validators.filter(v => v.approved).length} ({((validators.filter(v => v.approved).length / validators.length) * 100).toFixed(1)}%)<br />
             Rejected: {validators.filter(v => v.approved === false).length} ({((validators.filter(v => v.approved === false).length / validators.length) * 100).toFixed(1)}%)<br />
-            The proposing validator's block is successfully attested and ready for aggregation in the next step.
+            The proposing validator's block is successfully attested and ready for aggregation.
           </Typography>
           <Button 
             variant="contained" 
             color="primary" 
             sx={{ mt: 2 }}
-            onClick={() => onComplete(validators)}
+            onClick={handleAggregateVotes}
+            disabled={showAggregation}
           >
-            Next: Block Aggregation
+            Aggregate Votes
           </Button>
         </Paper>
+      )}
+
+      {renderAggregationSection()}
+
+      {showAggregation && aggregatedHash && (
+        <Button 
+          variant="contained" 
+          color="primary" 
+          sx={{ mt: 2, width: '100%' }}
+          onClick={() => onComplete(validators)}
+        >
+          Next: Incorporation into Chain
+        </Button>
       )}
     </Box>
   );
