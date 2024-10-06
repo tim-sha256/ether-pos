@@ -1,11 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Box, Typography, Paper, Button } from '@mui/material';
+import { Box, Typography, Paper, Button, LinearProgress, Tooltip } from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
+import Confetti from 'react-confetti';
 
 function ChainSelectionAndFinality() {
   const [chainData, setChainData] = useState({ finalized: [], proposed: null, forked: null });
   const [validators, setValidators] = useState([]);
   const [votes, setVotes] = useState([]);
   const [isFinalized, setIsFinalized] = useState(false);
+  const [votingProgress, setVotingProgress] = useState(0);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [voteStats, setVoteStats] = useState({ proposed: 0, forked: 0 });
   const svgRef = useRef(null);
 
   useEffect(() => {
@@ -16,7 +21,7 @@ function ChainSelectionAndFinality() {
     if (chainData.finalized.length > 0 && validators.length > 0) {
       drawChainVisualization();
     }
-  }, [chainData, validators, votes, isFinalized]);
+  }, [chainData, validators, votes, isFinalized, votingProgress]);
 
   const loadChainData = () => {
     const singleChain = JSON.parse(localStorage.getItem('singleChain') || '[]');
@@ -42,18 +47,40 @@ function ChainSelectionAndFinality() {
   };
 
   const simulateVoting = () => {
-    const newVotes = validators.map(validator => {
-      // Ensure at least 2/3 vote for the proposed chain
-      const voteForProposed = Math.random() < 0.8;
-      return { validator, voteForProposed };
-    });
-    setVotes(newVotes);
+    setVotes([]);
+    setVotingProgress(0);
+    setIsFinalized(false);
+    setVoteStats({ proposed: 0, forked: 0 });
 
-    const proposedVotes = newVotes.filter(v => v.voteForProposed).length;
-    if (proposedVotes >= Math.ceil(validators.length * 2 / 3)) {
-      setIsFinalized(true);
-      updateFinalizedChain();
-    }
+    const totalValidators = validators.length;
+    const requiredVotes = Math.ceil(totalValidators * 2 / 3);
+    const guaranteedVotes = Math.floor(requiredVotes * 1.1); // Ensure slightly more than 2/3 votes
+
+    validators.forEach((validator, index) => {
+      setTimeout(() => {
+        let voteForProposed;
+        if (index < guaranteedVotes) {
+          voteForProposed = true;
+        } else {
+          voteForProposed = Math.random() < 0.4; // 40% chance for remaining votes
+        }
+
+        setVotes(prevVotes => [...prevVotes, { validator, voteForProposed }]);
+        setVotingProgress((index + 1) / totalValidators * 100);
+
+        setVoteStats(prevStats => ({
+          proposed: voteForProposed ? prevStats.proposed + 1 : prevStats.proposed,
+          forked: voteForProposed ? prevStats.forked : prevStats.forked + 1
+        }));
+
+        if (index === totalValidators - 1) {
+          setIsFinalized(true);
+          updateFinalizedChain();
+          setShowConfetti(true);
+          setTimeout(() => setShowConfetti(false), 5000);
+        }
+      }, index * 1000);
+    });
   };
 
   const updateFinalizedChain = () => {
@@ -68,8 +95,8 @@ function ChainSelectionAndFinality() {
     const height = svg.clientHeight;
     const blockWidth = 144;
     const blockHeight = 80;
-    const horizontalGap = 50;
-    const verticalGap = 100;
+    const horizontalGap = 100;
+    const verticalGap = 150;
 
     // Clear previous content
     while (svg.firstChild) {
@@ -82,7 +109,7 @@ function ChainSelectionAndFinality() {
       const y = height / 2 - blockHeight / 2;
       drawBlock(svg, x, y, block, '#4caf50');
       if (index > 0) {
-        drawArrow(svg, x - horizontalGap, y + blockHeight / 2, x, y + blockHeight / 2);
+        drawCurvedArrow(svg, x - horizontalGap, y + blockHeight / 2, x, y + blockHeight / 2);
       }
     });
 
@@ -96,16 +123,36 @@ function ChainSelectionAndFinality() {
     drawBlock(svg, proposedX, forkedY, chainData.forked, isFinalized ? '#d32f2f' : '#ff9800');
 
     // Draw arrows to proposed and forked blocks
-    drawArrow(svg, lastX + blockWidth, height / 2, proposedX, proposedY + blockHeight / 2);
-    drawArrow(svg, lastX + blockWidth, height / 2, proposedX, forkedY + blockHeight / 2);
+    drawCurvedArrow(svg, lastX + blockWidth, height / 2, proposedX, proposedY + blockHeight / 2);
+    drawCurvedArrow(svg, lastX + blockWidth, height / 2, proposedX, forkedY + blockHeight / 2);
 
     // Draw votes
-    votes.forEach((vote, index) => {
-      const x = proposedX + blockWidth + 20;
-      const y = index * 20 + 20;
-      const color = vote.voteForProposed ? '#4caf50' : '#d32f2f';
-      drawVote(svg, x, y, color, vote.validator.id);
+    const proposedVotes = votes.filter(v => v.voteForProposed);
+    const forkedVotes = votes.filter(v => !v.voteForProposed);
+
+    proposedVotes.forEach((vote, index) => {
+      const x = proposedX + blockWidth + 20 + (index % 5) * 30;
+      const y = proposedY + blockHeight + 30 + Math.floor(index / 5) * 30;
+      drawVote(svg, x, y, '#2196f3', vote.validator.id, vote.validator.withdrawalAddress);
     });
+
+    forkedVotes.forEach((vote, index) => {
+      const x = proposedX + blockWidth + 20 + (index % 5) * 30;
+      const y = forkedY - 30 - Math.floor(index / 5) * 30;
+      drawVote(svg, x, y, '#ff9800', vote.validator.id, vote.validator.withdrawalAddress);
+    });
+
+    // Add "Discarded" label to forked block if finalized
+    if (isFinalized) {
+      const discardedLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      discardedLabel.setAttribute('x', proposedX + blockWidth / 2);
+      discardedLabel.setAttribute('y', forkedY - 20);
+      discardedLabel.setAttribute('text-anchor', 'middle');
+      discardedLabel.setAttribute('fill', '#d32f2f');
+      discardedLabel.setAttribute('font-size', '16px');
+      discardedLabel.textContent = 'Discarded';
+      svg.appendChild(discardedLabel);
+    }
   };
 
   const drawBlock = (svg, x, y, block, color) => {
@@ -139,33 +186,43 @@ function ChainSelectionAndFinality() {
     svg.appendChild(g);
   };
 
-  const drawArrow = (svg, x1, y1, x2, y2) => {
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', x1);
-    line.setAttribute('y1', y1);
-    line.setAttribute('x2', x2);
-    line.setAttribute('y2', y2);
-    line.setAttribute('stroke', 'black');
-    line.setAttribute('stroke-width', 2);
-    line.setAttribute('marker-end', 'url(#arrowhead)');
-    svg.appendChild(line);
+  const drawCurvedArrow = (svg, x1, y1, x2, y2) => {
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const midX = (x1 + x2) / 2;
+    const midY = (y1 + y2) / 2 - 30;
+    path.setAttribute('d', `M${x1},${y1} Q${midX},${midY} ${x2},${y2}`);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', 'black');
+    path.setAttribute('stroke-width', 2);
+    path.setAttribute('marker-end', 'url(#arrowhead)');
+    svg.appendChild(path);
   };
 
-  const drawVote = (svg, x, y, color, validatorId) => {
+  const drawVote = (svg, x, y, color, validatorId, withdrawalAddress) => {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     circle.setAttribute('cx', x);
     circle.setAttribute('cy', y);
-    circle.setAttribute('r', 5);
+    circle.setAttribute('r', 10);
     circle.setAttribute('fill', color);
-    svg.appendChild(circle);
+    g.appendChild(circle);
 
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    text.setAttribute('x', x + 10);
+    text.setAttribute('x', x);
     text.setAttribute('y', y);
     text.setAttribute('dy', '0.3em');
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('fill', 'white');
     text.setAttribute('font-size', '10px');
-    text.textContent = `Validator ${validatorId}`;
-    svg.appendChild(text);
+    text.textContent = validatorId;
+    g.appendChild(text);
+
+    const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+    title.textContent = `Validator ${validatorId}\nAddress: ${withdrawalAddress}`;
+    g.appendChild(title);
+
+    svg.appendChild(g);
   };
 
   return (
@@ -181,19 +238,13 @@ function ChainSelectionAndFinality() {
           Green: Finalized chain
         </Typography>
         <Typography variant="body2">
-          Blue: Proposed block (not yet finalized)
+          Blue: Proposed block and its votes
         </Typography>
         <Typography variant="body2">
-          Orange: Competing fork
-        </Typography>
-        <Typography variant="body2">
-          Green dots: Votes for proposed chain
-        </Typography>
-        <Typography variant="body2">
-          Red dots: Votes for competing fork
+          Orange: Competing fork and its votes
         </Typography>
       </Paper>
-      <Box sx={{ width: '100%', height: 400, mb: 2 }}>
+      <Box sx={{ width: '100%', height: 500, mb: 2 }}>
         <svg ref={svgRef} width="100%" height="100%">
           <defs>
             <marker id="arrowhead" markerWidth="10" markerHeight="7" 
@@ -206,15 +257,26 @@ function ChainSelectionAndFinality() {
       <Button variant="contained" onClick={simulateVoting} disabled={isFinalized} sx={{ mb: 2 }}>
         {isFinalized ? 'Finalized' : 'Simulate Voting'}
       </Button>
+      <Box sx={{ width: '100%', mb: 2 }}>
+        <LinearProgress variant="determinate" value={votingProgress} />
+      </Box>
       <Typography variant="body1" paragraph>
         {isFinalized 
           ? 'Consensus reached! The proposed chain has been finalized.' 
           : 'Click the button to simulate the voting process and reach consensus.'}
       </Typography>
+      <Typography variant="body1" paragraph>
+        Voting Statistics:
+        <br />
+        Proposed Chain: {voteStats.proposed} votes ({((voteStats.proposed / validators.length) * 100).toFixed(2)}%)
+        <br />
+        Competing Fork: {voteStats.forked} votes ({((voteStats.forked / validators.length) * 100).toFixed(2)}%)
+      </Typography>
       <Typography variant="body1">
         Once quorum is reached (at least 2/3 of validators vote for a chain), that chain becomes finalized and added to the main chain.
         The competing fork is discarded.
       </Typography>
+      {showConfetti && <Confetti />}
     </Box>
   );
 }
