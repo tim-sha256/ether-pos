@@ -3,6 +3,8 @@ import { Box, Typography, Paper, Button } from '@mui/material';
 
 function ForksAndDivergingChains() {
   const [chainData, setChainData] = useState({ finalized: [], proposed: null, forked: null });
+  const [selectedValidator, setSelectedValidator] = useState(null);
+  const [competingValidator, setCompetingValidator] = useState(null);
   const svgRef = useRef(null);
 
   useEffect(() => {
@@ -13,19 +15,32 @@ function ForksAndDivergingChains() {
     if (chainData.finalized.length > 0) {
       drawChainVisualization();
     }
-  }, [chainData]);
+  }, [chainData, selectedValidator, competingValidator]);
 
   const loadChainData = () => {
     const singleChain = JSON.parse(localStorage.getItem('singleChain') || '[]');
-    const proposedBlockData = JSON.parse(localStorage.getItem('proposedBlockData') || '{}');
+    const validators = JSON.parse(localStorage.getItem('validators') || '[]');
 
-    if (singleChain.length === 0 || !proposedBlockData.blockHeader) {
-      console.error('No chain data or proposed block found in local storage');
+    if (singleChain.length === 0) {
+      console.error('No chain data found in local storage');
       return;
     }
 
-    const finalizedChain = singleChain.slice(0, -1); // Exclude the last block as it's not finalized yet
-    const proposedBlock = proposedBlockData.blockHeader;
+    const finalizedChain = singleChain.slice(0, -1);
+    const proposedBlock = singleChain[singleChain.length - 1];
+    
+    // Set the selected validator
+    const selectedValidatorId = proposedBlock.feeRecipient?.validatorId;
+    setSelectedValidator({ id: selectedValidatorId, withdrawalAddress: proposedBlock.feeRecipient?.withdrawalAddress });
+
+    // Choose a competing validator
+    let competingValidator;
+    do {
+      const competingValidatorIndex = Math.floor(Math.random() * validators.length);
+      competingValidator = validators[competingValidatorIndex];
+    } while (competingValidator.id === selectedValidatorId);
+    setCompetingValidator(competingValidator);
+
     const forkedBlock = {
       ...proposedBlock,
       hash: `0x${Math.random().toString(36).substr(2, 64)}`,
@@ -37,14 +52,20 @@ function ForksAndDivergingChains() {
       proposed: proposedBlock,
       forked: forkedBlock
     });
+
+    // Store competing fork data
+    localStorage.setItem('competingForkData', JSON.stringify({
+      validator: competingValidator,
+      block: forkedBlock
+    }));
   };
 
   const drawChainVisualization = () => {
     const svg = svgRef.current;
     const width = svg.clientWidth;
     const height = svg.clientHeight;
-    const blockWidth = 144; // 20% thinner than 180
-    const blockHeight = 80; // 20% thinner than 100
+    const blockWidth = 144;
+    const blockHeight = 80;
     const horizontalGap = 50;
     const verticalGap = 100;
 
@@ -69,15 +90,15 @@ function ForksAndDivergingChains() {
     const proposedY = height / 2 - blockHeight - verticalGap / 2;
     const forkedY = height / 2 + verticalGap / 2;
 
-    drawBlock(svg, proposedX, proposedY, chainData.proposed, '#2196f3');
-    drawBlock(svg, proposedX, forkedY, chainData.forked, '#ff9800');
+    drawBlock(svg, proposedX, proposedY, chainData.proposed, '#2196f3', selectedValidator);
+    drawBlock(svg, proposedX, forkedY, chainData.forked, '#ff9800', competingValidator);
 
     // Draw arrows to proposed and forked blocks
     drawArrow(svg, lastX + blockWidth, height / 2, proposedX, proposedY + blockHeight / 2);
     drawArrow(svg, lastX + blockWidth, height / 2, proposedX, forkedY + blockHeight / 2);
   };
 
-  const drawBlock = (svg, x, y, block, color) => {
+  const drawBlock = (svg, x, y, block, color, validator) => {
     const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     
     const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -92,18 +113,21 @@ function ForksAndDivergingChains() {
     const addText = (text, dy) => {
       const textElement = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       textElement.setAttribute('x', x + 72);
-      textElement.setAttribute('y', y + 40); // Center vertically
+      textElement.setAttribute('y', y + 40);
       textElement.setAttribute('dy', dy);
       textElement.setAttribute('text-anchor', 'middle');
       textElement.setAttribute('fill', 'white');
-      textElement.setAttribute('font-size', '12px');
+      textElement.setAttribute('font-size', '11px');
       textElement.textContent = text;
       g.appendChild(textElement);
     };
 
-    addText(`Block ${block.blockNumber}`, '-1.2em');
-    addText(`Hash: ${block.hash.slice(0, 6)}...${block.hash.slice(-4)}`, '0em');
-    addText(`Parent: ${block.parentHash.slice(0, 6)}...${block.parentHash.slice(-4)}`, '1.2em');
+    addText(`Block ${block.blockNumber}`, '-1.6em');
+    addText(`Hash: ${block.hash.slice(0, 6)}...${block.hash.slice(-4)}`, '-0.4em');
+    addText(`Parent: ${block.parentHash.slice(0, 6)}...${block.parentHash.slice(-4)}`, '0.8em');
+    if (validator) {
+      addText(`Validator: ${validator.id}`, '2em');
+    }
 
     svg.appendChild(g);
   };
@@ -137,10 +161,10 @@ function ForksAndDivergingChains() {
           Green: Finalized chain stored in local storage.
         </Typography>
         <Typography variant="body2">
-          Blue: Our proposed block continuing the chain.
+          Blue: Our proposed block continuing the chain (Validator {selectedValidator?.id || 'N/A'}).
         </Typography>
         <Typography variant="body2">
-          Orange: A competing fork with a different block hash and state root.
+          Orange: A competing fork with a different block hash and state root (Validator {competingValidator?.id || 'N/A'}).
         </Typography>
       </Paper>
       <Box sx={{ width: '100%', height: 400, mb: 2 }}>
@@ -156,10 +180,16 @@ function ForksAndDivergingChains() {
       <Button variant="contained" onClick={handleRegenerateFork} sx={{ mb: 2 }}>
         Regenerate Fork
       </Button>
+      <Typography variant="body1" paragraph>
+        This visualization shows how forks can occur when multiple validators propose blocks simultaneously. 
+        The blue block represents the proposal by the officially selected validator (Validator {selectedValidator?.id || 'N/A'}, 
+        address: {selectedValidator?.withdrawalAddress ? `${selectedValidator.withdrawalAddress.slice(0, 6)}...${selectedValidator.withdrawalAddress.slice(-4)}` : 'N/A'}), 
+        while the orange block represents a competing proposal from Validator {competingValidator?.id || 'N/A'}.
+      </Typography>
       <Typography variant="body1">
-        This visualization shows how forks can occur when multiple validators propose blocks at the same time. 
-        Notice that while the block numbers and parent hashes are the same for the forked blocks, their block hashes differ.
-        In the next step, we'll explore how consensus is reached to finalize one of these branches.
+        In a perfect scenario, only one block is proposed for each slot, but due to real-world network conditions, 
+        competing blocks may occasionally be proposed by other validators. Notice that while the block numbers and 
+        parent hashes are the same for the forked blocks, their block hashes differ.
       </Typography>
     </Box>
   );
