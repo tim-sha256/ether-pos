@@ -54,16 +54,40 @@ function ChainSelectionAndFinality() {
 
     const totalValidators = validators.length;
     const requiredVotes = Math.ceil(totalValidators * 2 / 3);
-    const guaranteedVotes = Math.floor(requiredVotes * 1.1); // Ensure slightly more than 2/3 votes
 
+    // Create an array of random votes
+    const randomVotes = validators.map(() => Math.random() < 0.5);
+
+    // Count initial votes for the proposed chain
+    let proposedVotes = randomVotes.filter(v => v).length;
+
+    // If we don't have enough votes for the proposed chain, flip some votes
+    if (proposedVotes < requiredVotes) {
+      const votesToFlip = requiredVotes - proposedVotes;
+      const noVoteIndices = randomVotes.reduce((acc, vote, index) => {
+        if (!vote) acc.push(index);
+        return acc;
+      }, []);
+
+      // Shuffle the noVoteIndices array
+      for (let i = noVoteIndices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [noVoteIndices[i], noVoteIndices[j]] = [noVoteIndices[j], noVoteIndices[i]];
+      }
+
+      // Flip votes in random order
+      for (let i = 0; i < votesToFlip; i++) {
+        if (i < noVoteIndices.length) {
+          randomVotes[noVoteIndices[i]] = true;
+          proposedVotes++;
+        }
+      }
+    }
+
+    // Simulate voting process
     validators.forEach((validator, index) => {
       setTimeout(() => {
-        let voteForProposed;
-        if (index < guaranteedVotes) {
-          voteForProposed = true;
-        } else {
-          voteForProposed = Math.random() < 0.4; // 40% chance for remaining votes
-        }
+        const voteForProposed = randomVotes[index];
 
         setVotes(prevVotes => [...prevVotes, { validator, voteForProposed }]);
         setVotingProgress((index + 1) / totalValidators * 100);
@@ -93,53 +117,61 @@ function ChainSelectionAndFinality() {
     const svg = svgRef.current;
     const width = svg.clientWidth;
     const height = svg.clientHeight;
-    const blockWidth = 144;
-    const blockHeight = 80;
-    const horizontalGap = 100;
-    const verticalGap = 150;
+    const blockWidth = Math.min(144, width * 0.15);
+    const blockHeight = blockWidth * 0.55;
+    const horizontalGap = blockWidth * 0.7;
+    const verticalGap = blockHeight * 1.5;
 
     // Clear previous content
     while (svg.firstChild) {
       svg.removeChild(svg.firstChild);
     }
 
+    // Calculate the maximum number of blocks that can fit horizontally
+    const maxBlocks = Math.floor((width - blockWidth) / (blockWidth + horizontalGap));
+    const finalizedChain = chainData.finalized.slice(-maxBlocks);
+
     // Draw finalized chain
-    chainData.finalized.forEach((block, index) => {
+    finalizedChain.forEach((block, index) => {
       const x = index * (blockWidth + horizontalGap);
-      const y = height / 2 - blockHeight / 2;
-      drawBlock(svg, x, y, block, '#4caf50');
+      const y = height / 3 - blockHeight / 2;
+      drawBlock(svg, x, y, block, '#4caf50', blockWidth, blockHeight);
       if (index > 0) {
         drawCurvedArrow(svg, x - horizontalGap, y + blockHeight / 2, x, y + blockHeight / 2);
       }
     });
 
     // Draw proposed and forked blocks
-    const lastX = (chainData.finalized.length - 1) * (blockWidth + horizontalGap);
+    const lastX = (finalizedChain.length - 1) * (blockWidth + horizontalGap);
     const proposedX = lastX + blockWidth + horizontalGap;
-    const proposedY = height / 2 - blockHeight - verticalGap / 2;
-    const forkedY = height / 2 + verticalGap / 2;
+    const proposedY = height / 3 - blockHeight / 2;
+    const forkedY = height / 3 + verticalGap;
 
-    drawBlock(svg, proposedX, proposedY, chainData.proposed, isFinalized ? '#4caf50' : '#2196f3');
-    drawBlock(svg, proposedX, forkedY, chainData.forked, isFinalized ? '#d32f2f' : '#ff9800');
+    drawBlock(svg, proposedX, proposedY, chainData.proposed, isFinalized ? '#4caf50' : '#2196f3', blockWidth, blockHeight);
+    drawBlock(svg, proposedX, forkedY, chainData.forked, isFinalized ? '#d32f2f' : '#ff9800', blockWidth, blockHeight);
 
     // Draw arrows to proposed and forked blocks
-    drawCurvedArrow(svg, lastX + blockWidth, height / 2, proposedX, proposedY + blockHeight / 2);
-    drawCurvedArrow(svg, lastX + blockWidth, height / 2, proposedX, forkedY + blockHeight / 2);
+    drawCurvedArrow(svg, lastX + blockWidth, height / 3, proposedX, proposedY + blockHeight / 2);
+    drawCurvedArrow(svg, lastX + blockWidth, height / 3, proposedX, forkedY + blockHeight / 2);
 
     // Draw votes
     const proposedVotes = votes.filter(v => v.voteForProposed);
     const forkedVotes = votes.filter(v => !v.voteForProposed);
 
+    const voteRadius = Math.min(10, blockWidth * 0.07);
+    const voteSpacing = voteRadius * 2.5;
+    const votesPerRow = Math.floor(width / voteSpacing);
+
     proposedVotes.forEach((vote, index) => {
-      const x = proposedX + blockWidth + 20 + (index % 5) * 30;
-      const y = proposedY + blockHeight + 30 + Math.floor(index / 5) * 30;
-      drawVote(svg, x, y, '#2196f3', vote.validator.id, vote.validator.withdrawalAddress);
+      const x = (index % votesPerRow) * voteSpacing + voteSpacing / 2;
+      const y = height * 2/3 + Math.floor(index / votesPerRow) * voteSpacing + voteSpacing / 2;
+      drawVote(svg, x, y, '#2196f3', vote.validator.id, vote.validator.withdrawalAddress, voteRadius);
     });
 
     forkedVotes.forEach((vote, index) => {
-      const x = proposedX + blockWidth + 20 + (index % 5) * 30;
-      const y = forkedY - 30 - Math.floor(index / 5) * 30;
-      drawVote(svg, x, y, '#ff9800', vote.validator.id, vote.validator.withdrawalAddress);
+      const x = (index % votesPerRow) * voteSpacing + voteSpacing / 2;
+      const y = height * 5/6 + Math.floor(index / votesPerRow) * voteSpacing + voteSpacing / 2;
+      drawVote(svg, x, y, '#ff9800', vote.validator.id, vote.validator.withdrawalAddress, voteRadius);
     });
 
     // Add "Discarded" label to forked block if finalized
@@ -155,22 +187,22 @@ function ChainSelectionAndFinality() {
     }
   };
 
-  const drawBlock = (svg, x, y, block, color) => {
+  const drawBlock = (svg, x, y, block, color, width, height) => {
     const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     
     const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     rect.setAttribute('x', x);
     rect.setAttribute('y', y);
-    rect.setAttribute('width', 144);
-    rect.setAttribute('height', 80);
+    rect.setAttribute('width', width);
+    rect.setAttribute('height', height);
     rect.setAttribute('fill', color);
     rect.setAttribute('rx', 5);
     g.appendChild(rect);
 
     const addText = (text, dy) => {
       const textElement = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      textElement.setAttribute('x', x + 72);
-      textElement.setAttribute('y', y + 40);
+      textElement.setAttribute('x', x + width / 2);
+      textElement.setAttribute('y', y + height / 2);
       textElement.setAttribute('dy', dy);
       textElement.setAttribute('text-anchor', 'middle');
       textElement.setAttribute('fill', 'white');
@@ -198,13 +230,13 @@ function ChainSelectionAndFinality() {
     svg.appendChild(path);
   };
 
-  const drawVote = (svg, x, y, color, validatorId, withdrawalAddress) => {
+  const drawVote = (svg, x, y, color, validatorId, withdrawalAddress, radius) => {
     const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
 
     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     circle.setAttribute('cx', x);
     circle.setAttribute('cy', y);
-    circle.setAttribute('r', 10);
+    circle.setAttribute('r', radius);
     circle.setAttribute('fill', color);
     g.appendChild(circle);
 
@@ -244,7 +276,7 @@ function ChainSelectionAndFinality() {
           Orange: Competing fork and its votes
         </Typography>
       </Paper>
-      <Box sx={{ width: '100%', height: 500, mb: 2 }}>
+      <Box sx={{ width: '100%', height: 600, mb: 2 }}> {/* Increased height to accommodate votes below */}
         <svg ref={svgRef} width="100%" height="100%">
           <defs>
             <marker id="arrowhead" markerWidth="10" markerHeight="7" 
