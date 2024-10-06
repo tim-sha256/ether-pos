@@ -24,16 +24,20 @@ function IncorporationIntoChain() {
       };
       setNewBlock(newBlockData);
 
-      // Generate previous blocks
+      // Generate previous blocks with correct parent hashes
       const previousBlocks = [];
-      for (let i = 1; i <= 3; i++) {
-        previousBlocks.push({
+      for (let i = 3; i >= 1; i--) {
+        const block = {
           blockNumber: newBlockData.blockNumber - i,
           hash: i === 1 ? newBlockData.parentHash : `0x${Math.random().toString(36).substr(2, 64)}`,
-          parentHash: `0x${Math.random().toString(36).substr(2, 64)}`
-        });
+          parentHash: i === 3 ? `0x${Math.random().toString(36).substr(2, 64)}` : ''
+        };
+        if (i < 3) {
+          block.parentHash = previousBlocks[previousBlocks.length - 1].hash;
+        }
+        previousBlocks.push(block);
       }
-      setBlockchain([...previousBlocks.reverse(), newBlockData]);
+      setBlockchain([...previousBlocks, newBlockData]);
     }
   }, []);
 
