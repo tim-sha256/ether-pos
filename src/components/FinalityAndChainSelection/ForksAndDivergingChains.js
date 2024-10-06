@@ -1,112 +1,127 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Box, Typography, Button } from '@mui/material';
-import * as d3 from 'd3';
+import React, { useEffect, useState, useRef } from 'react';
+import { Box, Typography, Paper, Button } from '@mui/material';
 
-function ForksAndDivergingChains({ chainData, validatorData }) {
+function ForksAndDivergingChains() {
+  const [chainData, setChainData] = useState({ finalized: [], proposed: null, forked: null });
   const svgRef = useRef(null);
-  const [forks, setForks] = useState([]);
 
   useEffect(() => {
-    if (chainData && validatorData) {
-      generateForks();
-    }
-  }, [chainData, validatorData]);
+    loadChainData();
+  }, []);
 
   useEffect(() => {
-    if (forks.length > 0) {
-      drawForkVisualization();
+    if (chainData.finalized.length > 0) {
+      drawChainVisualization();
     }
-  }, [forks]);
+  }, [chainData]);
 
-  const generateForks = () => {
-    const lastBlock = chainData[chainData.length - 1];
-    const newForks = [
-      {
-        id: 'main',
-        blocks: chainData,
-        validator: validatorData
-      },
-      {
-        id: 'fork1',
-        blocks: [
-          ...chainData.slice(0, -1),
-          {
-            ...lastBlock,
-            hash: `0x${Math.random().toString(36).substr(2, 64)}`,
-            stateRoot: `0x${Math.random().toString(36).substr(2, 64)}`
-          }
-        ],
-        validator: { ...validatorData, id: validatorData.id + 1 }
-      },
-      {
-        id: 'fork2',
-        blocks: [
-          ...chainData.slice(0, -1),
-          {
-            ...lastBlock,
-            hash: `0x${Math.random().toString(36).substr(2, 64)}`,
-            stateRoot: `0x${Math.random().toString(36).substr(2, 64)}`
-          }
-        ],
-        validator: { ...validatorData, id: validatorData.id + 2 }
-      }
-    ];
-    setForks(newForks);
+  const loadChainData = () => {
+    const singleChain = JSON.parse(localStorage.getItem('singleChain') || '[]');
+    const proposedBlockData = JSON.parse(localStorage.getItem('proposedBlockData') || '{}');
+
+    if (singleChain.length === 0 || !proposedBlockData.blockHeader) {
+      console.error('No chain data or proposed block found in local storage');
+      return;
+    }
+
+    const finalizedChain = singleChain.slice(0, -1); // Exclude the last block as it's not finalized yet
+    const proposedBlock = proposedBlockData.blockHeader;
+    const forkedBlock = {
+      ...proposedBlock,
+      hash: `0x${Math.random().toString(36).substr(2, 64)}`,
+      stateRoot: `0x${Math.random().toString(36).substr(2, 64)}`
+    };
+
+    setChainData({
+      finalized: finalizedChain,
+      proposed: proposedBlock,
+      forked: forkedBlock
+    });
   };
 
-  const drawForkVisualization = () => {
-    const svg = d3.select(svgRef.current);
-    svg.selectAll("*").remove();
+  const drawChainVisualization = () => {
+    const svg = svgRef.current;
+    const width = svg.clientWidth;
+    const height = svg.clientHeight;
+    const blockWidth = 144; // 20% thinner than 180
+    const blockHeight = 80; // 20% thinner than 100
+    const horizontalGap = 50;
+    const verticalGap = 100;
 
-    const width = 800;
-    const height = 400;
-    const blockWidth = 100;
-    const blockHeight = 50;
-    const blockSpacing = 120;
-    const forkSpacing = 80;
+    // Clear previous content
+    while (svg.firstChild) {
+      svg.removeChild(svg.firstChild);
+    }
 
-    svg.attr("width", width).attr("height", height);
-
-    forks.forEach((fork, forkIndex) => {
-      const forkGroup = svg.append("g")
-        .attr("transform", `translate(0, ${forkIndex * forkSpacing})`);
-
-      fork.blocks.forEach((block, blockIndex) => {
-        const blockGroup = forkGroup.append("g")
-          .attr("transform", `translate(${blockIndex * blockSpacing}, 0)`);
-
-        blockGroup.append("rect")
-          .attr("width", blockWidth)
-          .attr("height", blockHeight)
-          .attr("fill", fork.id === 'main' ? "#4caf50" : "#2196f3")
-          .attr("stroke", "#000")
-          .attr("rx", 5);
-
-        blockGroup.append("text")
-          .attr("x", blockWidth / 2)
-          .attr("y", blockHeight / 2)
-          .attr("text-anchor", "middle")
-          .attr("dominant-baseline", "middle")
-          .attr("fill", "white")
-          .text(`Block ${block.blockNumber}`);
-
-        if (blockIndex > 0) {
-          forkGroup.append("line")
-            .attr("x1", (blockIndex - 1) * blockSpacing + blockWidth)
-            .attr("y1", blockHeight / 2)
-            .attr("x2", blockIndex * blockSpacing)
-            .attr("y2", blockHeight / 2)
-            .attr("stroke", "#000")
-            .attr("stroke-width", 2);
-        }
-      });
-
-      forkGroup.append("text")
-        .attr("x", fork.blocks.length * blockSpacing + 10)
-        .attr("y", blockHeight / 2)
-        .attr("dominant-baseline", "middle")
-        .text(`Validator ${fork.validator.id}`);
+    // Draw finalized chain
+    chainData.finalized.forEach((block, index) => {
+      const x = index * (blockWidth + horizontalGap);
+      const y = height / 2 - blockHeight / 2;
+      drawBlock(svg, x, y, block, '#4caf50');
+      if (index > 0) {
+        drawArrow(svg, x - horizontalGap, y + blockHeight / 2, x, y + blockHeight / 2);
+      }
     });
+
+    // Draw proposed and forked blocks
+    const lastX = (chainData.finalized.length - 1) * (blockWidth + horizontalGap);
+    const proposedX = lastX + blockWidth + horizontalGap;
+    const proposedY = height / 2 - blockHeight - verticalGap / 2;
+    const forkedY = height / 2 + verticalGap / 2;
+
+    drawBlock(svg, proposedX, proposedY, chainData.proposed, '#2196f3');
+    drawBlock(svg, proposedX, forkedY, chainData.forked, '#ff9800');
+
+    // Draw arrows to proposed and forked blocks
+    drawArrow(svg, lastX + blockWidth, height / 2, proposedX, proposedY + blockHeight / 2);
+    drawArrow(svg, lastX + blockWidth, height / 2, proposedX, forkedY + blockHeight / 2);
+  };
+
+  const drawBlock = (svg, x, y, block, color) => {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', x);
+    rect.setAttribute('y', y);
+    rect.setAttribute('width', 144);
+    rect.setAttribute('height', 80);
+    rect.setAttribute('fill', color);
+    rect.setAttribute('rx', 5);
+    g.appendChild(rect);
+
+    const addText = (text, dy) => {
+      const textElement = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      textElement.setAttribute('x', x + 72);
+      textElement.setAttribute('y', y + 40); // Center vertically
+      textElement.setAttribute('dy', dy);
+      textElement.setAttribute('text-anchor', 'middle');
+      textElement.setAttribute('fill', 'white');
+      textElement.setAttribute('font-size', '12px');
+      textElement.textContent = text;
+      g.appendChild(textElement);
+    };
+
+    addText(`Block ${block.blockNumber}`, '-1.2em');
+    addText(`Hash: ${block.hash.slice(0, 6)}...${block.hash.slice(-4)}`, '0em');
+    addText(`Parent: ${block.parentHash.slice(0, 6)}...${block.parentHash.slice(-4)}`, '1.2em');
+
+    svg.appendChild(g);
+  };
+
+  const drawArrow = (svg, x1, y1, x2, y2) => {
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x1);
+    line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2);
+    line.setAttribute('y2', y2);
+    line.setAttribute('stroke', 'black');
+    line.setAttribute('stroke-width', 2);
+    line.setAttribute('marker-end', 'url(#arrowhead)');
+    svg.appendChild(line);
+  };
+
+  const handleRegenerateFork = () => {
+    loadChainData();
   };
 
   return (
@@ -117,8 +132,35 @@ function ForksAndDivergingChains({ chainData, validatorData }) {
       <Typography variant="body1" paragraph>
         During the block creation process, multiple validators may propose blocks simultaneously, leading to forks in the chain.
       </Typography>
-      <Box ref={svgRef} sx={{ width: '100%', height: 400, mb: 2 }} />
-      <Button variant="contained" onClick={generateForks}>Generate New Forks</Button>
+      <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
+        <Typography variant="body2">
+          Green: Finalized chain stored in local storage.
+        </Typography>
+        <Typography variant="body2">
+          Blue: Our proposed block continuing the chain.
+        </Typography>
+        <Typography variant="body2">
+          Orange: A competing fork with a different block hash and state root.
+        </Typography>
+      </Paper>
+      <Box sx={{ width: '100%', height: 400, mb: 2 }}>
+        <svg ref={svgRef} width="100%" height="100%">
+          <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+            refX="0" refY="3.5" orient="auto">
+              <polygon points="0 0, 10 3.5, 0 7" />
+            </marker>
+          </defs>
+        </svg>
+      </Box>
+      <Button variant="contained" onClick={handleRegenerateFork} sx={{ mb: 2 }}>
+        Regenerate Fork
+      </Button>
+      <Typography variant="body1">
+        This visualization shows how forks can occur when multiple validators propose blocks at the same time. 
+        Notice that while the block numbers and parent hashes are the same for the forked blocks, their block hashes differ.
+        In the next step, we'll explore how consensus is reached to finalize one of these branches.
+      </Typography>
     </Box>
   );
 }
