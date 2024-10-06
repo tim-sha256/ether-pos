@@ -158,7 +158,7 @@ function ForksAndDivergingChains() {
       </Typography>
       <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
         <Typography variant="body2">
-          Green: Finalized chain stored in local storage.
+          Green: Already finalized chain
         </Typography>
         <Typography variant="body2">
           Blue: Our proposed block continuing the chain (Validator {selectedValidator?.id || 'N/A'}).

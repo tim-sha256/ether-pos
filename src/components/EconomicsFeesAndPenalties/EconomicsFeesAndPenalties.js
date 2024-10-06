@@ -1,27 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Button, Stepper, Step, StepLabel } from '@mui/material';
-import ForksAndDivergingChains from './FinalityAndChainSelection/ForksAndDivergingChains';
-import ChainSelectionAndFinality from './FinalityAndChainSelection/ChainSelectionAndFinality';
-import sidebarContent from '../sidebarContent.json';
+import React, { useState } from 'react';
+import { Box, Typography, Paper, Button, Stepper, Step, StepLabel, Card, CardContent } from '@mui/material';
+import sidebarContent from '../../sidebarContent.json';
+import TransactionFees from './TransactionFees';
 
-const steps = ['Forks & Diverging Chains', 'Chain Selection & Finality'];
+const steps = ['Introduction', 'Transaction Fees', 'Block Rewards', 'Penalties and Slashing'];
 
-function FinalityAndChainSelection() {
+function EconomicsFeesAndPenalties() {
   const [activeStep, setActiveStep] = useState(0);
-  const [chainData, setChainData] = useState(null);
-  const [validatorData, setValidatorData] = useState(null);
-  const [blockAggregationData, setBlockAggregationData] = useState(null);
-
-  useEffect(() => {
-    // Load data from local storage
-    const storedChainData = JSON.parse(localStorage.getItem('singleChain') || '[]');
-    const storedValidatorData = JSON.parse(localStorage.getItem('validatorData') || '{}');
-    const storedBlockAggregationData = JSON.parse(localStorage.getItem('blockAggregationData') || '{}');
-
-    setChainData(storedChainData);
-    setValidatorData(storedValidatorData);
-    setBlockAggregationData(storedBlockAggregationData);
-  }, []);
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -34,15 +19,37 @@ function FinalityAndChainSelection() {
   const renderStepContent = (step) => {
     switch (step) {
       case 0:
-        return <ForksAndDivergingChains chainData={chainData} validatorData={validatorData} />;
+        return (
+          <Card>
+            <CardContent>
+              <Typography variant="h5" gutterBottom>Introduction</Typography>
+              <Typography variant="body1" paragraph>
+                That's very cool, but I haven't seen anybody earning anything yet. Are the validators acting as charities?
+              </Typography>
+              <Typography variant="body1" paragraph>
+                No. It's time to talk money!
+              </Typography>
+              <Typography variant="body1" paragraph>
+                In this section, we'll break down all fees and penalties which are present in the Ethereum network.
+                For the reasons of clean visualization and simpler explanations, we didn't include this before.
+                After understanding the fees, you might see more clearly how voting works, why everybody can't just produce their own blocks, and why they sign up for this at all.
+              </Typography>
+            </CardContent>
+          </Card>
+        );
       case 1:
-        return <ChainSelectionAndFinality chainData={chainData} validatorData={validatorData} blockAggregationData={blockAggregationData} />;
+        return <TransactionFees />;
+      case 2:
+        return <Typography>Content for Block Rewards</Typography>;
+      case 3:
+        return <Typography>Content for Penalties and Slashing</Typography>;
       default:
         return null;
     }
   };
 
   const renderSidebarContent = (content) => {
+    if (!content) return null;
     return content.map((item, index) => {
       if (typeof item === 'string') {
         return <Typography key={index} variant="body1" sx={{ mb: 2 }}>{item}</Typography>;
@@ -62,6 +69,8 @@ function FinalityAndChainSelection() {
     });
   };
 
+  const currentStepContent = sidebarContent.economicsFeesAndPenalties?.[`step${activeStep}`];
+
   return (
     <Box sx={{ 
       display: 'flex', 
@@ -78,14 +87,15 @@ function FinalityAndChainSelection() {
         mr: { md: 4 } 
       }}>
         <Typography variant="h6" gutterBottom>
-          {sidebarContent.finalityAndChainSelection[Object.keys(sidebarContent.finalityAndChainSelection)[activeStep]].title}
+          {currentStepContent?.title || `Step ${activeStep + 1}`}
         </Typography>
-        {renderSidebarContent(sidebarContent.finalityAndChainSelection[Object.keys(sidebarContent.finalityAndChainSelection)[activeStep]].content)}
+        {renderSidebarContent(currentStepContent?.content)}
       </Box>
       <Box sx={{ width: { xs: '100%', md: '75%' } }}>
         <Typography variant="h4" gutterBottom>
-          Finality & Chain Selection
+          Economics, Fees and Penalties
         </Typography>
+
         <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
           {steps.map((label) => (
             <Step key={label}>
@@ -93,9 +103,11 @@ function FinalityAndChainSelection() {
             </Step>
           ))}
         </Stepper>
+
         <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
           {renderStepContent(activeStep)}
         </Paper>
+
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
           <Button
             variant="contained"
@@ -119,4 +131,4 @@ function FinalityAndChainSelection() {
   );
 }
 
-export default FinalityAndChainSelection;
+export default EconomicsFeesAndPenalties;

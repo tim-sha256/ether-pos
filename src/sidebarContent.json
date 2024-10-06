@@ -198,5 +198,36 @@
         "In severe cases of malicious behavior, validators can be 'slashed', losing a significant portion of their staked ETH."
       ]
     }
+  },
+  "economicsFeesAndPenalties": {
+    "step1": {
+      "title": "Transaction Fees",
+      "content": [
+        "Transaction fees in Ethereum consist of two parts:",
+        {
+          "type": "list",
+          "items": [
+            "Base Fee: This is burned (removed from circulation), reducing ETH supply.",
+            "Priority Fee (Tip): This goes to the validator as an incentive for faster processing."
+          ]
+        },
+        "The fee structure helps maintain network security and manage congestion.",
+        "Validators are incentivized to include transactions with higher tips, ensuring efficient processing of high-priority transactions."
+      ]
+    },
+    "step2": {
+      "title": "Block Rewards",
+      "content": [
+        "Block rewards incentivize validators to participate in the network.",
+        "We'll explore how these rewards are calculated and distributed."
+      ]
+    },
+    "step3": {
+      "title": "Penalties and Slashing",
+      "content": [
+        "To maintain network security, Ethereum implements penalties for misbehaving validators.",
+        "We'll examine how these penalties work and what actions can lead to slashing of a validator's stake."
+      ]
+    }
   }
 }

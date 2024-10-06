@@ -5,6 +5,7 @@ import StakingOverview from './components/StakingOverview';
 import ValidatorSelection from './components/ValidatorSelection';
 import BlockCreation from './components/BlockCreation';
 import FinalityAndChainSelection from './components/FinalityAndChainSelection';
+import EconomicsFeesAndPenalties from './components/EconomicsFeesAndPenalties/EconomicsFeesAndPenalties';
 
 function App() {
   return (
@@ -26,6 +27,9 @@ function App() {
           <Button color="inherit" component={Link} to="/finality-and-chain-selection">
             Finality & Chain Selection
           </Button>
+          <Button color="inherit" component={Link} to="/economics-fees-and-penalties">
+            Economics, Fees & Penalties
+          </Button>
         </Toolbar>
       </AppBar>
 
@@ -35,6 +39,7 @@ function App() {
           <Route path="/validator-selection" element={<ValidatorSelection />} />
           <Route path="/block-creation" element={<BlockCreation />} />
           <Route path="/finality-and-chain-selection" element={<FinalityAndChainSelection />} />
+          <Route path="/economics-fees-and-penalties" element={<EconomicsFeesAndPenalties />} />
         </Routes>
       </Box>
     </Router>
