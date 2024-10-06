@@ -170,5 +170,33 @@
       },
       "This process ensures the continuous growth and security of the Ethereum blockchain."
     ]
+  },
+  "finalityAndChainSelection": {
+    "forksAndDivergingChains": {
+      "title": "Forks & Diverging Chains",
+      "content": [
+        "In a decentralized network like Ethereum, multiple validators may propose blocks simultaneously, leading to temporary forks in the blockchain.",
+        "These forks create diverging chains, each with its own set of proposed blocks and associated validators.",
+        "Understanding how these forks occur and are resolved is crucial to grasping the consensus mechanism of Ethereum's Proof of Stake."
+      ]
+    },
+    "chainSelectionAndFinality": {
+      "title": "Chain Selection & Finality",
+      "content": [
+        "Ethereum uses a concept called 'epochs' to group blocks together and establish checkpoints.",
+        "Validators vote on these checkpoints to determine which chain should be considered the 'canonical' chain.",
+        "A supermajority vote (typically 2/3) is required to finalize a checkpoint and its associated chain.",
+        "Once finalized, all other competing chains are discarded, ensuring the network converges on a single, agreed-upon history."
+      ]
+    },
+    "economicIncentivesAndPenalties": {
+      "title": "Economic Incentives & Penalties",
+      "content": [
+        "To maintain network security and encourage proper behavior, Ethereum implements a system of rewards and penalties for validators.",
+        "Validators are rewarded for proposing and attesting to blocks that become part of the finalized chain.",
+        "Conversely, validators can be penalized for being offline, failing to attest, or proposing conflicting blocks.",
+        "In severe cases of malicious behavior, validators can be 'slashed', losing a significant portion of their staked ETH."
+      ]
+    }
   }
 }

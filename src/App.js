@@ -4,6 +4,7 @@ import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 import StakingOverview from './components/StakingOverview';
 import ValidatorSelection from './components/ValidatorSelection';
 import BlockCreation from './components/BlockCreation';
+import FinalityAndChainSelection from './components/FinalityAndChainSelection';
 
 function App() {
   return (
@@ -22,6 +23,9 @@ function App() {
           <Button color="inherit" component={Link} to="/block-creation">
             Block Creation
           </Button>
+          <Button color="inherit" component={Link} to="/finality-and-chain-selection">
+            Finality & Chain Selection
+          </Button>
         </Toolbar>
       </AppBar>
 
@@ -30,6 +34,7 @@ function App() {
           <Route path="/" element={<StakingOverview />} />
           <Route path="/validator-selection" element={<ValidatorSelection />} />
           <Route path="/block-creation" element={<BlockCreation />} />
+          <Route path="/finality-and-chain-selection" element={<FinalityAndChainSelection />} />
         </Routes>
       </Box>
     </Router>
