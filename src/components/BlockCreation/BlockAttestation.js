@@ -95,6 +95,14 @@ function BlockAttestation({ proposedBlock, onComplete }) {
     }
   }, [validators, currentValidatorIndex, simulateAttestation]);
 
+  // Wrap getValidatorColor in useCallback
+  const getValidatorColor = useCallback((validator, index) => {
+    if (quorumReached) {
+      return validator.approved ? "green" : "red";
+    }
+    return index === currentValidatorIndex ? "yellow" : (validator.approved === null ? "gray" : (validator.approved ? "green" : "red"));
+  }, [quorumReached, currentValidatorIndex]);
+
   const drawGraph = useCallback(() => {
     if (!svgRef.current || validators.length === 0 || !proposingValidator) return;
 
@@ -153,19 +161,11 @@ function BlockAttestation({ proposedBlock, onComplete }) {
         .attr("stroke-width", 3)
         .attr("stroke-dasharray", validator.approved === null ? "5,5" : "none");
     });
-  }, [validators, proposingValidator, currentValidatorIndex, quorumReached]);
-
-  // Add this helper function outside of the drawGraph function
-  const getValidatorColor = (validator, index) => {
-    if (quorumReached) {
-      return validator.approved ? "green" : "red";
-    }
-    return index === currentValidatorIndex ? "yellow" : (validator.approved === null ? "gray" : (validator.approved ? "green" : "red"));
-  };
+  }, [validators, proposingValidator, currentValidatorIndex, quorumReached, getValidatorColor]); // Add getValidatorColor to the dependency array
 
   useEffect(() => {
     drawGraph();
-  }, [drawGraph, quorumReached]); // Add quorumReached as a dependency
+  }, [drawGraph, quorumReached]);
 
   const progressBarProps = useSpring({
     width: attestationProgress,
@@ -376,14 +376,6 @@ function BlockAttestation({ proposedBlock, onComplete }) {
           color="primary" 
           sx={{ mt: 2, width: '100%' }}
           onClick={() => {
-            // Save final attestation results before moving to the next step
-            const attestationResults = {
-              totalAttestations: validators.length,
-              approvals: validators.filter(v => v.approved).length,
-              rejections: validators.filter(v => !v.approved).length,
-              aggregatedCommitment: aggregatedHash
-            };
-            localStorage.setItem('attestationResults', JSON.stringify(attestationResults));
             onComplete(validators);
           }}
         >

@@ -42,6 +42,8 @@ function IncorporationIntoChain() {
     setShowProcess(true);
     setTimeout(() => {
       setIncorporationStatus('completed');
+      // Save the blockchain to local storage
+      localStorage.setItem('singleChain', JSON.stringify(blockchain));
     }, 3000);
   };
 
@@ -196,6 +198,9 @@ function IncorporationIntoChain() {
         <Paper elevation={3} sx={{ p: 2, mt: 4, mb: 4, width: '100%' }}>
           <Typography variant="h6" gutterBottom>Blockchain Visualization</Typography>
           {renderBlockchain()}
+          <Typography variant="body2" sx={{ mt: 2, fontStyle: 'italic' }}>
+            The blockchain has been saved to local storage under the key "singleChain".
+          </Typography>
         </Paper>
       )}
     </Box>

@@ -6,7 +6,7 @@ import 'katex/dist/katex.min.css';
 import { InlineMath } from 'react-katex';
 import sidebarContent from '../sidebarContent.json';
 import LockIcon from '@mui/icons-material/Lock';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 function StakingOverview() {
   const [stake, setStake] = useState('');
@@ -157,27 +157,24 @@ function StakingOverview() {
   };
 
   const handleStake = () => {
-    if (numericStake >= 32 && withdrawalAddress && randaoSteps.length > 0 && validationCode) {
-      const newValidator = {
-        id: validators.length + 1,
-        stake: numericStake,
-        validationCode: validationCode,
-        randaoCommitment: randaoSteps[randaoSteps.length - 1].hash,
-        withdrawalAddress: withdrawalAddress
-      };
-      const updatedValidators = [...validators, newValidator];
-      setValidators(updatedValidators);
-      
-      // Save to localStorage
-      localStorage.setItem('validators', JSON.stringify(updatedValidators));
-      localStorage.setItem('userValidator', JSON.stringify({
-        secretPhrase,
-        hashSteps: blocksToValidate,
-        ...newValidator
-      }));
-      
-      setActiveStep(2); // Move to the summary step after staking
-    }
+    const newValidator = {
+      id: validators.length + 1,
+      stake: parseFloat(stake),
+      validationCode,
+      randaoCommitment: randaoSteps[randaoSteps.length - 1].hash,
+      withdrawalAddress,
+      secretPhrase,
+      hashSteps: blocksToValidate,
+      globalRandao: '0x' + sha3_256(Math.random().toString()), // Generate a random global RANDAO
+      timestamp: new Date().toISOString()
+    };
+
+    const updatedValidators = [...validators, newValidator];
+    setValidators(updatedValidators);
+    localStorage.setItem('validators', JSON.stringify(updatedValidators));
+    localStorage.setItem('validatorData', JSON.stringify(newValidator));
+
+    setActiveStep(2);
   };
 
   const numericStake = parseFloat(stake) || 0;
