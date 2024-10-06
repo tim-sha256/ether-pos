@@ -1,98 +1,203 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, List, ListItem, ListItemText, Button } from '@mui/material';
-import { motion } from 'framer-motion';
+import { Box, Typography, Paper, List, ListItem, ListItemText, Button, Card, CardContent, Grid } from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
-function IncorporationIntoChain({ proposedBlock, attestedValidators }) {
-  const [aggregatedBlock, setAggregatedBlock] = useState(null);
+function IncorporationIntoChain() {
+  const [newBlock, setNewBlock] = useState(null);
   const [incorporationStatus, setIncorporationStatus] = useState('pending');
+  const [showProcess, setShowProcess] = useState(false);
+  const [blockchain, setBlockchain] = useState([]);
 
   useEffect(() => {
-    // Simulate block aggregation
-    const timer = setTimeout(() => {
-      const aggregated = {
-        ...proposedBlock,
-        attestations: attestedValidators.filter(v => v.approved).length,
-        finalizedAt: new Date().toISOString()
-      };
-      setAggregatedBlock(aggregated);
-    }, 2000);
+    const proposedBlockData = JSON.parse(localStorage.getItem('proposedBlockData') || '{}');
+    const aggregationData = JSON.parse(localStorage.getItem('blockAggregationData') || '{}');
 
-    return () => clearTimeout(timer);
-  }, [proposedBlock, attestedValidators]);
+    if (proposedBlockData.blockHeader) {
+      const newBlockData = {
+        ...proposedBlockData.blockHeader,
+        attestationResults: {
+          totalAttestations: aggregationData.totalAttestations,
+          approvals: aggregationData.approvals,
+          aggregatedCommitment: aggregationData.aggregatedCommitment
+        }
+      };
+      setNewBlock(newBlockData);
+
+      // Generate previous blocks
+      const previousBlocks = [];
+      for (let i = 1; i <= 3; i++) {
+        previousBlocks.push({
+          blockNumber: newBlockData.blockNumber - i,
+          hash: i === 1 ? newBlockData.parentHash : `0x${Math.random().toString(36).substr(2, 64)}`,
+          parentHash: `0x${Math.random().toString(36).substr(2, 64)}`
+        });
+      }
+      setBlockchain([...previousBlocks.reverse(), newBlockData]);
+    }
+  }, []);
 
   const handleIncorporation = () => {
-    // Simulate incorporation process
     setIncorporationStatus('in_progress');
+    setShowProcess(true);
     setTimeout(() => {
       setIncorporationStatus('completed');
     }, 3000);
+  };
+
+  const renderIncorporationProcess = () => {
+    const steps = [
+      "Verifying the block's integrity",
+      "Updating the local chain state",
+      "Broadcasting the new block to other nodes"
+    ];
+
+    return (
+      <AnimatePresence>
+        {showProcess && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <Typography variant="h6" gutterBottom>Incorporation Process</Typography>
+            <List>
+              {steps.map((step, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.5 }}
+                >
+                  <ListItem>
+                    <ListItemText primary={`${index + 1}. ${step}`} />
+                  </ListItem>
+                </motion.div>
+              ))}
+            </List>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  };
+
+  const renderBlockchain = () => {
+    return (
+      <Grid container spacing={2} alignItems="center">
+        {blockchain.map((block, index) => (
+          <React.Fragment key={block.blockNumber}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card 
+                variant="outlined" 
+                sx={{ 
+                  bgcolor: index === blockchain.length - 1 ? 'success.light' : 'background.paper',
+                  transition: 'background-color 0.3s'
+                }}
+              >
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>Block {block.blockNumber}</Typography>
+                  <Typography variant="body2">Hash: {block.hash.slice(0, 10)}...</Typography>
+                  <Typography variant="body2">Parent: {block.parentHash.slice(0, 10)}...</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            {index < blockchain.length - 1 && (
+              <Grid item xs={12} sm={6} md={1}>
+                <ArrowForwardIcon />
+              </Grid>
+            )}
+          </React.Fragment>
+        ))}
+      </Grid>
+    );
   };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
       <Typography variant="h5" gutterBottom>Incorporation into Chain</Typography>
       
-      {aggregatedBlock && (
+      {newBlock && (
         <Paper elevation={3} sx={{ p: 2, mt: 2, mb: 4, width: '100%' }}>
-          <Typography variant="h6" gutterBottom>Aggregated Block Details</Typography>
+          <Typography variant="h6" gutterBottom>New Block Details</Typography>
           <List>
             <ListItem>
-              <ListItemText primary="Block Number" secondary={aggregatedBlock.blockNumber} />
+              <ListItemText primary="Block Number" secondary={newBlock.blockNumber} />
             </ListItem>
             <ListItem>
-              <ListItemText primary="Block Hash" secondary={aggregatedBlock.hash} />
+              <ListItemText primary="Block Hash" secondary={newBlock.hash} />
             </ListItem>
             <ListItem>
-              <ListItemText primary="Attestations" secondary={aggregatedBlock.attestations} />
+              <ListItemText primary="Parent Hash" secondary={newBlock.parentHash} />
             </ListItem>
             <ListItem>
-              <ListItemText primary="Finalized At" secondary={aggregatedBlock.finalizedAt} />
+              <ListItemText primary="State Root" secondary={newBlock.stateRoot} />
+            </ListItem>
+            <ListItem>
+              <ListItemText primary="Transactions Root" secondary={newBlock.transactionsRoot} />
+            </ListItem>
+            <ListItem>
+              <ListItemText primary="Receipts Root" secondary={newBlock.receiptsRoot} />
+            </ListItem>
+            <ListItem>
+              <ListItemText primary="Withdrawals Root" secondary={newBlock.withdrawalsRoot} />
+            </ListItem>
+            <ListItem>
+              <ListItemText 
+                primary="Fee Recipient" 
+                secondary={
+                  newBlock.feeRecipient
+                    ? `Validator ${newBlock.feeRecipient.validatorId || 'N/A'} (${newBlock.feeRecipient.withdrawalAddress || 'N/A'})`
+                    : 'N/A'
+                } 
+              />
+            </ListItem>
+            <ListItem>
+              <ListItemText primary="Total Attestations" secondary={newBlock.attestationResults?.totalAttestations || 'N/A'} />
+            </ListItem>
+            <ListItem>
+              <ListItemText primary="Approvals" secondary={newBlock.attestationResults?.approvals || 'N/A'} />
+            </ListItem>
+            <ListItem>
+              <ListItemText primary="Aggregated Commitment" secondary={newBlock.attestationResults?.aggregatedCommitment || 'N/A'} />
             </ListItem>
           </List>
         </Paper>
       )}
       
-      <Paper elevation={3} sx={{ p: 2, mt: 2, width: '100%' }}>
-        <Typography variant="h6" gutterBottom>Incorporation Process</Typography>
-        <Typography variant="body1">
-          The aggregated block is now ready to be incorporated into the blockchain. This process involves:
-        </Typography>
-        <List>
-          <ListItem>
-            <ListItemText primary="1. Verifying the block's integrity" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="2. Updating the local chain state" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="3. Broadcasting the new block to other nodes" />
-          </ListItem>
-        </List>
-        {incorporationStatus === 'pending' && (
-          <Button 
-            variant="contained" 
-            color="primary" 
-            onClick={handleIncorporation}
-            sx={{ mt: 2 }}
-          >
-            Start Incorporation
-          </Button>
-        )}
-        {incorporationStatus === 'in_progress' && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <Typography variant="body1" color="info.main" sx={{ mt: 2 }}>
-              Incorporation in progress...
-            </Typography>
-          </motion.div>
-        )}
-        {incorporationStatus === 'completed' && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <Typography variant="body1" color="success.main" sx={{ mt: 2 }}>
-              Block successfully incorporated into the chain!
-            </Typography>
-          </motion.div>
-        )}
-      </Paper>
+      {incorporationStatus === 'pending' && (
+        <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={handleIncorporation}
+          sx={{ mt: 2 }}
+        >
+          Start Incorporation
+        </Button>
+      )}
+
+      {showProcess && (
+        <Paper elevation={3} sx={{ p: 2, mt: 2, mb: 4, width: '100%' }}>
+          {renderIncorporationProcess()}
+        </Paper>
+      )}
+
+      {incorporationStatus === 'in_progress' && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <Typography variant="body1" color="info.main" sx={{ mt: 2 }}>
+            Incorporation in progress...
+          </Typography>
+        </motion.div>
+      )}
+      {incorporationStatus === 'completed' && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <Typography variant="body1" color="success.main" sx={{ mt: 2 }}>
+            Block {newBlock?.blockNumber} has been successfully incorporated into the chain!
+          </Typography>
+        </motion.div>
+      )}
+
+      {incorporationStatus === 'completed' && (
+        <Paper elevation={3} sx={{ p: 2, mt: 4, mb: 4, width: '100%' }}>
+          <Typography variant="h6" gutterBottom>Blockchain Visualization</Typography>
+          {renderBlockchain()}
+        </Paper>
+      )}
     </Box>
   );
 }

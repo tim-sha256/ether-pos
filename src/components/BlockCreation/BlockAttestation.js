@@ -191,6 +191,16 @@ function BlockAttestation({ proposedBlock, onComplete }) {
         }));
         const aggregatedHash = sha256(JSON.stringify(aggregatedVotes));
         setAggregatedHash(aggregatedHash);
+
+        // Save aggregation data to local storage
+        const aggregationData = {
+          aggregatedCommitment: aggregatedHash,
+          totalAttestations: validators.length,
+          approvals: validators.filter(v => v.approved).length,
+          rejections: validators.filter(v => !v.approved).length
+        };
+        localStorage.setItem('blockAggregationData', JSON.stringify(aggregationData));
+
         return;
       }
 
@@ -365,7 +375,17 @@ function BlockAttestation({ proposedBlock, onComplete }) {
           variant="contained" 
           color="primary" 
           sx={{ mt: 2, width: '100%' }}
-          onClick={() => onComplete(validators)}
+          onClick={() => {
+            // Save final attestation results before moving to the next step
+            const attestationResults = {
+              totalAttestations: validators.length,
+              approvals: validators.filter(v => v.approved).length,
+              rejections: validators.filter(v => !v.approved).length,
+              aggregatedCommitment: aggregatedHash
+            };
+            localStorage.setItem('attestationResults', JSON.stringify(attestationResults));
+            onComplete(validators);
+          }}
         >
           Next: Incorporation into Chain
         </Button>

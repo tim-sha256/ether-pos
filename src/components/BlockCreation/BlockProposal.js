@@ -87,8 +87,30 @@ function BlockProposal({ validator, onPropose }) {
 
     block.hash = '0x' + sha256(JSON.stringify(block)).slice(0, 64);
     setProposedBlock(block);
-    onPropose(block);
     setCurrentStep(3);
+
+    // Move handleProposeBlock logic here
+    const proposedBlockData = {
+      blockHeader: {
+        parentHash: block.parentHash,
+        stateRoot: block.stateRoot,
+        transactionsRoot: block.transactionsRoot,
+        receiptsRoot: block.receiptsRoot,
+        withdrawalsRoot: block.withdrawalsRoot,
+        blockNumber: block.blockNumber,
+        timestamp: block.timestamp,
+        hash: block.hash,
+        gasUsed: block.gasUsed,
+        gasLimit: block.gasLimit,
+        feeRecipient: {
+          validatorId: validator.id,
+          withdrawalAddress: validator.withdrawalAddress
+        }
+      }
+    };
+
+    localStorage.setItem('proposedBlockData', JSON.stringify(proposedBlockData));
+    onPropose(block);
   };
 
   const renderTransactions = () => (
