@@ -164,6 +164,10 @@ function ValidatorSelection() {
     );
   };
 
+  const handleNextSection = () => {
+    navigate('/block-creation');
+  };
+
   const handleNext = () => {
     setCurrentStep((prevStep) => prevStep + 1);
   };
@@ -248,10 +252,11 @@ function ValidatorSelection() {
           </Button>
           <Button
             variant="contained"
-            onClick={handleNext}
-            disabled={currentStep === steps.length - 1 || !isStepComplete(currentStep)}
+            color="primary"
+            onClick={currentStep === steps.length - 1 ? handleNextSection : handleNext}
+            disabled={!isStepComplete(currentStep)}
           >
-            {currentStep === steps.length - 1 ? 'Finish' : 'Next'}
+            {currentStep === steps.length - 1 ? 'Go to Next Section' : 'Next'}
           </Button>
         </Box>
 

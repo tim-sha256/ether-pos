@@ -3,10 +3,12 @@ import { Box, Typography, Paper, Button, Stepper, Step, StepLabel } from '@mui/m
 import ForksAndDivergingChains from './FinalityAndChainSelection/ForksAndDivergingChains';
 import ChainSelectionAndFinality from './FinalityAndChainSelection/ChainSelectionAndFinality';
 import sidebarContent from '../sidebarContent.json';
+import { useNavigate } from 'react-router-dom';
 
 const steps = ['Forks & Diverging Chains', 'Chain Selection & Finality'];
 
 function FinalityAndChainSelection() {
+  const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
   const [chainData, setChainData] = useState(null);
   const [validatorData, setValidatorData] = useState(null);
@@ -29,6 +31,10 @@ function FinalityAndChainSelection() {
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleNextSection = () => {
+    navigate('/economics-fees-and-penalties');
   };
 
   const renderStepContent = (step) => {
@@ -108,10 +114,9 @@ function FinalityAndChainSelection() {
           <Button
             variant="contained"
             color="primary"
-            onClick={handleNext}
-            disabled={activeStep === steps.length - 1}
+            onClick={activeStep === steps.length - 1 ? handleNextSection : handleNext}
           >
-            {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+            {activeStep === steps.length - 1 ? 'Go to Next Section' : 'Next'}
           </Button>
         </Box>
       </Box>

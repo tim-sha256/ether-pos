@@ -98,6 +98,10 @@ function BlockCreation() {
     );
   };
 
+  const handleNextSection = () => {
+    navigate('/finality-and-chain-selection');
+  };
+
   return (
     <Box sx={{ 
       display: 'flex', 
@@ -154,10 +158,10 @@ function BlockCreation() {
           </Button>
           <Button
             variant="contained"
-            onClick={handleNext}
-            disabled={currentStep === steps.length - 1}
+            color="primary"
+            onClick={currentStep === steps.length - 1 ? handleNextSection : handleNext}
           >
-            {currentStep === steps.length - 1 ? 'Finish' : 'Next'}
+            {currentStep === steps.length - 1 ? 'Go to Next Section' : 'Next'}
           </Button>
         </Box>
 

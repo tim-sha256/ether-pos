@@ -7,8 +7,10 @@ import { InlineMath } from 'react-katex';
 import sidebarContent from '../sidebarContent.json';
 import LockIcon from '@mui/icons-material/Lock';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 function StakingOverview() {
+  const navigate = useNavigate();
   const [stake, setStake] = useState('');
   const [validators, setValidators] = useState([]);
   const [withdrawalAddress, setWithdrawalAddress] = useState('');
@@ -259,6 +261,10 @@ function StakingOverview() {
         {renderSidebarContent(content.content)}
       </Box>
     );
+  };
+
+  const handleNextSection = () => {
+    navigate('/validator-selection');
   };
 
   return (
@@ -519,10 +525,10 @@ function StakingOverview() {
           </Button>
           <Button
             variant="contained"
-            onClick={handleNext}
-            disabled={activeStep === steps.length - 1 || (activeStep === 1 && !(numericStake >= 32 && withdrawalAddress && randaoSteps.length > 0 && validationCode))}
+            color="primary"
+            onClick={activeStep === steps.length - 1 ? handleNextSection : handleNext}
           >
-            {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+            {activeStep === steps.length - 1 ? 'Go to Next Section' : 'Next'}
           </Button>
         </Box>
       </Box>
