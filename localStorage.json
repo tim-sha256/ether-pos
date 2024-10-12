@@ -1,0 +1,46 @@
+{
+  "validators": [
+    {
+      "id": "",
+      "randaoCommitment": "",
+      "stake": "",
+      "validationCode": "",
+      "withdrawalAddress": ""
+    }
+  ],
+  "userValidatorData": {
+    "hashSteps": "",
+    "id": "",
+    "randaoCommitment": "",
+    "secretPhrase": "",
+    "stake": "",
+    "timestamp": "",
+    "validationCode": "",
+    "withdrawalAddress": "",
+    "unrolledRandao": ""
+  },
+  "globalRandao": "",
+  "selectedValidatorID": "",
+  "proposedBlockTransactions": [
+    {
+      "id": "",
+      "From": "",
+      "To": "",
+      "Value": ""
+    }
+  ],
+  "proposedBlock": {
+    "blockNumber": "",
+    "timestamp": "",
+    "parentHash": "",
+    "stateRoot": "",
+    "transactionsRoot": "",
+    "receiptsRoot": "",
+    "withdrawalsRoot": "",
+    "gasUsed": "",
+    "gasLimit": "",
+    "feeRecipient": "",
+    "transactions": [],
+    "hash": ""
+  }
+}

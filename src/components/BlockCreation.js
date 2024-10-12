@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Stepper, Step, StepLabel, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import sha256 from 'js-sha256';
+import sha256 from 'js-sha3';
 import sidebarContent from '../sidebarContent.json';
 
 // Import sub-components
@@ -22,9 +22,9 @@ function BlockCreation() {
   const steps = ['Block Proposal', 'Block Attestation', 'Incorporation into Chain'];
 
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('validatorSelectionData'));
-    if (storedData && storedData.length > 0) {
-      setValidatorData(storedData[storedData.length - 1]);
+    const storedValidatorData = JSON.parse(localStorage.getItem('userValidatorData'));
+    if (storedValidatorData) {
+      setValidatorData(storedValidatorData);
     } else {
       setOpenDialog(true);
     }
@@ -41,6 +41,7 @@ function BlockCreation() {
 
     for (let i = 0; i < numTransactions; i++) {
       const transaction = {
+        id: i + 1,
         hash: '0x' + sha256(Math.random().toString()).slice(0, 64),
         from: '0x' + sha256(Math.random().toString()).slice(0, 40),
         to: '0x' + sha256(Math.random().toString()).slice(0, 40),
@@ -53,6 +54,7 @@ function BlockCreation() {
     }
 
     setTransactions(newTransactions);
+    localStorage.setItem('proposedBlockTransactions', JSON.stringify(newTransactions));
   };
 
   const handleNext = () => {
@@ -125,7 +127,7 @@ function BlockCreation() {
         
         {currentStep === 0 && (
           <BlockProposal 
-            validator={validatorData?.selectedValidator}
+            validator={validatorData?.selectedValidator || validatorData}
             onPropose={setProposedBlock}
           />
         )}

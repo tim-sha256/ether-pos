@@ -10,41 +10,34 @@ import sidebarContent from '../sidebarContent.json';
 import { InlineMath } from 'react-katex';
 
 function ValidatorSelection() {
-  const [validators, setValidators] = useState([]);
-  const [globalRandao, setGlobalRandao] = useState('');
   const [currentStep, setCurrentStep] = useState(0);
-  const [xorResult, setXorResult] = useState('');
-  const [selectedValidator, setSelectedValidator] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [userValidator, setUserValidator] = useState(null);
+  const [validatorData, setValidatorData] = useState(null);
+  const [validators, setValidators] = useState([]);
   const [randaoResult, setRandaoResult] = useState('');
-  const [expanded, setExpanded] = useState(true);
+  const [xorResult, setXorResult] = useState('');
+  const [openDialog, setOpenDialog] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [globalRandao, setGlobalRandao] = useState('');
 
   const navigate = useNavigate();
-
+  
   const steps = ['RANDao Unrolling', 'Global XOR Calculation', 'Validator Selection'];
 
   useEffect(() => {
-    loadValidatorsData();
-    setGlobalRandao(generateInitialGlobalRandao());
-  }, []);
-
-  const loadValidatorsData = () => {
-    const savedValidators = JSON.parse(localStorage.getItem('validators') || '[]');
-    setValidators(savedValidators);
-
-    const userValidatorData = JSON.parse(localStorage.getItem('userValidator') || 'null');
+    const storedValidators = JSON.parse(localStorage.getItem('validators') || '[]');
+    const storedValidatorData = JSON.parse(localStorage.getItem('userValidatorData') || 'null');
     
-    if (savedValidators.length >= 16 && userValidatorData && userValidatorData.secretPhrase && userValidatorData.hashSteps) {
-      setUserValidator(userValidatorData);
+    if (storedValidators.length >= 16 && storedValidatorData) {
+      setValidators(storedValidators);
+      setValidatorData(storedValidatorData);
     } else {
       setOpenDialog(true);
     }
-  };
 
-  const generateInitialGlobalRandao = () => {
-    return '0x' + sha3_256(Math.random().toString());
-  };
+    const storedGlobalRandao = localStorage.getItem('globalRandao') || `0x${sha3_256(Math.random().toString()).substring(0, 64)}`;
+    setGlobalRandao(storedGlobalRandao);
+    localStorage.setItem('globalRandao', storedGlobalRandao);
+  }, []);
 
   const handleDialogClose = (option) => {
     setOpenDialog(false);
@@ -67,8 +60,8 @@ function ValidatorSelection() {
       randaoCommitment: '0x' + sha3_256(randomSecretPhrase.repeat(randomBlocks)).substring(0, 64),
       withdrawalAddress: '0x' + sha3_256(Math.random().toString()).substring(0, 40)
     };
-    setUserValidator(newUserValidator);
-    localStorage.setItem('userValidator', JSON.stringify(newUserValidator));
+    setValidatorData(newUserValidator);
+    localStorage.setItem('validatorData', JSON.stringify(newUserValidator));
     
     const updatedValidators = [...validators, newUserValidator];
     setValidators(updatedValidators);
@@ -77,23 +70,29 @@ function ValidatorSelection() {
 
   const handleRandaoUnrolling = (finalHash) => {
     setRandaoResult(finalHash);
+    const updatedUserValidatorData = {
+      ...validatorData,
+      unrolledRandao: finalHash
+    };
+    setValidatorData(updatedUserValidatorData);
+    localStorage.setItem('userValidatorData', JSON.stringify(updatedUserValidatorData));
   };
 
   const handleXorCalculation = (result) => {
     setXorResult(result);
+    setGlobalRandao(result);
+    localStorage.setItem('globalRandao', result);
   };
 
-  const handleValidatorSelection = (validator) => {
-    setSelectedValidator(validator);
-
-    // Save additional data to local storage
-    const selectionData = JSON.parse(localStorage.getItem('validatorSelectionData') || '[]');
-    selectionData.push({
-      selectedValidator: validator,
-      globalRandao: globalRandao,
+  const handleValidatorSelection = (selectedValidator) => {
+    localStorage.setItem('selectedValidatorID', selectedValidator.id.toString());
+    const updatedValidatorData = {
+      ...validatorData,
+      selectedValidator,
       timestamp: new Date().toISOString()
-    });
-    localStorage.setItem('validatorSelectionData', JSON.stringify(selectionData));
+    };
+    setValidatorData(updatedValidatorData);
+    localStorage.setItem('userValidatorData', JSON.stringify(updatedValidatorData));
   };
 
   const handleAccordionChange = (event, isExpanded) => {
@@ -110,12 +109,12 @@ function ValidatorSelection() {
         <Typography variant="h6">Your Validator Details</Typography>
       </AccordionSummary>
       <AccordionDetails>
-        <Typography>Stake Amount: {userValidator.stake} ETH</Typography>
-        <Typography>Validation Code: {userValidator.validationCode}</Typography>
-        <Typography>Randao Commitment: {userValidator.randaoCommitment}</Typography>
-        <Typography>Withdrawal Address: {userValidator.withdrawalAddress}</Typography>
-        <Typography>Secret Phrase: {userValidator.secretPhrase}</Typography>
-        <Typography>Number of Blocks: {userValidator.hashSteps}</Typography>
+        <Typography>Stake Amount: {validatorData.stake} ETH</Typography>
+        <Typography>Validation Code: {validatorData.validationCode}</Typography>
+        <Typography>Randao Commitment: {validatorData.randaoCommitment}</Typography>
+        <Typography>Withdrawal Address: {validatorData.withdrawalAddress}</Typography>
+        <Typography>Secret Phrase: {validatorData.secretPhrase}</Typography>
+        <Typography>Number of Blocks: {validatorData.hashSteps}</Typography>
       </AccordionDetails>
     </Accordion>
   );
@@ -180,7 +179,7 @@ function ValidatorSelection() {
       case 1:
         return !!xorResult;
       case 2:
-        return !!selectedValidator;
+        return !!validatorData?.selectedValidator;
       default:
         return false;
     }
@@ -205,7 +204,7 @@ function ValidatorSelection() {
       </Box>
       <Box sx={{ width: { xs: '100%', md: '75%' } }}>
         <Typography variant="h4" gutterBottom>Validator Selection Process</Typography>
-        {userValidator && renderUserValidatorDetails()}
+        {validatorData && renderUserValidatorDetails()}
         <Stepper activeStep={currentStep} alternativeLabel sx={{ mb: 4 }}>
           {steps.map((label, index) => (
             <Step key={index}>
@@ -217,8 +216,8 @@ function ValidatorSelection() {
           <CardContent>
             {currentStep === 0 && (
               <RandaoUnrolling 
-                secretPhrase={userValidator?.secretPhrase}
-                hashSteps={userValidator?.hashSteps}
+                secretPhrase={validatorData?.secretPhrase}
+                hashSteps={validatorData?.hashSteps}
                 onComplete={handleRandaoUnrolling}
               />
             )}

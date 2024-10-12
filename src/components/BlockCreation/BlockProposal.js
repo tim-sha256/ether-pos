@@ -9,12 +9,20 @@ function BlockProposal({ validator, onPropose }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [merkleTree, setMerkleTree] = useState([]);
   const [merkleRoot, setMerkleRoot] = useState(null);
-  const [validatorData, setValidatorData] = useState(null);
+  const [feeRecipient, setFeeRecipient] = useState(null);
 
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('validatorSelectionData'));
-    if (storedData && storedData.length > 0) {
-      setValidatorData(storedData[storedData.length - 1]);
+    const storedTransactions = JSON.parse(localStorage.getItem('proposedBlockTransactions') || '[]');
+    if (storedTransactions.length > 0) {
+      setTransactions(storedTransactions);
+      setCurrentStep(1);
+    }
+
+    const selectedValidatorID = localStorage.getItem('selectedValidatorID');
+    const validators = JSON.parse(localStorage.getItem('validators') || '[]');
+    const selectedValidator = validators.find(v => v.id.toString() === selectedValidatorID);
+    if (selectedValidator) {
+      setFeeRecipient(selectedValidator.withdrawalAddress);
     }
   }, []);
 
@@ -24,17 +32,16 @@ function BlockProposal({ validator, onPropose }) {
 
     for (let i = 0; i < numTransactions; i++) {
       const transaction = {
-        hash: '0x' + sha256(Math.random().toString()).slice(0, 64),
+        id: i + 1,
         from: '0x' + sha256(Math.random().toString()).slice(0, 40),
         to: '0x' + sha256(Math.random().toString()).slice(0, 40),
         value: (Math.random() * 9.99 + 0.01).toFixed(2), // 0.01 to 10 ETH
-        fee: (Math.random() * 1.9 + 0.1).toFixed(1), // 0.1 to 2 Gwei
-        gasUsed: Math.floor(Math.random() * 79000) + 21000, // 21,000 to 100,000 units
       };
       newTransactions.push(transaction);
     }
 
     setTransactions(newTransactions);
+    localStorage.setItem('proposedBlockTransactions', JSON.stringify(newTransactions));
     setCurrentStep(1);
   };
 
@@ -42,7 +49,7 @@ function BlockProposal({ validator, onPropose }) {
     if (transactions.length === 0) return null;
     if (transactions.length === 1) return transactions[0].hash;
 
-    const tree = [transactions.map(tx => ({ hash: tx.hash }))];
+    const tree = [transactions.map(tx => ({ hash: sha256(JSON.stringify(tx)) }))];
     
     while (tree[tree.length - 1].length > 1) {
       const currentLevel = tree[tree.length - 1];
@@ -50,66 +57,36 @@ function BlockProposal({ validator, onPropose }) {
       for (let i = 0; i < currentLevel.length; i += 2) {
         const left = currentLevel[i].hash;
         const right = i + 1 < currentLevel.length ? currentLevel[i + 1].hash : left;
-        const combined = '0x' + sha256(left + right);
+        const combined = sha256(left + right);
         newLevel.push({ hash: combined, left, right });
       }
       tree.push(newLevel);
     }
 
     setMerkleTree(tree);
-    setMerkleRoot(tree[tree.length - 1][0].hash);
+    setMerkleRoot('0x' + tree[tree.length - 1][0].hash);
     setCurrentStep(2);
   };
 
   const createBlock = () => {
-    const blockNumber = Math.floor(Math.random() * 1000000);
-    const timestamp = Date.now();
-    const parentHash = '0x' + sha256(Math.random().toString()).slice(0, 64);
-    const gasUsed = transactions.reduce((sum, tx) => sum + tx.gasUsed, 0);
-    const gasLimit = 30000000;
-    const stateRoot = '0x' + sha256(Math.random().toString()).slice(0, 64);
-    const receiptsRoot = '0x' + sha256(Math.random().toString()).slice(0, 64);
-    const withdrawalsRoot = '0x' + sha256(Math.random().toString()).slice(0, 64);
-
     const block = {
-      blockNumber,
-      timestamp,
-      parentHash,
-      stateRoot,
+      blockNumber: Math.floor(Math.random() * 1000000),
+      timestamp: Date.now(),
+      parentHash: '0x' + sha256(Math.random().toString()).slice(0, 64),
+      stateRoot: '0x' + sha256(Math.random().toString()).slice(0, 64),
       transactionsRoot: merkleRoot,
-      receiptsRoot,
-      withdrawalsRoot,
-      gasUsed,
-      gasLimit,
-      feeRecipient: validator.address,
-      transactions,
+      receiptsRoot: '0x' + sha256(Math.random().toString()).slice(0, 64),
+      withdrawalsRoot: '0x' + sha256(Math.random().toString()).slice(0, 64),
+      gasUsed: Math.floor(Math.random() * 15000000),
+      gasLimit: 30000000,
+      feeRecipient: feeRecipient,
+      transactions: transactions,
     };
 
     block.hash = '0x' + sha256(JSON.stringify(block)).slice(0, 64);
     setProposedBlock(block);
+    localStorage.setItem('proposedBlock', JSON.stringify(block));
     setCurrentStep(3);
-
-    // Move handleProposeBlock logic here
-    const proposedBlockData = {
-      blockHeader: {
-        parentHash: block.parentHash,
-        stateRoot: block.stateRoot,
-        transactionsRoot: block.transactionsRoot,
-        receiptsRoot: block.receiptsRoot,
-        withdrawalsRoot: block.withdrawalsRoot,
-        blockNumber: block.blockNumber,
-        timestamp: block.timestamp,
-        hash: block.hash,
-        gasUsed: block.gasUsed,
-        gasLimit: block.gasLimit,
-        feeRecipient: {
-          validatorId: validator.id,
-          withdrawalAddress: validator.withdrawalAddress
-        }
-      }
-    };
-
-    localStorage.setItem('proposedBlockData', JSON.stringify(proposedBlockData));
     onPropose(block);
   };
 
@@ -117,7 +94,7 @@ function BlockProposal({ validator, onPropose }) {
     <AnimatePresence>
       {transactions.map((tx, index) => (
         <motion.div
-          key={tx.hash}
+          key={tx.id}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
@@ -125,7 +102,7 @@ function BlockProposal({ validator, onPropose }) {
         >
           <ListItem>
             <ListItemText
-              primary={`Transaction ${index + 1}`}
+              primary={`Transaction ${tx.id}`}
               secondary={`From: ${tx.from.slice(0, 10)}... To: ${tx.to.slice(0, 10)}... Value: ${tx.value} ETH`}
             />
           </ListItem>
@@ -165,7 +142,7 @@ function BlockProposal({ validator, onPropose }) {
           </Box>
         ))}
         <Typography variant="body1" sx={{ fontWeight: 'bold', mt: 2 }}>
-          Merkle Root: {merkleRoot?.slice(0, 10)}...{merkleRoot?.slice(-10)}
+          Merkle Root: {merkleRoot}
         </Typography>
       </Box>
     );
@@ -198,33 +175,21 @@ function BlockProposal({ validator, onPropose }) {
           Create Block
         </Button>
       )}
-      {proposedBlock && validatorData && (
+      {proposedBlock && (
         <Paper elevation={3} sx={{ p: 2, mt: 2 }}>
           <Typography variant="h6">Proposed Block</Typography>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mt: 2 }}>Block Header</Typography>
-            <Divider sx={{ my: 1 }} />
+            <Typography>Block Number: {proposedBlock.blockNumber}</Typography>
+            <Typography>Timestamp: {new Date(proposedBlock.timestamp).toLocaleString()}</Typography>
             <Typography>Parent Hash: {proposedBlock.parentHash}</Typography>
             <Typography>State Root: {proposedBlock.stateRoot}</Typography>
             <Typography>Transactions Root: {proposedBlock.transactionsRoot}</Typography>
             <Typography>Receipts Root: {proposedBlock.receiptsRoot}</Typography>
             <Typography>Withdrawals Root: {proposedBlock.withdrawalsRoot}</Typography>
-            <Divider sx={{ my: 1 }} />
-            <Typography>Block Number: {proposedBlock.blockNumber}</Typography>
-            <Typography>Timestamp: {new Date(proposedBlock.timestamp).toLocaleString()}</Typography>
-            <Typography>Hash: {proposedBlock.hash}</Typography>
             <Typography>Gas Used: {proposedBlock.gasUsed}</Typography>
             <Typography>Gas Limit: {proposedBlock.gasLimit}</Typography>
-            <Divider sx={{ my: 1 }} />
-            <Typography>
-              Fee Recipient: {validatorData.selectedValidator.address}
-            </Typography>
-            <Typography>
-              Fee Recipient Withdrawal Address: {validatorData.selectedValidator.withdrawalAddress}
-            </Typography>
-            <Typography>
-              (Validator {validatorData.selectedValidator.id}, selected in previous section)
-            </Typography>
+            <Typography>Fee Recipient: {proposedBlock.feeRecipient}</Typography>
+            <Typography>Block Hash: {proposedBlock.hash}</Typography>
           </motion.div>
         </Paper>
       )}

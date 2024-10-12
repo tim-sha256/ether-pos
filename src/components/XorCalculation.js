@@ -6,6 +6,8 @@ function XorCalculation({ randaoResult, globalRandao, onComplete }) {
   const [xorResult, setXorResult] = useState('');
   const [binarySteps, setBinarySteps] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
+  const [calculatedXOR, setCalculatedXOR] = useState('');
+  const [originalGlobalRandao, setOriginalGlobalRandao] = useState(globalRandao);
 
   const hexToBinary = (hex) => {
     return parseInt(hex.slice(2), 16).toString(2).padStart(64, '0');
@@ -18,7 +20,7 @@ function XorCalculation({ randaoResult, globalRandao, onComplete }) {
   const calculateXor = () => {
     // Use only the first 16 characters of the hash for illustration
     const shortRandao = randaoResult.slice(0, 18); // '0x' + 16 characters
-    const shortGlobalRandao = globalRandao.slice(0, 18);
+    const shortGlobalRandao = originalGlobalRandao.slice(0, 18);
 
     const randaoBinary = hexToBinary(shortRandao);
     const globalBinary = hexToBinary(shortGlobalRandao);
@@ -34,7 +36,8 @@ function XorCalculation({ randaoResult, globalRandao, onComplete }) {
     setCurrentStep(0);
 
     // Calculate the full XOR result
-    const fullResultHex = calculateFullXor(randaoResult, globalRandao);
+    const fullResultHex = calculateFullXor(randaoResult, originalGlobalRandao);
+    setCalculatedXOR(fullResultHex);
     onComplete(fullResultHex);
   };
 
@@ -88,7 +91,7 @@ function XorCalculation({ randaoResult, globalRandao, onComplete }) {
         RANDao Result: {randaoResult.slice(0, 18)}...
       </Typography>
       <Typography variant="body1" gutterBottom>
-        Global RANDao: {globalRandao.slice(0, 18)}...
+        Global RANDao: {originalGlobalRandao.slice(0, 18)}...
       </Typography>
       <Button variant="contained" onClick={calculateXor}>Calculate XOR</Button>
       {binarySteps.length > 0 && (
@@ -104,7 +107,7 @@ function XorCalculation({ randaoResult, globalRandao, onComplete }) {
             Illustrated XOR Result: {xorResult}
           </Typography>
           <Typography variant="body1" sx={{ mt: 1 }}>
-            Full XOR Result: {calculateFullXor(randaoResult, globalRandao)}
+            Full XOR Result: {calculatedXOR}
           </Typography>
           <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic' }}>
             This is the new Global Randao value

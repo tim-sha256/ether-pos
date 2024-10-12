@@ -26,16 +26,23 @@ function StakingOverview() {
   useEffect(() => {
     // Generate 15 random validators on component mount
     const generateValidators = () => {
-      return Array.from({ length: 15 }, (_, index) => ({
+      const newValidators = Array.from({ length: 15 }, (_, index) => ({
         id: index + 1,
         stake: Math.floor(Math.random() * (500 - 32) + 32),
         validationCode: `0x${sha3_256(Math.random().toString()).substring(0, 40)}`,
         randaoCommitment: `0x${sha3_256(Math.random().toString()).substring(0, 64)}`,
         withdrawalAddress: `0x${sha3_256(Math.random().toString()).substring(0, 40)}`
       }));
+      setValidators(newValidators);
+      localStorage.setItem('validators', JSON.stringify(newValidators));
     };
 
-    setValidators(generateValidators());
+    const storedValidators = JSON.parse(localStorage.getItem('validators'));
+    if (storedValidators && storedValidators.length >= 15) {
+      setValidators(storedValidators);
+    } else {
+      generateValidators();
+    }
   }, []);
 
   useEffect(() => {
@@ -165,14 +172,18 @@ function StakingOverview() {
       withdrawalAddress,
       secretPhrase,
       hashSteps: blocksToValidate,
-      globalRandao: '0x' + sha3_256(Math.random().toString()), // Generate a random global RANDAO
       timestamp: new Date().toISOString()
     };
 
     const updatedValidators = [...validators, newValidator];
     setValidators(updatedValidators);
     localStorage.setItem('validators', JSON.stringify(updatedValidators));
-    localStorage.setItem('validatorData', JSON.stringify(newValidator));
+
+    const userValidatorData = {
+      ...newValidator,
+      hashSteps: blocksToValidate
+    };
+    localStorage.setItem('userValidatorData', JSON.stringify(userValidatorData));
 
     setActiveStep(2);
   };
