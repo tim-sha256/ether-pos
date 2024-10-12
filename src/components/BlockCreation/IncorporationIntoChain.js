@@ -10,17 +10,19 @@ function IncorporationIntoChain() {
   const [blockchain, setBlockchain] = useState([]);
 
   useEffect(() => {
-    const proposedBlockData = JSON.parse(localStorage.getItem('proposedBlockData') || '{}');
+    const proposedBlock = JSON.parse(localStorage.getItem('proposedBlock') || '{}');
     const aggregationData = JSON.parse(localStorage.getItem('blockAggregationData') || '{}');
+    const userValidatorData = JSON.parse(localStorage.getItem('userValidatorData') || '{}');
 
-    if (proposedBlockData.blockHeader) {
+    if (proposedBlock) {
       const newBlockData = {
-        ...proposedBlockData.blockHeader,
+        ...proposedBlock,
         attestationResults: {
           totalAttestations: aggregationData.totalAttestations,
           approvals: aggregationData.approvals,
           aggregatedCommitment: aggregationData.aggregatedCommitment
-        }
+        },
+        feeRecipient: userValidatorData.selectedValidator?.withdrawalAddress || proposedBlock.feeRecipient
       };
       setNewBlock(newBlockData);
 
@@ -47,7 +49,8 @@ function IncorporationIntoChain() {
     setTimeout(() => {
       setIncorporationStatus('completed');
       // Save the blockchain to local storage
-      localStorage.setItem('singleChain', JSON.stringify(blockchain));
+      const singleChain = [...blockchain];
+      localStorage.setItem('singleChain', JSON.stringify(singleChain));
     }, 3000);
   };
 
@@ -146,11 +149,7 @@ function IncorporationIntoChain() {
             <ListItem>
               <ListItemText 
                 primary="Fee Recipient" 
-                secondary={
-                  newBlock.feeRecipient
-                    ? `Validator ${newBlock.feeRecipient.validatorId || 'N/A'} (${newBlock.feeRecipient.withdrawalAddress || 'N/A'})`
-                    : 'N/A'
-                } 
+                secondary={newBlock.feeRecipient} 
               />
             </ListItem>
             <ListItem>

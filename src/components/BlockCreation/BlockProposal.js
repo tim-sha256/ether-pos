@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, List, ListItem, ListItemText, Button, Tooltip, Divider } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-import sha256 from 'js-sha256';
+import { sha3_256 } from 'js-sha3'; // Import sha3_256 function directly
 
 function BlockProposal({ validator, onPropose }) {
   const [transactions, setTransactions] = useState([]);
@@ -33,8 +33,8 @@ function BlockProposal({ validator, onPropose }) {
     for (let i = 0; i < numTransactions; i++) {
       const transaction = {
         id: i + 1,
-        from: '0x' + sha256(Math.random().toString()).slice(0, 40),
-        to: '0x' + sha256(Math.random().toString()).slice(0, 40),
+        from: '0x' + sha3_256(Math.random().toString()).slice(0, 40),
+        to: '0x' + sha3_256(Math.random().toString()).slice(0, 40),
         value: (Math.random() * 9.99 + 0.01).toFixed(2), // 0.01 to 10 ETH
       };
       newTransactions.push(transaction);
@@ -49,7 +49,7 @@ function BlockProposal({ validator, onPropose }) {
     if (transactions.length === 0) return null;
     if (transactions.length === 1) return transactions[0].hash;
 
-    const tree = [transactions.map(tx => ({ hash: sha256(JSON.stringify(tx)) }))];
+    const tree = [transactions.map(tx => ({ hash: sha3_256(JSON.stringify(tx)) }))];
     
     while (tree[tree.length - 1].length > 1) {
       const currentLevel = tree[tree.length - 1];
@@ -57,7 +57,7 @@ function BlockProposal({ validator, onPropose }) {
       for (let i = 0; i < currentLevel.length; i += 2) {
         const left = currentLevel[i].hash;
         const right = i + 1 < currentLevel.length ? currentLevel[i + 1].hash : left;
-        const combined = sha256(left + right);
+        const combined = sha3_256(left + right);
         newLevel.push({ hash: combined, left, right });
       }
       tree.push(newLevel);
@@ -72,18 +72,18 @@ function BlockProposal({ validator, onPropose }) {
     const block = {
       blockNumber: Math.floor(Math.random() * 1000000),
       timestamp: Date.now(),
-      parentHash: '0x' + sha256(Math.random().toString()).slice(0, 64),
-      stateRoot: '0x' + sha256(Math.random().toString()).slice(0, 64),
+      parentHash: '0x' + sha3_256(Math.random().toString()).slice(0, 64),
+      stateRoot: '0x' + sha3_256(Math.random().toString()).slice(0, 64),
       transactionsRoot: merkleRoot,
-      receiptsRoot: '0x' + sha256(Math.random().toString()).slice(0, 64),
-      withdrawalsRoot: '0x' + sha256(Math.random().toString()).slice(0, 64),
+      receiptsRoot: '0x' + sha3_256(Math.random().toString()).slice(0, 64),
+      withdrawalsRoot: '0x' + sha3_256(Math.random().toString()).slice(0, 64),
       gasUsed: Math.floor(Math.random() * 15000000),
       gasLimit: 30000000,
       feeRecipient: feeRecipient,
       transactions: transactions,
     };
 
-    block.hash = '0x' + sha256(JSON.stringify(block)).slice(0, 64);
+    block.hash = '0x' + sha3_256(JSON.stringify(block)).slice(0, 64);
     setProposedBlock(block);
     localStorage.setItem('proposedBlock', JSON.stringify(block));
     setCurrentStep(3);

@@ -7,32 +7,43 @@ import BlockCreation from './components/BlockCreation';
 import FinalityAndChainSelection from './components/FinalityAndChainSelection';
 import EconomicsFeesAndPenalties from './components/EconomicsFeesAndPenalties/EconomicsFeesAndPenalties';
 
+function Navigation() {
+  const handleStakingOverviewNavigation = () => {
+    if (window.confirm("Are you sure you want to start over? This will reset all your progress.")) {
+      window.location.href = '/';
+    }
+  };
+
+  return (
+    <AppBar position="static">
+      <Toolbar>
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          Ethereum PoS MVP
+        </Typography>
+        <Button color="inherit" onClick={handleStakingOverviewNavigation}>
+          Staking Overview
+        </Button>
+        <Button color="inherit" component={Link} to="/validator-selection">
+          Validator Selection
+        </Button>
+        <Button color="inherit" component={Link} to="/block-creation">
+          Block Creation
+        </Button>
+        <Button color="inherit" component={Link} to="/finality-and-chain-selection">
+          Finality & Chain Selection
+        </Button>
+        <Button color="inherit" component={Link} to="/economics-fees-and-penalties">
+          Economics, Fees & Penalties
+        </Button>
+      </Toolbar>
+    </AppBar>
+  );
+}
+
 function App() {
   return (
     <Router>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Ethereum PoS MVP
-          </Typography>
-          <Button color="inherit" component={Link} to="/">
-            Staking Overview
-          </Button>
-          <Button color="inherit" component={Link} to="/validator-selection">
-            Validator Selection
-          </Button>
-          <Button color="inherit" component={Link} to="/block-creation">
-            Block Creation
-          </Button>
-          <Button color="inherit" component={Link} to="/finality-and-chain-selection">
-            Finality & Chain Selection
-          </Button>
-          <Button color="inherit" component={Link} to="/economics-fees-and-penalties">
-            Economics, Fees & Penalties
-          </Button>
-        </Toolbar>
-      </AppBar>
-
+      <Navigation />
       <Box sx={{ mt: 4, mb: 4 }}>
         <Routes>
           <Route path="/" element={<StakingOverview />} />

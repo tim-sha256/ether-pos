@@ -3,30 +3,28 @@ import { Box, Typography, Paper, List, ListItem, ListItemText, Button } from '@m
 import { motion, AnimatePresence } from 'framer-motion';
 import * as d3 from 'd3';
 import { useSpring, animated, config } from 'react-spring';
-import sha256 from 'js-sha256';
+import { sha3_256 } from 'js-sha3';
 
 function BlockAttestation({ proposedBlock, onComplete }) {
   const [validators, setValidators] = useState([]);
   const [proposingValidator, setProposingValidator] = useState(null);
   const [attestationProgress, setAttestationProgress] = useState(0);
   const [quorumReached, setQuorumReached] = useState(false);
-  const [currentValidatorIndex, setCurrentValidatorIndex] = useState(0);
-  const [debugInfo, setDebugInfo] = useState({});
+  const [currentValidatorIndex, setCurrentValidatorIndex] = useState(-1);
   const [statusMessage, setStatusMessage] = useState('');
   const [showAggregation, setShowAggregation] = useState(false);
   const [aggregatedHash, setAggregatedHash] = useState('');
   const [aggregationProgress, setAggregationProgress] = useState(0);
 
-  const svgRef = React.useRef(null);
+  const svgRef = useRef(null);
   const aggregationRef = useRef(null);
 
   useEffect(() => {
     const storedValidators = JSON.parse(localStorage.getItem('validators') || '[]');
-    const storedData = JSON.parse(localStorage.getItem('validatorSelectionData') || '[]');
+    const storedData = JSON.parse(localStorage.getItem('userValidatorData') || '{}');
     
-    if (storedData.length > 0) {
-      const latestValidatorData = storedData[storedData.length - 1];
-      setProposingValidator(latestValidatorData.selectedValidator);
+    if (storedData.selectedValidator) {
+      setProposingValidator(storedData.selectedValidator);
     }
 
     // Use stored validators, but limit to 15 if there are more
@@ -36,23 +34,11 @@ function BlockAttestation({ proposedBlock, onComplete }) {
     }));
 
     setValidators(attestingValidators);
-
-    // Set debug info
-    if (storedData.length > 0) {
-      const latestValidatorData = storedData[storedData.length - 1];
-      setDebugInfo({
-        selectedValidatorId: latestValidatorData.selectedValidator.id,
-        selectedValidatorAddress: latestValidatorData.selectedValidator.withdrawalAddress,
-        totalValidatorsInStorage: storedValidators.length
-      });
-    }
   }, []);
 
   const simulateAttestation = useCallback(() => {
     const totalValidators = validators.length;
-    const minYesVotes = Math.ceil(totalValidators / 2);
-    const maxYesVotes = totalValidators;
-    const targetYesVotes = Math.floor(Math.random() * (maxYesVotes - minYesVotes + 1)) + minYesVotes;
+    const minYesVotes = Math.ceil(totalValidators * 2 / 3); // 2/3 majority for quorum
 
     const processValidator = (index) => {
       if (index >= totalValidators) {
@@ -60,48 +46,50 @@ function BlockAttestation({ proposedBlock, onComplete }) {
         return;
       }
 
-      setValidators(prevValidators => {
-        const updatedValidators = [...prevValidators];
-        const currentValidator = updatedValidators[index];
-        
-        const remainingValidators = totalValidators - index;
-        const currentYesVotes = updatedValidators.filter(v => v.approved === true).length;
-        const neededYesVotes = targetYesVotes - currentYesVotes;
+      setCurrentValidatorIndex(index);
 
-        if (neededYesVotes > remainingValidators) {
-          currentValidator.approved = true;
-        } else if (currentYesVotes >= targetYesVotes) {
-          currentValidator.approved = Math.random() < 0.5; // 50% chance to approve if target is reached
-        } else {
-          currentValidator.approved = Math.random() < 0.75; // 75% chance to approve otherwise
-        }
+      setTimeout(() => {
+        setValidators(prevValidators => {
+          const updatedValidators = [...prevValidators];
+          const currentValidator = updatedValidators[index];
+          
+          const currentYesVotes = updatedValidators.filter(v => v.approved === true).length;
+          const remainingValidators = totalValidators - index - 1;
 
-        setAttestationProgress(((index + 1) / totalValidators) * 100);
-        setStatusMessage(`Validator ${currentValidator.id} has ${currentValidator.approved ? 'approved' : 'rejected'} the block.`);
-        setCurrentValidatorIndex(index);
+          if (currentYesVotes + remainingValidators < minYesVotes) {
+            // If it's impossible to reach quorum, approve
+            currentValidator.approved = true;
+          } else if (currentYesVotes >= minYesVotes) {
+            // If quorum is already reached, 50% chance to approve
+            currentValidator.approved = Math.random() < 0.5;
+          } else {
+            // Otherwise, 75% chance to approve
+            currentValidator.approved = Math.random() < 0.75;
+          }
 
-        return updatedValidators;
-      });
+          setAttestationProgress(((index + 1) / totalValidators) * 100);
+          setStatusMessage(`Validator ${currentValidator.id} has ${currentValidator.approved ? 'approved' : 'rejected'} the block.`);
 
-      setTimeout(() => processValidator(index + 1), 1000);
+          return updatedValidators;
+        });
+
+        processValidator(index + 1);
+      }, 1000);
     };
 
     processValidator(0);
   }, [validators]);
 
   useEffect(() => {
-    if (validators.length > 0 && currentValidatorIndex === 0) {
+    if (validators.length > 0 && currentValidatorIndex === -1) {
       simulateAttestation();
     }
   }, [validators, currentValidatorIndex, simulateAttestation]);
 
-  // Wrap getValidatorColor in useCallback
   const getValidatorColor = useCallback((validator, index) => {
-    if (quorumReached) {
-      return validator.approved ? "green" : "red";
-    }
-    return index === currentValidatorIndex ? "yellow" : (validator.approved === null ? "gray" : (validator.approved ? "green" : "red"));
-  }, [quorumReached, currentValidatorIndex]);
+    if (index > currentValidatorIndex) return "gray";
+    return validator.approved ? "green" : "red";
+  }, [currentValidatorIndex]);
 
   const drawGraph = useCallback(() => {
     if (!svgRef.current || validators.length === 0 || !proposingValidator) return;
@@ -157,19 +145,19 @@ function BlockAttestation({ proposedBlock, onComplete }) {
         .attr("y1", centerY)
         .attr("x2", x)
         .attr("y2", y)
-        .attr("stroke", validator.approved === null ? "gray" : (validator.approved ? "green" : "red"))
+        .attr("stroke", index <= currentValidatorIndex ? (validator.approved ? "green" : "red") : "gray")
         .attr("stroke-width", 3)
-        .attr("stroke-dasharray", validator.approved === null ? "5,5" : "none");
+        .attr("stroke-dasharray", index <= currentValidatorIndex ? "none" : "5,5");
     });
-  }, [validators, proposingValidator, currentValidatorIndex, quorumReached, getValidatorColor]); // Add getValidatorColor to the dependency array
+  }, [validators, proposingValidator, currentValidatorIndex, getValidatorColor]);
 
   useEffect(() => {
     drawGraph();
-  }, [drawGraph, quorumReached]);
+  }, [drawGraph, currentValidatorIndex]);
 
   const progressBarProps = useSpring({
     width: attestationProgress,
-    config: { ...config.molasses, duration: 2000 }
+    config: { ...config.molasses, duration: 500 }
   });
 
   const handleAggregateVotes = () => {
@@ -187,9 +175,9 @@ function BlockAttestation({ proposedBlock, onComplete }) {
         const aggregatedVotes = validators.map(v => ({
           validator_id: v.id,
           approved: v.approved,
-          signature: `0x${sha256(v.id.toString() + v.approved.toString()).slice(0, 64)}`
+          signature: `0x${sha3_256(v.id.toString() + v.approved.toString()).slice(0, 64)}`
         }));
-        const aggregatedHash = sha256(JSON.stringify(aggregatedVotes));
+        const aggregatedHash = sha3_256(JSON.stringify(aggregatedVotes));
         setAggregatedHash(aggregatedHash);
 
         // Save aggregation data to local storage
@@ -272,14 +260,6 @@ function BlockAttestation({ proposedBlock, onComplete }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', width: '100%' }}>
       <Typography variant="h5" gutterBottom>Block Attestation</Typography>
-      
-      {/* Debug Information */}
-      <Paper elevation={3} sx={{ p: 2, mt: 2, mb: 4, backgroundColor: '#f0f0f0', width: '100%' }}>
-        <Typography variant="h6" gutterBottom>Debug Information</Typography>
-        <Typography>Selected Validator ID: {debugInfo.selectedValidatorId}</Typography>
-        <Typography>Selected Validator Address: {debugInfo.selectedValidatorAddress}</Typography>
-        <Typography>Total Validators in Storage: {debugInfo.totalValidatorsInStorage}</Typography>
-      </Paper>
       
       {proposedBlock && (
         <Paper elevation={3} sx={{ p: 2, mt: 2, mb: 4, width: '100%' }}>

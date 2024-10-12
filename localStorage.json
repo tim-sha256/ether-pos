@@ -17,16 +17,23 @@
     "timestamp": "",
     "validationCode": "",
     "withdrawalAddress": "",
-    "unrolledRandao": ""
+    "unrolledRandao": "",
+    "selectedValidator": {
+      "id": "",
+      "stake": "",
+      "validationCode": "",
+      "randaoCommitment": "",
+      "withdrawalAddress": ""
+    }
   },
   "globalRandao": "",
   "selectedValidatorID": "",
   "proposedBlockTransactions": [
     {
       "id": "",
-      "From": "",
-      "To": "",
-      "Value": ""
+      "from": "",
+      "to": "",
+      "value": ""
     }
   ],
   "proposedBlock": {
@@ -42,5 +49,26 @@
     "feeRecipient": "",
     "transactions": [],
     "hash": ""
+  },
+  "blockAggregationData": {
+    "aggregatedCommitment": "",
+    "totalAttestations": "",
+    "approvals": "",
+    "rejections": ""
+  },
+  "competingForkData": {
+    "validator": {
+      "id": "",
+      "stake": "",
+      "validationCode": "",
+      "randaoCommitment": "",
+      "withdrawalAddress": ""
+    },
+    "block": {
+      "blockNumber": "",
+      "hash": "",
+      "parentHash": "",
+      "feeRecipient": ""
+    }
   }
 }

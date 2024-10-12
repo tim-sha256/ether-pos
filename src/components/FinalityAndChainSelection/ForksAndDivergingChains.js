@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Box, Typography, Paper, Button } from '@mui/material';
+import { sha3_256 } from 'js-sha3';
 
 function ForksAndDivergingChains() {
   const [chainData, setChainData] = useState({ finalized: [], proposed: null, forked: null });
@@ -31,20 +32,20 @@ function ForksAndDivergingChains() {
     
     // Set the selected validator
     const selectedValidatorId = proposedBlock.feeRecipient?.validatorId;
-    setSelectedValidator({ id: selectedValidatorId, withdrawalAddress: proposedBlock.feeRecipient?.withdrawalAddress });
+    setSelectedValidator(validators.find(v => v.id === selectedValidatorId));
 
     // Choose a competing validator
     let competingValidator;
     do {
-      const competingValidatorIndex = Math.floor(Math.random() * validators.length);
-      competingValidator = validators[competingValidatorIndex];
+      competingValidator = validators[Math.floor(Math.random() * validators.length)];
     } while (competingValidator.id === selectedValidatorId);
     setCompetingValidator(competingValidator);
 
     const forkedBlock = {
-      ...proposedBlock,
-      hash: `0x${Math.random().toString(36).substr(2, 64)}`,
-      stateRoot: `0x${Math.random().toString(36).substr(2, 64)}`
+      blockNumber: proposedBlock.blockNumber,
+      hash: `0x${sha3_256(Math.random().toString()).slice(0, 64)}`,
+      parentHash: proposedBlock.parentHash,
+      feeRecipient: competingValidator.withdrawalAddress
     };
 
     setChainData({
@@ -54,10 +55,11 @@ function ForksAndDivergingChains() {
     });
 
     // Store competing fork data
-    localStorage.setItem('competingForkData', JSON.stringify({
+    const competingForkData = {
       validator: competingValidator,
       block: forkedBlock
-    }));
+    };
+    localStorage.setItem('competingForkData', JSON.stringify(competingForkData));
   };
 
   const drawChainVisualization = () => {

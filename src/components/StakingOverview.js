@@ -24,6 +24,9 @@ function StakingOverview() {
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF', '#FF67A1', '#FF6D00', '#A2FF67', '#67F7FF', '#FFD700'];
 
   useEffect(() => {
+    // Clear localStorage when component mounts
+    localStorage.clear();
+
     // Generate 15 random validators on component mount
     const generateValidators = () => {
       const newValidators = Array.from({ length: 15 }, (_, index) => ({
@@ -37,12 +40,7 @@ function StakingOverview() {
       localStorage.setItem('validators', JSON.stringify(newValidators));
     };
 
-    const storedValidators = JSON.parse(localStorage.getItem('validators'));
-    if (storedValidators && storedValidators.length >= 15) {
-      setValidators(storedValidators);
-    } else {
-      generateValidators();
-    }
+    generateValidators();
   }, []);
 
   useEffect(() => {

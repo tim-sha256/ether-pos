@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Stepper, Step, StepLabel, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import sha256 from 'js-sha3';
+import { sha3_256 } from 'js-sha3'; // Import sha3_256 function directly
 import sidebarContent from '../sidebarContent.json';
 
 // Import sub-components
@@ -42,9 +42,9 @@ function BlockCreation() {
     for (let i = 0; i < numTransactions; i++) {
       const transaction = {
         id: i + 1,
-        hash: '0x' + sha256(Math.random().toString()).slice(0, 64),
-        from: '0x' + sha256(Math.random().toString()).slice(0, 40),
-        to: '0x' + sha256(Math.random().toString()).slice(0, 40),
+        hash: '0x' + sha3_256(Math.random().toString()),
+        from: '0x' + sha3_256(Math.random().toString()).slice(0, 40),
+        to: '0x' + sha3_256(Math.random().toString()).slice(0, 40),
         value: (Math.random() * 9.99 + 0.01).toFixed(2), // 0.01 to 10 ETH
         fee: (Math.random() * 1.9 + 0.1).toFixed(1), // 0.1 to 2 Gwei
         gasUsed: Math.floor(Math.random() * 79000) + 21000, // 21,000 to 100,000 units
