@@ -76,6 +76,15 @@ function ValidatorSelection() {
     };
     setValidatorData(updatedUserValidatorData);
     localStorage.setItem('userValidatorData', JSON.stringify(updatedUserValidatorData));
+
+    // Update the validators array with the user's randaoReveal
+    const updatedValidators = validators.map(validator => 
+      validator.id === updatedUserValidatorData.id 
+        ? { ...validator, randaoReveal: finalHash }
+        : validator
+    );
+    setValidators(updatedValidators);
+    localStorage.setItem('validators', JSON.stringify(updatedValidators));
   };
 
   const handleXorCalculation = (result) => {

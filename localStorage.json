@@ -3,6 +3,7 @@
     {
       "id": "",
       "randaoCommitment": "",
+      "randaoReveal": "",
       "stake": "",
       "validationCode": "",
       "withdrawalAddress": ""
@@ -12,6 +13,7 @@
     "hashSteps": "",
     "id": "",
     "randaoCommitment": "",
+    "randaoReveal": "",
     "secretPhrase": "",
     "stake": "",
     "timestamp": "",
@@ -23,6 +25,7 @@
       "stake": "",
       "validationCode": "",
       "randaoCommitment": "",
+      "randaoReveal": "",
       "withdrawalAddress": ""
     }
   },

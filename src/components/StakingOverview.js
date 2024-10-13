@@ -31,13 +31,17 @@ function StakingOverview() {
 
     // Generate 15 random validators on component mount
     const generateValidators = () => {
-      const newValidators = Array.from({ length: 15 }, (_, index) => ({
-        id: index + 1,
-        stake: Math.floor(Math.random() * (500 - 32) + 32),
-        validationCode: `0x${sha3_256(Math.random().toString()).substring(0, 40)}`,
-        randaoCommitment: `0x${sha3_256(Math.random().toString()).substring(0, 64)}`,
-        withdrawalAddress: `0x${sha3_256(Math.random().toString()).substring(0, 40)}`
-      }));
+      const newValidators = Array.from({ length: 15 }, (_, index) => {
+        const randaoReveal = `0x${sha3_256(Math.random().toString()).substring(0, 64)}`;
+        return {
+          id: index + 1,
+          stake: Math.floor(Math.random() * (500 - 32) + 32),
+          validationCode: `0x${sha3_256(Math.random().toString()).substring(0, 40)}`,
+          randaoReveal: randaoReveal,
+          randaoCommitment: `0x${sha3_256(randaoReveal)}`,
+          withdrawalAddress: `0x${sha3_256(Math.random().toString()).substring(0, 40)}`
+        };
+      });
       setValidators(newValidators);
       localStorage.setItem('validators', JSON.stringify(newValidators));
     };
