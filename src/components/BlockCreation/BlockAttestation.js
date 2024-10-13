@@ -27,9 +27,12 @@ function BlockAttestation({ proposedBlock, onComplete }) {
       setProposingValidator(storedData.selectedValidator);
     }
 
-    // Use stored validators, but limit to 15 if there are more
-    const attestingValidators = storedValidators.slice(0, 15).map(validator => ({
-      ...validator,
+    // Get all validator IDs except the proposer's
+    const validatorIds = storedValidators.map(v => v.id).filter(id => id !== storedData.selectedValidator.id);
+    
+    // Create attestingValidators array with the correct IDs
+    const attestingValidators = validatorIds.map(id => ({
+      id: id,
       approved: null
     }));
 
@@ -105,6 +108,22 @@ function BlockAttestation({ proposedBlock, onComplete }) {
 
     svg.attr("width", width).attr("height", height);
 
+    // Draw lines first (behind the nodes)
+    validators.forEach((validator, index) => {
+      const angle = (index / validators.length) * 2 * Math.PI;
+      const x = centerX + radius * Math.cos(angle);
+      const y = centerY + radius * Math.sin(angle);
+
+      svg.append("line")
+        .attr("x1", centerX)
+        .attr("y1", centerY)
+        .attr("x2", x)
+        .attr("y2", y)
+        .attr("stroke", index <= currentValidatorIndex ? (validator.approved ? "green" : "red") : "gray")
+        .attr("stroke-width", 3)
+        .attr("stroke-dasharray", index <= currentValidatorIndex ? "none" : "5,5");
+    });
+
     // Draw proposing validator
     const proposerNode = svg.append("g")
       .attr("transform", `translate(${centerX},${centerY})`);
@@ -117,9 +136,9 @@ function BlockAttestation({ proposedBlock, onComplete }) {
 
     proposerNode.append("text")
       .attr("text-anchor", "middle")
-      .attr("dy", 90)
+      .attr("dy", 5)
       .attr("font-size", "14px")
-      .text(`Proposer: ${proposingValidator.withdrawalAddress.slice(0, 6)}...${proposingValidator.withdrawalAddress.slice(-4)}`);
+      .text(`Proposer: ${proposingValidator.id}`);
 
     // Draw other validators
     validators.forEach((validator, index) => {
@@ -136,18 +155,9 @@ function BlockAttestation({ proposedBlock, onComplete }) {
 
       validatorNode.append("text")
         .attr("text-anchor", "middle")
-        .attr("dy", 45)
+        .attr("dy", 5)
         .attr("font-size", "12px")
         .text(`Validator ${validator.id}`);
-
-      svg.append("line")
-        .attr("x1", centerX)
-        .attr("y1", centerY)
-        .attr("x2", x)
-        .attr("y2", y)
-        .attr("stroke", index <= currentValidatorIndex ? (validator.approved ? "green" : "red") : "gray")
-        .attr("stroke-width", 3)
-        .attr("stroke-dasharray", index <= currentValidatorIndex ? "none" : "5,5");
     });
   }, [validators, proposingValidator, currentValidatorIndex, getValidatorColor]);
 
