@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Button, Stepper, Step, StepLabel } from '@mui/material';
 import ForksAndDivergingChains from './FinalityAndChainSelection/ForksAndDivergingChains';
-import ChainSelectionAndFinality from './FinalityAndChainSelection/ChainSelectionAndFinality';
 import ValidatorBettingOverview from './FinalityAndChainSelection/ValidatorBettingOverview';
+import OtherValidatorsParticipate from './FinalityAndChainSelection/OtherValidatorsParticipate';
 import sidebarContent from '../sidebarContent.json';
 import { useNavigate } from 'react-router-dom';
 
-const steps = ['Forks & Diverging Chains', 'Validator Betting Overview', 'Chain Selection & Finality'];
+const steps = ['Forks & Diverging Chains', 'Validator Betting Overview', 'Other Validators Participate'];
 
 function FinalityAndChainSelection() {
   const navigate = useNavigate();
@@ -43,63 +43,41 @@ function FinalityAndChainSelection() {
       case 0:
         return <ForksAndDivergingChains chainData={chainData} validatorData={validatorData} />;
       case 1:
-        return <ValidatorBettingOverview />;
+        return <ValidatorBettingOverview onNextStep={handleNext} />;
       case 2:
-        return <ChainSelectionAndFinality chainData={chainData} validatorData={validatorData} blockAggregationData={blockAggregationData} />;
+        return <OtherValidatorsParticipate />;
       default:
         return null;
     }
   };
 
   const renderSidebarContent = (content) => {
-    let sidebarItems = content.map((item, index) => {
+    return content.map((item, index) => {
       if (typeof item === 'string') {
         return <Typography key={index} variant="body1" sx={{ mb: 2 }}>{item}</Typography>;
-      } else if (item.type === 'list' || item.type === 'orderedList') {
-        const ListComponent = item.type === 'list' ? 'ul' : 'ol';
+      } else if (item.type === 'list') {
         return (
-          <ListComponent key={index}>
+          <ul key={index}>
             {item.items.map((listItem, listIndex) => (
               <li key={listIndex}>
                 <Typography variant="body1">{listItem}</Typography>
               </li>
             ))}
-          </ListComponent>
+          </ul>
+        );
+      } else if (item.type === 'orderedList') {
+        return (
+          <ol key={index}>
+            {item.items.map((listItem, listIndex) => (
+              <li key={listIndex}>
+                <Typography variant="body1">{listItem}</Typography>
+              </li>
+            ))}
+          </ol>
         );
       }
       return null;
     });
-
-    // Add constants with definitions to sidebar for Validator Betting Overview step
-    if (activeStep === 1) {
-      sidebarItems.push(
-        <Box key="constants" sx={{ mt: 4 }}>
-          <Typography variant="h6" gutterBottom>Constants:</Typography>
-          <Typography variant="body2" sx={{ mb: 1 }}>
-            FINALITY_REWARD_COEFFICIENT: 6e-10
-            <br />
-            <em>The scaling factor that influences the base reward according to network size</em>
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 1 }}>
-            BLOCK_TIME: 4 seconds
-            <br />
-            <em>The average time between proposed blocks</em>
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 1 }}>
-            bet_coeff: 1
-            <br />
-            <em>Coefficient used in betting calculations</em>
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 1 }}>
-            total_validating_ether: 4045 ETH
-            <br />
-            <em>Total amount of ETH staked by all validators</em>
-          </Typography>
-        </Box>
-      );
-    }
-
-    return sidebarItems;
   };
 
   return (

@@ -3,7 +3,7 @@ import { Box, Typography, Paper, Slider, Button } from '@mui/material';
 import 'katex/dist/katex.min.css';
 import { BlockMath } from 'react-katex';
 
-function ValidatorBettingOverview() {
+function ValidatorBettingOverview({ onNextStep }) {
   const [userValidatorData, setUserValidatorData] = useState(null);
   const [validators, setValidators] = useState([]);
   const [odds, setOdds] = useState(2.5);
@@ -51,15 +51,33 @@ function ValidatorBettingOverview() {
 
   const handleSubmitBet = () => {
     const updatedValidators = [...validators];
-    const userValidatorIndex = updatedValidators.length - 1;
-    updatedValidators[userValidatorIndex] = {
-      ...updatedValidators[userValidatorIndex],
-      vLoss,
-      vGain
-    };
+    const userValidatorIndex = updatedValidators.findIndex(v => v.id === userValidatorData.id);
+    
+    if (userValidatorIndex !== -1) {
+      updatedValidators[userValidatorIndex] = {
+        ...updatedValidators[userValidatorIndex],
+        vLoss,
+        vGain,
+        odds
+      };
 
-    localStorage.setItem('validators', JSON.stringify(updatedValidators));
-    setValidators(updatedValidators);
+      localStorage.setItem('validators', JSON.stringify(updatedValidators));
+      setValidators(updatedValidators);
+
+      // Save user's finality betting data
+      const userFinalityBetting = {
+        validatorId: userValidatorData.id,
+        odds,
+        V_LOSS: vLoss,
+        V_GAIN: vGain
+      };
+      localStorage.setItem('userFinalityBetting', JSON.stringify(userFinalityBetting));
+
+      // Move to the next step
+      onNextStep();
+    } else {
+      console.error('User validator not found in the validators list');
+    }
   };
 
   return (
@@ -137,8 +155,12 @@ function ValidatorBettingOverview() {
         <Typography variant="body2" paragraph>
           After adjusting your odds and reviewing the calculations, click below to submit your bet.
         </Typography>
-        <Button variant="contained" onClick={handleSubmitBet} sx={{ mt: 2 }}>
-          Submit Bet
+        <Button 
+          variant="contained" 
+          onClick={handleSubmitBet} 
+          sx={{ mt: 2 }}
+        >
+          Submit bet
         </Button>
       </Paper>
     </Box>
