@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, Paper, Card, CardContent, LinearProgress, Tooltip } from '@mui/material';
 import { motion } from 'framer-motion';
-import { BlockMath } from 'react-katex';
 import CasinoIcon from '@mui/icons-material/Casino';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 
 function OtherValidatorsParticipate() {
   const [validators, setValidators] = useState([]);
@@ -13,6 +13,8 @@ function OtherValidatorsParticipate() {
   const [totalStakePerChain, setTotalStakePerChain] = useState({ proposed: 0, competing: 0 });
   const [currentValidatorIndex, setCurrentValidatorIndex] = useState(0);
   const [userFinalityBetting, setUserFinalityBetting] = useState(null);
+  const [finalResult, setFinalResult] = useState(null);
+  const [bettingFinished, setBettingFinished] = useState(false);
   const componentRef = useRef(null);
 
   const FINALITY_REWARD_COEFFICIENT = 6e-10;
@@ -22,7 +24,6 @@ function OtherValidatorsParticipate() {
 
   useEffect(() => {
     loadData();
-    // Scroll to the top when the component mounts
     if (componentRef.current) {
       componentRef.current.scrollIntoView({ behavior: 'smooth' });
     }
@@ -30,8 +31,11 @@ function OtherValidatorsParticipate() {
 
   useEffect(() => {
     if (validators.length > 0 && currentValidatorIndex < validators.length) {
-      const timer = setTimeout(() => simulateValidatorBet(currentValidatorIndex), 1000);
+      const timer = setTimeout(() => simulateValidatorBet(currentValidatorIndex), 2000);
       return () => clearTimeout(timer);
+    } else if (currentValidatorIndex >= validators.length) {
+      determineFinalResult();
+      setBettingFinished(true);
     }
   }, [currentValidatorIndex, validators]);
 
@@ -42,7 +46,13 @@ function OtherValidatorsParticipate() {
     const storedGlobalRandao = localStorage.getItem('globalRandao') || '';
     const storedUserFinalityBetting = JSON.parse(localStorage.getItem('userFinalityBetting') || '{}');
 
-    setValidators(storedValidators);
+    // Sort validators by ID, keeping user's validator first
+    const userValidator = storedValidators.find(v => v.id === storedUserFinalityBetting.validatorId);
+    const otherValidators = storedValidators.filter(v => v.id !== storedUserFinalityBetting.validatorId)
+                                            .sort((a, b) => a.id - b.id);
+    const sortedValidators = [userValidator, ...otherValidators];
+    
+    setValidators(sortedValidators);
     setCompetingForkData(storedCompetingForkData);
     setProposedBlock(storedProposedBlock);
     setGlobalRandao(storedGlobalRandao);
@@ -89,11 +99,27 @@ function OtherValidatorsParticipate() {
     const randaoSeed = parseInt(globalRandao, 16) ^ parseInt(validator.randaoReveal, 16);
     const chosenChain = (randaoSeed % 2 === 0) ? 'proposed' : 'competing';
 
+    // Calculate the current percentage of stake for the proposed chain
+    const currentProposedStakePercentage = totalStakePerChain.proposed / (totalStakePerChain.proposed + totalStakePerChain.competing) * 100;
+
+    // Adjust the probability to ensure the proposed chain always has at least 67% stake
+    // and at least one other validator votes for the competing chain
+    let finalChosenChain;
+    if (currentProposedStakePercentage < 67) {
+      finalChosenChain = 'proposed';
+    } else if (chainSupport.competing === 1 && index === validators.length - 1) { // Ensure at least one other validator votes for competing
+      finalChosenChain = 'competing';
+    } else {
+      // Allow some competing votes, but ensure we don't drop below 67%
+      const maxCompetingStake = (totalStakePerChain.proposed + totalStakePerChain.competing + validator.stake) * 0.33 - totalStakePerChain.competing;
+      finalChosenChain = (Math.random() < 0.2 && validator.stake <= maxCompetingStake) ? 'competing' : 'proposed';
+    }
+
     const updatedValidator = {
       ...validator,
       vLoss,
       vGain,
-      chosenChain,
+      chosenChain: finalChosenChain,
       odds
     };
 
@@ -105,32 +131,25 @@ function OtherValidatorsParticipate() {
 
     setChainSupport(prevSupport => ({
       ...prevSupport,
-      [chosenChain]: prevSupport[chosenChain] + 1
+      [finalChosenChain]: prevSupport[finalChosenChain] + 1
     }));
 
     setTotalStakePerChain(prevStake => ({
       ...prevStake,
-      [chosenChain]: prevStake[chosenChain] + validator.stake
+      [finalChosenChain]: prevStake[finalChosenChain] + validator.stake
     }));
 
     setCurrentValidatorIndex(prevIndex => prevIndex + 1);
   };
 
-  const renderFormulas = () => (
-    <Box sx={{ mt: 4 }}>
-      <Typography variant="h6" gutterBottom>Formulas Used:</Typography>
-      <BlockMath math={`\\text{BASE\\_REWARD} = \\text{FINALITY\\_REWARD\\_COEFFICIENT} \\times \\text{BLOCK\\_TIME} \\times \\text{total\\_validating\\_ether}`} />
-      <BlockMath math={`V_{LOSS} = \\text{BASE\\_REWARD} \\times \\text{odds} \\times \\text{bet\\_coeff} \\times \\text{stake}`} />
-      <BlockMath math={`V_{GAIN} = \\text{BASE\\_REWARD} \\times \\log(\\text{odds}) \\times \\text{bet\\_coeff} \\times \\text{stake}`} />
-      <Typography variant="body2">
-        Constants: FINALITY_REWARD_COEFFICIENT = {FINALITY_REWARD_COEFFICIENT}, BLOCK_TIME = {BLOCK_TIME}, bet_coeff = {bet_coeff}, total_validating_ether = {total_validating_ether}
-      </Typography>
-    </Box>
-  );
-
   const calculateBetChain = (randaoReveal) => {
     const combinedHash = parseInt(globalRandao, 16) ^ parseInt(randaoReveal, 16);
     return combinedHash % 2 === 0 ? 'proposed' : 'competing';
+  };
+
+  const determineFinalResult = () => {
+    const finalizedChain = totalStakePerChain.proposed > totalStakePerChain.competing ? 'Proposed' : 'Competing';
+    setFinalResult(finalizedChain);
   };
 
   const renderGlobalRandaoBanner = () => (
@@ -147,13 +166,12 @@ function OtherValidatorsParticipate() {
   const renderValidatorCard = (validator, index) => {
     const isUserValidator = validator.id === userFinalityBetting.validatorId;
     const isCompetingValidator = validator.id === competingForkData.validator.id;
-    const betChain = calculateBetChain(validator.randaoReveal);
 
     return (
       <motion.div
         key={validator.id}
         initial={{ opacity: 0, y: 50 }}
-        animate={index < currentValidatorIndex || isUserValidator || isCompetingValidator ? { opacity: 1, y: 0 } : {}}
+        animate={index <= currentValidatorIndex || isUserValidator || isCompetingValidator ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.5 }}
       >
         <Card sx={{ 
@@ -169,15 +187,20 @@ function OtherValidatorsParticipate() {
           <CardContent>
             <Typography variant="h6" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
               Validator {validator.id}
-              {isUserValidator ? ' (You)' : isCompetingValidator ? ' (Competing)' : ''}
+              {isUserValidator ? ' (You)' : ''}
             </Typography>
+            {isCompetingValidator && (
+              <Typography variant="body2" color="white" sx={{ fontStyle: 'italic' }}>
+                Submitted competing chain
+              </Typography>
+            )}
             <Typography variant="body2" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
               Stake: {validator.stake} ETH
             </Typography>
             <Typography variant="body2" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
               Randao Reveal: {validator.randaoReveal.slice(0, 10)}...
             </Typography>
-            {(validator.chosenChain || isUserValidator || isCompetingValidator) && (
+            {(validator.chosenChain || isUserValidator || isCompetingValidator) ? (
               <>
                 <Typography variant="body2" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
                   Chain: {isUserValidator ? 'proposed' : isCompetingValidator ? 'competing' : validator.chosenChain}
@@ -195,17 +218,40 @@ function OtherValidatorsParticipate() {
                   <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                     <CasinoIcon sx={{ mr: 1 }} />
                     <Typography variant="body2">
-                      Randomness Result: {betChain.charAt(0).toUpperCase() + betChain.slice(1)}
+                      Randomness Result: {isUserValidator ? 'Proposed' : isCompetingValidator ? 'Competing' : validator.chosenChain.charAt(0).toUpperCase() + validator.chosenChain.slice(1)}
                     </Typography>
                   </Box>
                 </Tooltip>
               </>
+            ) : (
+              <Typography variant="body2" sx={{ mt: 2, fontStyle: 'italic' }}>
+                Abstained
+              </Typography>
             )}
           </CardContent>
         </Card>
       </motion.div>
     );
   };
+
+  const renderChainSupportChart = () => (
+    <Box sx={{ height: 300, mt: 4 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={[
+            { name: 'Proposed Chain', value: totalStakePerChain.proposed },
+            { name: 'Competing Chain', value: totalStakePerChain.competing },
+          ]}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <RechartsTooltip />
+          <Bar dataKey="value" fill="#8884d8" />
+        </BarChart>
+      </ResponsiveContainer>
+    </Box>
+  );
 
   return (
     <Box ref={componentRef}>
@@ -226,12 +272,19 @@ function OtherValidatorsParticipate() {
           <Typography variant="body2">Proposed Chain Stake: {totalStakePerChain.proposed.toFixed(2)} ETH</Typography>
           <Typography variant="body2">Competing Chain Stake: {totalStakePerChain.competing.toFixed(2)} ETH</Typography>
         </Box>
+        {renderChainSupportChart()}
       </Paper>
       {renderGlobalRandaoBanner()}
+      {bettingFinished && finalResult && (
+        <Paper elevation={3} sx={{ p: 2, mt: 2, mb: 2, bgcolor: 'success.light' }}>
+          <Typography variant="h6" align="center">
+            Final Result: {finalResult} Chain Finalized
+          </Typography>
+        </Paper>
+      )}
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
         {validators.map((validator, index) => renderValidatorCard(validator, index))}
       </Box>
-      {renderFormulas()}
     </Box>
   );
 }
