@@ -13,8 +13,6 @@ function OtherValidatorsParticipate() {
   const [totalStakePerChain, setTotalStakePerChain] = useState({ proposed: 0, competing: 0 });
   const [currentValidatorIndex, setCurrentValidatorIndex] = useState(0);
   const [userFinalityBetting, setUserFinalityBetting] = useState(null);
-  const [finalResult, setFinalResult] = useState(null);
-  const [bettingFinished, setBettingFinished] = useState(false);
   const componentRef = useRef(null);
 
   const FINALITY_REWARD_COEFFICIENT = 6e-10;
@@ -33,9 +31,6 @@ function OtherValidatorsParticipate() {
     if (validators.length > 0 && currentValidatorIndex < validators.length) {
       const timer = setTimeout(() => simulateValidatorBet(currentValidatorIndex), 2000);
       return () => clearTimeout(timer);
-    } else if (currentValidatorIndex >= validators.length) {
-      determineFinalResult();
-      setBettingFinished(true);
     }
   }, [currentValidatorIndex, validators]);
 
@@ -145,11 +140,6 @@ function OtherValidatorsParticipate() {
   const calculateBetChain = (randaoReveal) => {
     const combinedHash = parseInt(globalRandao, 16) ^ parseInt(randaoReveal, 16);
     return combinedHash % 2 === 0 ? 'proposed' : 'competing';
-  };
-
-  const determineFinalResult = () => {
-    const finalizedChain = totalStakePerChain.proposed > totalStakePerChain.competing ? 'Proposed' : 'Competing';
-    setFinalResult(finalizedChain);
   };
 
   const renderGlobalRandaoBanner = () => (
@@ -275,13 +265,6 @@ function OtherValidatorsParticipate() {
         {renderChainSupportChart()}
       </Paper>
       {renderGlobalRandaoBanner()}
-      {bettingFinished && finalResult && (
-        <Paper elevation={3} sx={{ p: 2, mt: 2, mb: 2, bgcolor: 'success.light' }}>
-          <Typography variant="h6" align="center">
-            Final Result: {finalResult} Chain Finalized
-          </Typography>
-        </Paper>
-      )}
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
         {validators.map((validator, index) => renderValidatorCard(validator, index))}
       </Box>
