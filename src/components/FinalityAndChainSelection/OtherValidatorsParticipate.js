@@ -33,6 +33,8 @@ function OtherValidatorsParticipate() {
     if (validators.length > 0 && currentValidatorIndex < validators.length) {
       const timer = setTimeout(() => simulateValidatorBet(currentValidatorIndex), 2000);
       return () => clearTimeout(timer);
+    } else if (currentValidatorIndex >= validators.length) {
+      saveBettingResults();
     }
   }, [currentValidatorIndex, validators]);
 
@@ -47,6 +49,12 @@ function OtherValidatorsParticipate() {
     const userValidator = storedValidators.find(v => v.id === storedUserFinalityBetting.validatorId);
     const otherValidators = storedValidators.filter(v => v.id !== storedUserFinalityBetting.validatorId)
                                             .sort((a, b) => a.id - b.id);
+    
+    // Set the correct chain for the user's validator
+    if (userValidator) {
+      userValidator.chosenChain = 'proposed';
+    }
+
     const sortedValidators = [userValidator, ...otherValidators];
     
     // Calculate values for the competing fork validator
@@ -149,6 +157,28 @@ function OtherValidatorsParticipate() {
     setCurrentValidatorIndex(prevIndex => prevIndex + 1);
   };
 
+  const saveBettingResults = () => {
+    const finalizedChain = totalStakePerChain.proposed > totalStakePerChain.competing ? 'proposed' : 'competing';
+
+    const bettingResults = {
+      finalizedChain,
+      validators: validators.map(validator => ({
+        validatorId: validator.id,
+        chain: validator.chosenChain || 'none',
+        odds: validator.odds || 0,
+        vLoss: validator.vLoss || 0,
+        vGain: validator.vGain || 0,
+        randaoReveal: validator.randaoReveal
+      })),
+      proposedChainSupport: chainSupport.proposed,
+      proposedChainStake: totalStakePerChain.proposed,
+      competingChainSupport: chainSupport.competing,
+      competingChainStake: totalStakePerChain.competing
+    };
+
+    localStorage.setItem('bettingResults', JSON.stringify(bettingResults));
+  };
+
   const calculateBetChain = (randaoReveal) => {
     const combinedHash = parseInt(globalRandao, 16) ^ parseInt(randaoReveal, 16);
     return combinedHash % 2 === 0 ? 'proposed' : 'competing';
@@ -205,7 +235,7 @@ function OtherValidatorsParticipate() {
             {(validator.chosenChain || isUserValidator || isCompetingValidator) ? (
               <>
                 <Typography variant="body2" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
-                  Chain: {isUserValidator ? 'proposed' : isCompetingValidator ? 'competing' : validator.chosenChain}
+                  Chain: {validator.chosenChain || (isUserValidator ? 'proposed' : isCompetingValidator ? 'competing' : 'N/A')}
                 </Typography>
                 {(isUserValidator || validator.odds !== undefined) && (
                   <Typography variant="body2" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
@@ -226,7 +256,7 @@ function OtherValidatorsParticipate() {
                   <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                     <CasinoIcon sx={{ mr: 1 }} />
                     <Typography variant="body2">
-                      Randomness Result: {isUserValidator ? 'Proposed' : isCompetingValidator ? 'Competing' : validator.chosenChain.charAt(0).toUpperCase() + validator.chosenChain.slice(1)}
+                      Randomness Result: {validator.chosenChain ? validator.chosenChain.charAt(0).toUpperCase() + validator.chosenChain.slice(1) : 'N/A'}
                     </Typography>
                   </Box>
                 </Tooltip>
