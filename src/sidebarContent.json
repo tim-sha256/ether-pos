@@ -180,22 +180,28 @@
         "Understanding how these forks occur and are resolved is crucial to grasping the consensus mechanism of Ethereum's Proof of Stake."
       ]
     },
-    "chainSelectionAndFinality": {
-      "title": "Chain Selection & Finality",
+    "validatorBettingOverview": {
+      "title": "Validator Betting Overview",
       "content": [
-        "Ethereum uses a concept called 'epochs' to group blocks together and establish checkpoints.",
-        "Validators vote on these checkpoints to determine which chain should be considered the 'canonical' chain.",
-        "A supermajority vote (typically 2/3) is required to finalize a checkpoint and its associated chain.",
-        "Once finalized, all other competing chains are discarded, ensuring the network converges on a single, agreed-upon history."
+        "In this step, validators decide how much they're willing to bet on their proposed chain.",
+        "The betting process involves calculating potential gains (V_GAIN) and losses (V_LOSS) based on the validator's stake and chosen odds.",
+        "Higher odds increase potential rewards but also increase risk. Validators must balance their confidence in the chain being finalized with the potential rewards and risks."
       ]
     },
-    "economicIncentivesAndPenalties": {
-      "title": "Economic Incentives & Penalties",
+    "otherValidatorsParticipate": {
+      "title": "Other Validators Participate",
       "content": [
-        "To maintain network security and encourage proper behavior, Ethereum implements a system of rewards and penalties for validators.",
-        "Validators are rewarded for proposing and attesting to blocks that become part of the finalized chain.",
-        "Conversely, validators can be penalized for being offline, failing to attest, or proposing conflicting blocks.",
-        "In severe cases of malicious behavior, validators can be 'slashed', losing a significant portion of their staked ETH."
+        "In this step, we simulate the participation of all the network validators in betting on the finalization of the chain. Each validator decides between the proposed chain and the competing chain.",
+        {
+          "type": "list",
+          "items": [
+            "The global randao value is shown at the top of the page. This value introduces randomness, ensuring that the betting decisions are fair and unbiased.",
+            "Each validator has a unique randao reveal, which they use in combination with the global randao value through an XOR operation to generate randomness.",
+            "This XOR operation between the global randao and each validator's randao reveal ensures an unbiased result when selecting the chain to bet on.",
+            "Validators make their decisions based on their confidence in the chain being finalized. This confidence is influenced by the odds and their own stake."
+          ]
+        },
+        "The number of validators supporting each chain is displayed at the top, along with their total staked ETH backing each chain. The randomness used here is crucial for maintaining the fairness of the blockchain's finality mechanism."
       ]
     }
   },

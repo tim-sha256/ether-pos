@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, Paper, Card, CardContent, LinearProgress, Tooltip } from '@mui/material';
 import { motion } from 'framer-motion';
 import { BlockMath } from 'react-katex';
@@ -13,6 +13,7 @@ function OtherValidatorsParticipate() {
   const [totalStakePerChain, setTotalStakePerChain] = useState({ proposed: 0, competing: 0 });
   const [currentValidatorIndex, setCurrentValidatorIndex] = useState(0);
   const [userFinalityBetting, setUserFinalityBetting] = useState(null);
+  const componentRef = useRef(null);
 
   const FINALITY_REWARD_COEFFICIENT = 6e-10;
   const BLOCK_TIME = 4;
@@ -21,6 +22,10 @@ function OtherValidatorsParticipate() {
 
   useEffect(() => {
     loadData();
+    // Scroll to the top when the component mounts
+    if (componentRef.current) {
+      componentRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   }, []);
 
   useEffect(() => {
@@ -43,14 +48,20 @@ function OtherValidatorsParticipate() {
     setGlobalRandao(storedGlobalRandao);
     setUserFinalityBetting(storedUserFinalityBetting);
 
-    // Initialize chain support with user's bet
-    if (storedUserFinalityBetting.validatorId) {
-      setChainSupport({ proposed: 1, competing: 0 });
-      setTotalStakePerChain({ 
-        proposed: storedValidators.find(v => v.id === storedUserFinalityBetting.validatorId)?.stake || 0, 
-        competing: 0 
-      });
-    }
+    // Initialize chain support with user's bet and competing fork validator
+    setChainSupport({ proposed: 1, competing: 1 });
+    setTotalStakePerChain({ 
+      proposed: storedValidators.find(v => v.id === storedUserFinalityBetting.validatorId)?.stake || 0, 
+      competing: storedCompetingForkData.validator.stake || 0
+    });
+
+    // Assign the competing fork validator to the competing chain
+    const updatedValidators = storedValidators.map(v => 
+      v.id === storedCompetingForkData.validator.id 
+        ? { ...v, chosenChain: 'competing' } 
+        : v
+    );
+    setValidators(updatedValidators);
   };
 
   const simulateValidatorBet = (index) => {
@@ -74,8 +85,8 @@ function OtherValidatorsParticipate() {
     const vLoss = baseReward * odds * bet_coeff * validator.stake;
     const vGain = baseReward * Math.log(odds) * bet_coeff * validator.stake;
 
-    // Use global randao and validator's randaoReveal for randomness
-    const randaoSeed = parseInt(globalRandao + validator.randaoReveal, 16);
+    // Use XOR operation between global randao and validator's randaoReveal for randomness
+    const randaoSeed = parseInt(globalRandao, 16) ^ parseInt(validator.randaoReveal, 16);
     const chosenChain = (randaoSeed % 2 === 0) ? 'proposed' : 'competing';
 
     const updatedValidator = {
@@ -118,7 +129,7 @@ function OtherValidatorsParticipate() {
   );
 
   const calculateBetChain = (randaoReveal) => {
-    const combinedHash = parseInt(globalRandao + randaoReveal, 16);
+    const combinedHash = parseInt(globalRandao, 16) ^ parseInt(randaoReveal, 16);
     return combinedHash % 2 === 0 ? 'proposed' : 'competing';
   };
 
@@ -135,50 +146,52 @@ function OtherValidatorsParticipate() {
 
   const renderValidatorCard = (validator, index) => {
     const isUserValidator = validator.id === userFinalityBetting.validatorId;
+    const isCompetingValidator = validator.id === competingForkData.validator.id;
     const betChain = calculateBetChain(validator.randaoReveal);
 
     return (
       <motion.div
         key={validator.id}
         initial={{ opacity: 0, y: 50 }}
-        animate={index < currentValidatorIndex || isUserValidator ? { opacity: 1, y: 0 } : {}}
+        animate={index < currentValidatorIndex || isUserValidator || isCompetingValidator ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.5 }}
       >
         <Card sx={{ 
           width: 250, 
           bgcolor: isUserValidator 
             ? 'success.main'
-            : validator.chosenChain === 'proposed' 
-              ? 'info.light' 
-              : validator.chosenChain === 'competing'
-                ? 'warning.light'
+            : isCompetingValidator || validator.chosenChain === 'competing'
+              ? 'orange'
+              : validator.chosenChain === 'proposed' 
+                ? 'info.light'
                 : 'grey.300'
         }}>
           <CardContent>
-            <Typography variant="h6" color={isUserValidator ? 'white' : 'inherit'}>
-              Validator {validator.id}{isUserValidator ? ' (You)' : ''}
+            <Typography variant="h6" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
+              Validator {validator.id}
+              {isUserValidator ? ' (You)' : isCompetingValidator ? ' (Competing)' : ''}
             </Typography>
-            <Typography variant="body2" color={isUserValidator ? 'white' : 'inherit'}>
+            <Typography variant="body2" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
               Stake: {validator.stake} ETH
             </Typography>
-            <Typography variant="body2" color={isUserValidator ? 'white' : 'inherit'}>
+            <Typography variant="body2" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
               Randao Reveal: {validator.randaoReveal.slice(0, 10)}...
             </Typography>
-            {(validator.chosenChain || isUserValidator) && (
+            {(validator.chosenChain || isUserValidator || isCompetingValidator) && (
               <>
-                <Typography variant="body2" color={isUserValidator ? 'white' : 'inherit'}>
-                  Chain: {isUserValidator ? 'proposed' : validator.chosenChain}
+                <Typography variant="body2" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
+                  Chain: {isUserValidator ? 'proposed' : isCompetingValidator ? 'competing' : validator.chosenChain}
                 </Typography>
-                <Typography variant="body2" color={isUserValidator ? 'white' : 'inherit'}>
+                <Typography variant="body2" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
                   Odds: {isUserValidator ? userFinalityBetting.odds.toFixed(2) : validator.odds?.toFixed(2)}
                 </Typography>
-                <Typography variant="body2" color={isUserValidator ? 'white' : 'inherit'}>
+                <Typography variant="body2" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
                   V_LOSS: {isUserValidator ? userFinalityBetting.V_LOSS.toFixed(4) : validator.vLoss?.toFixed(4)} ETH
                 </Typography>
-                <Typography variant="body2" color={isUserValidator ? 'white' : 'inherit'}>
+                <Typography variant="body2" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
                   V_GAIN: {isUserValidator ? userFinalityBetting.V_GAIN.toFixed(4) : validator.vGain?.toFixed(4)} ETH
                 </Typography>
-                <Tooltip title={`Bet Chain Selection: Hash(globalRandao + randaoReveal) % 2 == 0 ? "Proposed" : "Competing"`}>
+                <Tooltip title={`Bet Chain Selection: XOR(globalRandao, randaoReveal) % 2 == 0 ? "Proposed" : "Competing"`}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                     <CasinoIcon sx={{ mr: 1 }} />
                     <Typography variant="body2">
@@ -195,14 +208,14 @@ function OtherValidatorsParticipate() {
   };
 
   return (
-    <Box>
+    <Box ref={componentRef}>
       <Typography variant="h5" gutterBottom>
         Chain Selection & Finality - Other Validators Participate
       </Typography>
       <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
         <Typography variant="body1" paragraph>
           Now, other validators will also participate in the betting process. You will see their decisions in real-time.
-          The betting outcome is influenced by the global randao, ensuring fairness in the selection process.
+          The betting outcome is influenced by the global randao and individual randao reveals, ensuring fairness in the selection process.
         </Typography>
         <LinearProgress variant="determinate" value={(currentValidatorIndex / validators.length) * 100} sx={{ mb: 2 }} />
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
