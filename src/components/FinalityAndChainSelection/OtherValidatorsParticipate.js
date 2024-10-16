@@ -20,6 +20,8 @@ function OtherValidatorsParticipate() {
   const bet_coeff = 1;
   const total_validating_ether = 4045;
 
+  const [totalTVL, setTotalTVL] = useState(0);
+
   useEffect(() => {
     loadData();
     if (componentRef.current) {
@@ -47,6 +49,20 @@ function OtherValidatorsParticipate() {
                                             .sort((a, b) => a.id - b.id);
     const sortedValidators = [userValidator, ...otherValidators];
     
+    // Calculate values for the competing fork validator
+    const competingValidator = sortedValidators.find(v => v.id === storedCompetingForkData.validator.id);
+    if (competingValidator) {
+      const odds = 1.1 + Math.random() * 3.9; // Random odds between 1.1 and 5.0
+      const baseReward = FINALITY_REWARD_COEFFICIENT * BLOCK_TIME * total_validating_ether;
+      const vLoss = baseReward * odds * bet_coeff * competingValidator.stake;
+      const vGain = baseReward * Math.log(odds) * bet_coeff * competingValidator.stake;
+
+      competingValidator.odds = odds;
+      competingValidator.vLoss = vLoss;
+      competingValidator.vGain = vGain;
+      competingValidator.chosenChain = 'competing';
+    }
+
     setValidators(sortedValidators);
     setCompetingForkData(storedCompetingForkData);
     setProposedBlock(storedProposedBlock);
@@ -56,17 +72,13 @@ function OtherValidatorsParticipate() {
     // Initialize chain support with user's bet and competing fork validator
     setChainSupport({ proposed: 1, competing: 1 });
     setTotalStakePerChain({ 
-      proposed: storedValidators.find(v => v.id === storedUserFinalityBetting.validatorId)?.stake || 0, 
-      competing: storedCompetingForkData.validator.stake || 0
+      proposed: userValidator?.stake || 0, 
+      competing: competingValidator?.stake || 0
     });
 
-    // Assign the competing fork validator to the competing chain
-    const updatedValidators = storedValidators.map(v => 
-      v.id === storedCompetingForkData.validator.id 
-        ? { ...v, chosenChain: 'competing' } 
-        : v
-    );
-    setValidators(updatedValidators);
+    // Calculate total TVL
+    const totalTVL = sortedValidators.reduce((sum, validator) => sum + validator.stake, 0);
+    setTotalTVL(totalTVL);
   };
 
   const simulateValidatorBet = (index) => {
@@ -195,15 +207,21 @@ function OtherValidatorsParticipate() {
                 <Typography variant="body2" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
                   Chain: {isUserValidator ? 'proposed' : isCompetingValidator ? 'competing' : validator.chosenChain}
                 </Typography>
-                <Typography variant="body2" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
-                  Odds: {isUserValidator ? userFinalityBetting.odds.toFixed(2) : validator.odds?.toFixed(2)}
-                </Typography>
-                <Typography variant="body2" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
-                  V_LOSS: {isUserValidator ? userFinalityBetting.V_LOSS.toFixed(4) : validator.vLoss?.toFixed(4)} ETH
-                </Typography>
-                <Typography variant="body2" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
-                  V_GAIN: {isUserValidator ? userFinalityBetting.V_GAIN.toFixed(4) : validator.vGain?.toFixed(4)} ETH
-                </Typography>
+                {(isUserValidator || validator.odds !== undefined) && (
+                  <Typography variant="body2" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
+                    Odds: {isUserValidator ? userFinalityBetting.odds.toFixed(2) : validator.odds.toFixed(2)}
+                  </Typography>
+                )}
+                {(isUserValidator || validator.vLoss !== undefined) && (
+                  <Typography variant="body2" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
+                    V_LOSS: {isUserValidator ? userFinalityBetting.V_LOSS.toFixed(4) : validator.vLoss.toFixed(4)} ETH
+                  </Typography>
+                )}
+                {(isUserValidator || validator.vGain !== undefined) && (
+                  <Typography variant="body2" color={isUserValidator || isCompetingValidator ? 'white' : 'inherit'}>
+                    V_GAIN: {isUserValidator ? userFinalityBetting.V_GAIN.toFixed(4) : validator.vGain.toFixed(4)} ETH
+                  </Typography>
+                )}
                 <Tooltip title={`Bet Chain Selection: XOR(globalRandao, randaoReveal) % 2 == 0 ? "Proposed" : "Competing"`}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                     <CasinoIcon sx={{ mr: 1 }} />
@@ -259,8 +277,14 @@ function OtherValidatorsParticipate() {
           <Typography variant="body2">Competing Chain Support: {chainSupport.competing}</Typography>
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="body2">Proposed Chain Stake: {totalStakePerChain.proposed.toFixed(2)} ETH</Typography>
-          <Typography variant="body2">Competing Chain Stake: {totalStakePerChain.competing.toFixed(2)} ETH</Typography>
+          <Typography variant="body2">
+            Proposed Chain Stake: {totalStakePerChain.proposed.toFixed(2)} ETH 
+            ({((totalStakePerChain.proposed / totalTVL) * 100).toFixed(2)}% of TVL)
+          </Typography>
+          <Typography variant="body2">
+            Competing Chain Stake: {totalStakePerChain.competing.toFixed(2)} ETH
+            ({((totalStakePerChain.competing / totalTVL) * 100).toFixed(2)}% of TVL)
+          </Typography>
         </Box>
         {renderChainSupportChart()}
       </Paper>
