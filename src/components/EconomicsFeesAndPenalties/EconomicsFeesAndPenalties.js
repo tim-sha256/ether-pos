@@ -3,6 +3,7 @@ import { Box, Typography, Paper, Button, Stepper, Step, StepLabel, Card, CardCon
 import sidebarContent from '../../sidebarContent.json';
 import TransactionFees from './TransactionFees';
 import BlockRewards from './BlockRewards';
+import PenaltiesAndSlashing from './PenaltiesAndSlashing';
 
 const steps = ['Introduction', 'Transaction Fees', 'Block Rewards', 'Penalties and Slashing'];
 
@@ -43,7 +44,7 @@ function EconomicsFeesAndPenalties() {
       case 2:
         return <BlockRewards />;
       case 3:
-        return <Typography>Content for Penalties and Slashing</Typography>;
+        return <PenaltiesAndSlashing />;
       default:
         return null;
     }
