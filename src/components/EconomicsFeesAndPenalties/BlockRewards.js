@@ -2,13 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Grid, Divider } from '@mui/material';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 function BlockRewards() {
   const [validator, setValidator] = useState(null);
   const [blockData, setBlockData] = useState(null);
   const [reward, setReward] = useState({ base: 0, priorityFees: 0, total: 0 });
-  const [rewardAccumulationData, setRewardAccumulationData] = useState([]);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -61,16 +59,6 @@ function BlockRewards() {
         priorityFees: priorityFees,
         total: totalReward
       });
-
-      // Generate reward accumulation data
-      const accumulationData = [
-        {
-          block: proposedBlock.blockNumber,
-          baseReward: baseReward,
-          priorityFees: priorityFees
-        }
-      ];
-      setRewardAccumulationData(accumulationData);
     } catch (err) {
       console.error('Error loading data:', err);
       setError(err.message);
@@ -85,29 +73,28 @@ function BlockRewards() {
   
     return (
       <Box sx={{ position: 'relative', height: 300, width: '100%', mt: 4 }}>
-        <svg width="100%" height="100%">
-          <circle cx="100" cy="150" r="40" fill="#4CAF50" />
-          <text x="100" y="150" textAnchor="middle" fill="white" dy=".3em">Block</text>
+        <svg width="100%" height="100%" viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
+          <circle cx="50" cy="150" r="40" fill="#4CAF50" />
+          <text x="50" y="150" textAnchor="middle" fill="white" dy=".3em">Block</text>
   
-          <circle cx="500" cy="75" r="40" fill="#FFC107" />
-          <text x="500" y="75" textAnchor="middle" fill="white" dy=".3em">Validator</text>
+          <circle cx="750" cy="75" r="40" fill="#FFC107" />
+          <text x="750" y="75" textAnchor="middle" fill="white" dy=".3em">Validator</text>
   
-          <circle cx="500" cy="225" r="40" fill="#F44336" />
-          <text x="500" y="225" textAnchor="middle" fill="white" dy=".3em">Burn</text>
+          <circle cx="750" cy="225" r="40" fill="#F44336" />
+          <text x="750" y="225" textAnchor="middle" fill="white" dy=".3em">Burn</text>
   
-          <line x1="140" y1="150" x2="460" y2="75" stroke="green" strokeWidth="2" />
-          <text x="300" y="100" textAnchor="middle" fill="green">{`${reward.priorityFees.toFixed(4)} ETH (Priority Fees)`}</text>
+          <line x1="90" y1="150" x2="710" y2="75" stroke="green" strokeWidth="2" />
+          <text x="400" y="100" textAnchor="middle" fill="green">{`${reward.priorityFees.toFixed(4)} ETH (Priority Fees)`}</text>
   
-          <line x1="140" y1="150" x2="460" y2="225" stroke="red" strokeWidth="2" />
-          <text x="300" y="200" textAnchor="middle" fill="red">{`${burnedFees.toFixed(4)} ETH (Burned Fees)`}</text>
+          <line x1="90" y1="150" x2="710" y2="225" stroke="red" strokeWidth="2" />
+          <text x="400" y="200" textAnchor="middle" fill="red">{`${burnedFees.toFixed(4)} ETH (Burned Fees)`}</text>
   
-          <line x1="140" y1="150" x2="460" y2="150" stroke="blue" strokeWidth="2" strokeDasharray="5,5" />
-          <text x="300" y="140" textAnchor="middle" fill="blue">{`${totalFees.toFixed(4)} ETH (Total Fees)`}</text>
+          <line x1="90" y1="150" x2="710" y2="150" stroke="blue" strokeWidth="2" strokeDasharray="5,5" />
+          <text x="400" y="140" textAnchor="middle" fill="blue">{`${totalFees.toFixed(4)} ETH (Total Fees)`}</text>
         </svg>
       </Box>
     );
   };
-  
 
   if (error) {
     return <Typography color="error">Error: {error}</Typography>;
@@ -176,21 +163,6 @@ function BlockRewards() {
           <br />
           Total Reward: <InlineMath math={`0.04854 + ${reward.priorityFees.toFixed(4)} = ${reward.total.toFixed(4)} \\text{ ETH}`} />
         </Typography>
-      </Paper>
-
-      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h5" gutterBottom>Reward Breakdown</Typography>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={rewardAccumulationData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="block" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="baseReward" stackId="a" fill="#8884d8" name="Base Reward" />
-            <Bar dataKey="priorityFees" stackId="a" fill="#82ca9d" name="Priority Fees" />
-          </BarChart>
-        </ResponsiveContainer>
       </Paper>
 
       <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
