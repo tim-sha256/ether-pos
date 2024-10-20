@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, Typography, Paper, Button, Stepper, Step, StepLabel, Card, CardContent } from '@mui/material';
 import sidebarContent from '../../sidebarContent.json';
 import TransactionFees from './TransactionFees';
+import BlockRewards from './BlockRewards';
 
 const steps = ['Introduction', 'Transaction Fees', 'Block Rewards', 'Penalties and Slashing'];
 
@@ -40,7 +41,7 @@ function EconomicsFeesAndPenalties() {
       case 1:
         return <TransactionFees />;
       case 2:
-        return <Typography>Content for Block Rewards</Typography>;
+        return <BlockRewards />;
       case 3:
         return <Typography>Content for Penalties and Slashing</Typography>;
       default:

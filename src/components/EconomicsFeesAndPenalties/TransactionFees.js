@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Grid, Slider, Tooltip, IconButton } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
-import { motion } from 'framer-motion';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
 
@@ -24,11 +23,10 @@ function TransactionFees() {
 
   const loadTransactionData = () => {
     const storedTransaction = JSON.parse(localStorage.getItem('sampleTransaction') || '{}');
-    const selectedValidatorID = parseInt(localStorage.getItem('selectedValidatorID'));
+    const selectedValidatorID = localStorage.getItem('selectedValidatorID');
     const validators = JSON.parse(localStorage.getItem('validators') || '[]');
     const userValidatorData = JSON.parse(localStorage.getItem('userValidatorData') || '{}');
     
-    // Fallback transaction details if local storage is empty
     const transaction = storedTransaction.from ? storedTransaction : {
       from: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
       to: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
@@ -39,7 +37,6 @@ function TransactionFees() {
     };
     setSampleTransaction(transaction);
     
-    // Determine fee recipient address
     let recipientAddress = 'Unknown';
     if (selectedValidatorID) {
       const selectedValidator = validators.find(v => v.id === selectedValidatorID);
@@ -49,13 +46,8 @@ function TransactionFees() {
     }
     setFeeRecipient(recipientAddress);
 
-    // Load priority fee from local storage if available
     const storedPriorityFee = localStorage.getItem('priorityFeePerGas');
-    if (storedPriorityFee) {
-      setPriorityFee(parseFloat(storedPriorityFee));
-    } else {
-      setPriorityFee(transaction.priorityFeePerGas);
-    }
+    setPriorityFee(storedPriorityFee ? parseFloat(storedPriorityFee) : transaction.priorityFeePerGas);
   };
 
   const calculateFees = (userPriorityFee, gasLimit, baseFeePerGas) => {
