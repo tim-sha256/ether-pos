@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Grid, TextField, Button, Tooltip } from '@mui/material';
+import { Box, Typography, Paper, Grid, Slider, Tooltip, IconButton } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 import { motion } from 'framer-motion';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
@@ -7,7 +8,7 @@ import { InlineMath, BlockMath } from 'react-katex';
 function TransactionFees() {
   const [sampleTransaction, setSampleTransaction] = useState(null);
   const [feeBreakdown, setFeeBreakdown] = useState({ baseFee: 630000, tip: 42000, total: 672000 });
-  const [feeRecipient, setFeeRecipient] = useState('');
+  const [feeRecipient, setFeeRecipient] = useState('Unknown');
   const [priorityFee, setPriorityFee] = useState(2);
   const [showFlowchart, setShowFlowchart] = useState(false);
 
@@ -15,10 +16,20 @@ function TransactionFees() {
     loadTransactionData();
   }, []);
 
+  useEffect(() => {
+    if (sampleTransaction) {
+      calculateFees(priorityFee, sampleTransaction.gasLimit, sampleTransaction.baseFeePerGas);
+    }
+  }, [priorityFee, sampleTransaction]);
+
   const loadTransactionData = () => {
-    const proposedBlockData = JSON.parse(localStorage.getItem('proposedBlockData') || '{}');
+    const storedTransaction = JSON.parse(localStorage.getItem('sampleTransaction') || '{}');
+    const selectedValidatorID = parseInt(localStorage.getItem('selectedValidatorID'));
+    const validators = JSON.parse(localStorage.getItem('validators') || '[]');
+    const userValidatorData = JSON.parse(localStorage.getItem('userValidatorData') || '{}');
     
-    const transaction = {
+    // Fallback transaction details if local storage is empty
+    const transaction = storedTransaction.from ? storedTransaction : {
       from: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
       to: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
       value: '1.5',
@@ -26,11 +37,25 @@ function TransactionFees() {
       baseFeePerGas: 30,
       priorityFeePerGas: 2
     };
-
     setSampleTransaction(transaction);
-    setFeeRecipient(proposedBlockData.blockHeader?.feeRecipient?.withdrawalAddress || 'Unknown');
-    setPriorityFee(transaction.priorityFeePerGas);
-    calculateFees(transaction.priorityFeePerGas, transaction.gasLimit, transaction.baseFeePerGas);
+    
+    // Determine fee recipient address
+    let recipientAddress = 'Unknown';
+    if (selectedValidatorID) {
+      const selectedValidator = validators.find(v => v.id === selectedValidatorID);
+      recipientAddress = selectedValidator?.withdrawalAddress || 'Unknown';
+    } else if (userValidatorData?.withdrawalAddress) {
+      recipientAddress = userValidatorData.withdrawalAddress;
+    }
+    setFeeRecipient(recipientAddress);
+
+    // Load priority fee from local storage if available
+    const storedPriorityFee = localStorage.getItem('priorityFeePerGas');
+    if (storedPriorityFee) {
+      setPriorityFee(parseFloat(storedPriorityFee));
+    } else {
+      setPriorityFee(transaction.priorityFeePerGas);
+    }
   };
 
   const calculateFees = (userPriorityFee, gasLimit, baseFeePerGas) => {
@@ -45,6 +70,15 @@ function TransactionFees() {
     });
 
     setShowFlowchart(true);
+  };
+
+  const handlePriorityFeeChange = (event, newValue) => {
+    if (newValue < 0) {
+      alert('Priority Fee cannot be negative');
+      return;
+    }
+    setPriorityFee(newValue);
+    localStorage.setItem('priorityFeePerGas', newValue.toString());
   };
 
   const renderFlowchart = () => {
@@ -86,12 +120,42 @@ function TransactionFees() {
     );
   };
 
-  const Arrow = ({ start, end, label, color }) => (
-    <g>
-      <line x1={start[0]} y1={start[1]} x2={end[0]} y2={end[1]} stroke={color} strokeWidth="2" markerEnd="url(#arrowhead)" />
-      <text x={(start[0] + end[0]) / 2} y={(start[1] + end[1]) / 2} textAnchor="middle" fill={color} dy="-0.5em">{label}</text>
-    </g>
-  );
+  const Arrow = ({ start, end, label, color }) => {
+    // Calculate angle for rotation
+    const dx = end[0] - start[0];
+    const dy = end[1] - start[1];
+    const angle = Math.atan2(dy, dx) * (180 / Math.PI); // Convert from radians to degrees
+  
+    const midX = (start[0] + end[0]) / 2;
+    const midY = (start[1] + end[1]) / 2;
+  
+    return (
+      <g>
+        {/* Draw the line */}
+        <line
+          x1={start[0]}
+          y1={start[1]}
+          x2={end[0]}
+          y2={end[1]}
+          stroke={color}
+          strokeWidth="2"
+          markerEnd="url(#arrowhead)"
+        />
+        {/* Draw the label rotated along the line */}
+        <text
+          x={midX}
+          y={midY}
+          transform={`rotate(${angle}, ${midX}, ${midY})`}
+          textAnchor="middle"
+          fill={color}
+          dy="-0.5em"
+        >
+          {label}
+        </text>
+      </g>
+    );
+  };
+  
 
   if (!sampleTransaction) {
     return <Typography>Loading transaction data...</Typography>;
@@ -119,25 +183,25 @@ function TransactionFees() {
           <Grid item xs={12} sm={6}>
             <Typography><strong>Gas Limit:</strong> {sampleTransaction.gasLimit}</Typography>
             <Typography><strong>Base Fee Per Gas:</strong> {sampleTransaction.baseFeePerGas} Wei</Typography>
-            <Typography><strong>Priority Fee Per Gas:</strong> {sampleTransaction.priorityFeePerGas} Wei</Typography>
+            <Typography><strong>Priority Fee Per Gas:</strong> {priorityFee} Wei</Typography>
           </Grid>
         </Grid>
       </Paper>
 
       <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
         <Typography variant="h5" gutterBottom>Set Priority Fee</Typography>
-        <TextField
-          type="number"
-          label="Priority Fee Per Gas (Wei)"
+        <Slider
           value={priorityFee}
-          onChange={(e) => {
-            const newPriorityFee = parseInt(e.target.value);
-            setPriorityFee(newPriorityFee);
-            calculateFees(newPriorityFee, sampleTransaction.gasLimit, sampleTransaction.baseFeePerGas);
-          }}
+          onChange={handlePriorityFeeChange}
+          aria-labelledby="priority-fee-slider"
+          valueLabelDisplay="auto"
+          step={0.1}
+          marks
+          min={0}
+          max={10}
           sx={{ mb: 2 }}
         />
-        <Button variant="contained" onClick={() => calculateFees(priorityFee, sampleTransaction.gasLimit, sampleTransaction.baseFeePerGas)}>Recalculate Fees</Button>
+        <Typography>Priority Fee: {priorityFee} Wei</Typography>
       </Paper>
 
       <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
@@ -146,7 +210,12 @@ function TransactionFees() {
         </Typography>
         <Typography variant="body1">
           <Tooltip title="Burned to reduce ETH supply and manage network congestion">
-            <span><strong>Base Fee:</strong> {feeBreakdown.baseFee} Wei ({(feeBreakdown.baseFee / 1e18).toFixed(18)} ETH)</span>
+            <span>
+              <strong>Base Fee:</strong> {feeBreakdown.baseFee} Wei ({(feeBreakdown.baseFee / 1e18).toFixed(18)} ETH)
+              <IconButton size="small">
+                <InfoIcon fontSize="small" />
+              </IconButton>
+            </span>
           </Tooltip>
         </Typography>
         <BlockMath>
@@ -154,7 +223,12 @@ function TransactionFees() {
         </BlockMath>
         <Typography variant="body1">
           <Tooltip title="Reward paid to validators to prioritize the transaction">
-            <span><strong>Priority Fee (Tip):</strong> {feeBreakdown.tip} Wei ({(feeBreakdown.tip / 1e18).toFixed(18)} ETH)</span>
+            <span>
+              <strong>Priority Fee (Tip):</strong> {feeBreakdown.tip} Wei ({(feeBreakdown.tip / 1e18).toFixed(18)} ETH)
+              <IconButton size="small">
+                <InfoIcon fontSize="small" />
+              </IconButton>
+            </span>
           </Tooltip>
         </Typography>
         <BlockMath>

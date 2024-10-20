@@ -167,7 +167,7 @@ function ResultsRewardsAndPenalties() {
         {' '}{((bettingResults?.competingChainStake / (bettingResults?.proposedChainStake + bettingResults?.competingChainStake)) * 100).toFixed(2)} % 
         of the stake.
       </Typography>
-      <Box sx={{ width: '100%', height: 450, mb: 2 }}> {/* Increased height to accommodate legend */}
+      <Box sx={{ width: '100%', height: 450, mb: 2 }}>
         <svg ref={svgRef} width="100%" height="100%">
           <defs>
             <marker id="arrowhead" markerWidth="10" markerHeight="7" 
@@ -181,14 +181,21 @@ function ResultsRewardsAndPenalties() {
   );
 
   const renderStakeChangesChart = () => {
+    const formattedData = stakeChanges.map(change => ({
+      ...change,
+      change: Math.abs(Number(change.change)), // Use absolute value for height to avoid negative heights
+      color: change.change >= 0 ? "#82ca9d" : "#ff7f7f", // Determine color based on change
+      isPenalty: change.change < 0 // Flag to indicate if the change is a penalty
+    }));
+  
     return (
       <Box sx={{ height: 400, mb: 2 }}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={stakeChanges}>
+          <BarChart data={formattedData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="id" />
             <YAxis />
-            <Tooltip 
+            <Tooltip
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
                   const data = payload[0].payload;
@@ -196,7 +203,7 @@ function ResultsRewardsAndPenalties() {
                     <div style={{ backgroundColor: '#fff', padding: '5px', border: '1px solid #ccc' }}>
                       <p>{`Validator ID: ${data.id}`}</p>
                       <p>{`Initial Stake: ${data.initialStake.toFixed(4)} ETH`}</p>
-                      <p>{`Change: ${data.change.toFixed(4)} ETH`}</p>
+                      <p>{`Change: ${data.isPenalty ? '-' : ''}${data.change.toFixed(4)} ETH`}</p>
                       <p>{`Final Stake: ${data.finalStake.toFixed(4)} ETH`}</p>
                     </div>
                   );
@@ -205,16 +212,23 @@ function ResultsRewardsAndPenalties() {
               }}
             />
             <Bar dataKey="initialStake" stackId="a" fill="#8884d8" />
-            <Bar 
-              dataKey="change" 
-              stackId="a" 
-              fill={(data) => (data.change >= 0 ? "#82ca9d" : "#ff7f7f")}
+            <Bar
+              dataKey="change"
+              stackId="a"
+              fill={({ payload }) => payload.isPenalty ? "#ff7f7f" : "#82ca9d"} // Set fill color based on penalty or reward
             />
           </BarChart>
         </ResponsiveContainer>
       </Box>
     );
   };
+  
+
+
+
+
+
+
 
   const renderValidatorSummaryTable = () => (
     <TableContainer component={Paper}>
@@ -224,8 +238,8 @@ function ResultsRewardsAndPenalties() {
             <TableCell>Validator ID</TableCell>
             <TableCell>Initial Stake</TableCell>
             <TableCell>Bet Amount</TableCell>
-            <TableCell>Reward/Penalty</TableCell>
             <TableCell>Final Stake</TableCell>
+            <TableCell>Reward/Penalty</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -242,8 +256,15 @@ function ResultsRewardsAndPenalties() {
                 <TableCell>{validator.id}</TableCell>
                 <TableCell>{initialStake.toFixed(4)} ETH</TableCell>
                 <TableCell>{betAmount.toFixed(4)} ETH</TableCell>
-                <TableCell>{rewardPenalty.toFixed(4)} ETH</TableCell>
                 <TableCell>{finalStake.toFixed(4)} ETH</TableCell>
+                <TableCell 
+                  sx={{ 
+                    color: rewardPenalty >= 0 ? 'green' : 'red',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {rewardPenalty.toFixed(4)} ETH
+                </TableCell>
               </TableRow>
             );
           })}
