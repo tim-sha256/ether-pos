@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Stepper, Step, StepLabel, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, Typography, Button, Stepper, Step, StepLabel, Dialog, DialogTitle, DialogContent, DialogActions, Paper, ArrowForwardIcon } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { sha3_256 } from 'js-sha3'; // Import sha3_256 function directly
 import sidebarContent from '../sidebarContent.json';

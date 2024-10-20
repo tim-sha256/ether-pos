@@ -15,7 +15,7 @@ function OtherValidatorsParticipate() {
   const [userFinalityBetting, setUserFinalityBetting] = useState(null);
   const componentRef = useRef(null);
 
-  const FINALITY_REWARD_COEFFICIENT = 6e-10;
+  const FINALITY_REWARD_COEFFICIENT = 6e-7; // Increased by a factor of 1000
   const BLOCK_TIME = 4;
   const bet_coeff = 1;
   const total_validating_ether = 4045;

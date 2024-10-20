@@ -3,10 +3,11 @@ import { Box, Typography, Paper, Button, Stepper, Step, StepLabel } from '@mui/m
 import ForksAndDivergingChains from './FinalityAndChainSelection/ForksAndDivergingChains';
 import ValidatorBettingOverview from './FinalityAndChainSelection/ValidatorBettingOverview';
 import OtherValidatorsParticipate from './FinalityAndChainSelection/OtherValidatorsParticipate';
+import ResultsRewardsAndPenalties from './FinalityAndChainSelection/ResultsRewardsAndPenalties';
 import sidebarContent from '../sidebarContent.json';
 import { useNavigate } from 'react-router-dom';
 
-const steps = ['Forks & Diverging Chains', 'Validator Betting Overview', 'Other Validators Participate'];
+const steps = ['Forks & Diverging Chains', 'Validator Betting Overview', 'Other Validators Participate', 'Results, Rewards, and Penalties'];
 
 function FinalityAndChainSelection() {
   const navigate = useNavigate();
@@ -46,6 +47,8 @@ function FinalityAndChainSelection() {
         return <ValidatorBettingOverview onNextStep={handleNext} />;
       case 2:
         return <OtherValidatorsParticipate />;
+      case 3:
+        return <ResultsRewardsAndPenalties />;
       default:
         return null;
     }
@@ -80,6 +83,11 @@ function FinalityAndChainSelection() {
     });
   };
 
+  const getSidebarContent = (step) => {
+    const contentKey = Object.keys(sidebarContent.finalityAndChainSelection)[step];
+    return sidebarContent.finalityAndChainSelection[contentKey] || { title: '', content: [] };
+  };
+
   return (
     <Box sx={{ 
       display: 'flex', 
@@ -96,9 +104,9 @@ function FinalityAndChainSelection() {
         mr: { md: 4 } 
       }}>
         <Typography variant="h6" gutterBottom>
-          {sidebarContent.finalityAndChainSelection[Object.keys(sidebarContent.finalityAndChainSelection)[activeStep]].title}
+          {getSidebarContent(activeStep).title}
         </Typography>
-        {renderSidebarContent(sidebarContent.finalityAndChainSelection[Object.keys(sidebarContent.finalityAndChainSelection)[activeStep]].content)}
+        {renderSidebarContent(getSidebarContent(activeStep).content)}
       </Box>
       <Box sx={{ width: { xs: '100%', md: '75%' } }}>
         <Typography variant="h4" gutterBottom>

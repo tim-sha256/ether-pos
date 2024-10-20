@@ -11,7 +11,7 @@ function ValidatorBettingOverview({ onNextStep }) {
   const [vLoss, setVLoss] = useState(0);
   const [baseReward, setBaseReward] = useState(0);
 
-  const FINALITY_REWARD_COEFFICIENT = 6e-10;
+  const FINALITY_REWARD_COEFFICIENT = 6e-7; // Increased by a factor of 1000
   const BLOCK_TIME = 4;
   const bet_coeff = 1;
   const total_validating_ether = 4045;
@@ -73,7 +73,7 @@ function ValidatorBettingOverview({ onNextStep }) {
       };
       localStorage.setItem('userFinalityBetting', JSON.stringify(userFinalityBetting));
 
-      // Move to the next step
+      // Call onNextStep after submitting the bet
       onNextStep();
     } else {
       console.error('User validator not found in the validators list');

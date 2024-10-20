@@ -175,33 +175,25 @@
     "forksAndDivergingChains": {
       "title": "Forks & Diverging Chains",
       "content": [
-        "In a decentralized network like Ethereum, multiple validators may propose blocks simultaneously, leading to temporary forks in the blockchain.",
-        "These forks create diverging chains, each with its own set of proposed blocks and associated validators.",
-        "Understanding how these forks occur and are resolved is crucial to grasping the consensus mechanism of Ethereum's Proof of Stake."
+        "In this step, we'll explore how forks can occur in the Ethereum blockchain and how diverging chains are created."
       ]
     },
     "validatorBettingOverview": {
       "title": "Validator Betting Overview",
       "content": [
-        "In this step, validators decide how much they're willing to bet on their proposed chain.",
-        "The betting process involves calculating potential gains (V_GAIN) and losses (V_LOSS) based on the validator's stake and chosen odds.",
-        "Higher odds increase potential rewards but also increase risk. Validators must balance their confidence in the chain being finalized with the potential rewards and risks."
+        "Here, you'll learn about the betting process for validators and how to calculate potential gains and losses."
       ]
     },
     "otherValidatorsParticipate": {
       "title": "Other Validators Participate",
       "content": [
-        "In this step, we simulate the participation of all the network validators in betting on the finalization of the chain. Each validator decides between the proposed chain and the competing chain.",
-        {
-          "type": "list",
-          "items": [
-            "The global randao value is shown at the top of the page. This value introduces randomness, ensuring that the betting decisions are fair and unbiased.",
-            "Each validator has a unique randao reveal, which they use in combination with the global randao value through an XOR operation to generate randomness.",
-            "This XOR operation between the global randao and each validator's randao reveal ensures an unbiased result when selecting the chain to bet on.",
-            "Validators make their decisions based on their confidence in the chain being finalized. This confidence is influenced by the odds and their own stake."
-          ]
-        },
-        "The number of validators supporting each chain is displayed at the top, along with their total staked ETH backing each chain. The randomness used here is crucial for maintaining the fairness of the blockchain's finality mechanism."
+        "In this step, we'll simulate how other validators participate in the betting process and make their decisions."
+      ]
+    },
+    "resultsRewardsAndPenalties": {
+      "title": "Results, Rewards, and Penalties",
+      "content": [
+        "Finally, we'll review the results of the betting process and see how rewards and penalties are distributed among validators."
       ]
     }
   },
