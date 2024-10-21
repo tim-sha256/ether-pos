@@ -104,7 +104,7 @@ function BlockRewards() {
     return <Typography>Loading reward data... Please make sure you have completed previous steps.</Typography>;
   }
 
-  return ( 
+  return (
     <Box>
       <Typography variant="h4" gutterBottom>
         Block Rewards
