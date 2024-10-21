@@ -6,6 +6,7 @@ import ValidatorSelection from './components/ValidatorSelection';
 import BlockCreation from './components/BlockCreation';
 import FinalityAndChainSelection from './components/FinalityAndChainSelection';
 import EconomicsFeesAndPenalties from './components/EconomicsFeesAndPenalties/EconomicsFeesAndPenalties';
+import LightClientSyncing from './components/LightClientSyncing';
 
 function Navigation() {
   const handleStakingOverviewNavigation = () => {
@@ -35,6 +36,9 @@ function Navigation() {
         <Button color="inherit" component={Link} to="/economics-fees-and-penalties">
           Economics, Fees & Penalties
         </Button>
+        <Button color="inherit" component={Link} to="/light-client-syncing">
+          Light Client Syncing
+        </Button>
       </Toolbar>
     </AppBar>
   );
@@ -51,6 +55,7 @@ function App() {
           <Route path="/block-creation" element={<BlockCreation />} />
           <Route path="/finality-and-chain-selection" element={<FinalityAndChainSelection />} />
           <Route path="/economics-fees-and-penalties" element={<EconomicsFeesAndPenalties />} />
+          <Route path="/light-client-syncing" element={<LightClientSyncing />} />
         </Routes>
       </Box>
     </Router>
