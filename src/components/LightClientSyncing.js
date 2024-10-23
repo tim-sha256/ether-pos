@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Paper, Grid } from '@mui/material';
+import { Box, Typography, Paper, Grid, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
 import sidebarContent from '../sidebarContent.json';
@@ -65,6 +65,62 @@ function LightClientSyncing() {
     </svg>
   );
 
+  const renderFinalizedBlocksFlow = () => (
+    <svg width="100%" height="200" viewBox="0 0 800 200">
+      <rect x="50" y="50" width="150" height="100" rx="20" fill="#4CAF50" />
+      <text x="125" y="100" textAnchor="middle" fill="white">Full Node</text>
+      
+      <rect x="600" y="50" width="150" height="100" rx="20" fill="#2196F3" />
+      <text x="675" y="100" textAnchor="middle" fill="white">Light Client</text>
+      
+      <path d="M200 75 L600 75" stroke="#333" strokeWidth="2" markerEnd="url(#arrowhead)" />
+      <text x="400" y="65" textAnchor="middle" fill="#333">Finalized Block Header</text>
+      
+      <path d="M200 125 L600 125" stroke="#333" strokeWidth="2" markerEnd="url(#arrowhead)" />
+      <text x="400" y="145" textAnchor="middle" fill="#333">Merkle Proof</text>
+      
+      <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" />
+        </marker>
+      </defs>
+    </svg>
+  );
+
+  const renderComparisonChart = () => (
+    <Table>
+      <TableHead>
+        <TableRow>
+          <TableCell>Feature</TableCell>
+          <TableCell>Light Client</TableCell>
+          <TableCell>Full Node</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        <TableRow>
+          <TableCell>Storage Requirements</TableCell>
+          <TableCell>Minimal</TableCell>
+          <TableCell>Full blockchain history</TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>Verification Process</TableCell>
+          <TableCell>Relies on cryptographic proofs</TableCell>
+          <TableCell>Validates all transactions</TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>Resource Usage</TableCell>
+          <TableCell>Low</TableCell>
+          <TableCell>High</TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>Suitable for</TableCell>
+          <TableCell>Mobile devices, IoT, lightweight apps</TableCell>
+          <TableCell>Servers, desktop computers</TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  );
+
   const renderSidebarContent = (content) => {
     if (!content) return null;
     return content.map((item, index) => {
@@ -121,12 +177,19 @@ function LightClientSyncing() {
           <Typography variant="body1" paragraph>
             Light clients are a type of node that do not store the full blockchain history, unlike full nodes. Instead, they rely on finalized blocks and proofs from the network to stay synced, requiring less computation and data. This efficiency is particularly useful for mobile devices and lightweight applications.
           </Typography>
+          <Typography variant="body1" paragraph>
+            For example, a mobile wallet app like MetaMask can function as a light client. It allows users to interact with the Ethereum network, check balances, and send transactions without needing to download and process the entire blockchain. This makes it possible for users to access Ethereum services quickly and efficiently on their smartphones.
+          </Typography>
         </Paper>
 
         <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
           <Typography variant="h5" gutterBottom>Syncing via Finalized Blocks</Typography>
           <Typography variant="body1" paragraph>
             Unlike full nodes, light clients do not validate each transaction but instead trust finalized blocks through cryptographic proofs. They request minimal data to verify that the latest block is correct, making them much more efficient in terms of resource usage.
+          </Typography>
+          {renderFinalizedBlocksFlow()}
+          <Typography variant="body2" sx={{ mt: 2 }}>
+            The diagram above illustrates how a light client receives finalized block headers and Merkle proofs from a full node to stay synchronized with the network.
           </Typography>
         </Paper>
 
@@ -159,9 +222,17 @@ function LightClientSyncing() {
         </Paper>
 
         <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+          <Typography variant="h5" gutterBottom>Light Clients vs Full Nodes</Typography>
+          <Typography variant="body1" paragraph>
+            Here's a comparison of light clients and full nodes to highlight their differences:
+          </Typography>
+          {renderComparisonChart()}
+        </Paper>
+
+        <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
           <Typography variant="h5" gutterBottom>Why Light Clients Matter</Typography>
           <Typography variant="body1" paragraph>
-            Light clients are crucial in making Ethereum accessible for a broader range of devices and applications. They provide security without the resource needs of a full node, enabling more users to interact with the Ethereum network efficiently.
+            Light clients are crucial in making Ethereum accessible for a broader range of devices and applications. They provide security without the resource needs of a full node, enabling more users to interact with the Ethereum network efficiently. This is particularly important for mobile devices, IoT applications, and other resource-constrained environments where running a full node would be impractical.
           </Typography>
         </Paper>
       </Box>
