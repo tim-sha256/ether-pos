@@ -53,31 +53,48 @@ function ShardingAndCrossShard() {
   );
 
   const renderCrossShardCommunicationDiagram = () => (
-    <svg width="100%" height="400" viewBox="0 0 800 400">
-      <rect x="50" y="50" width="700" height="300" fill="#E0E0E0" stroke="#333" strokeWidth="2" />
-      
-      {[0, 1, 2].map((i) => (
-        <g key={i}>
-          <rect x={100 + i * 250} y="100" width="200" height="100" fill="#81C784" stroke="#333" strokeWidth="2" />
-          <text x={200 + i * 250} y="90" textAnchor="middle" fill="#333" fontSize="16">Shard {String.fromCharCode(65 + i)}</text>
+    <svg width="100%" height="550" viewBox="0 0 800 550">
+      {/* Background */}
+      <rect x="0" y="0" width="800" height="550" fill="#E0E0E0" />
+
+      {/* Shards */}
+      {['A', 'B', 'C'].map((shard, index) => (
+        <g key={shard}>
+          <rect x={50 + index * 250} y="50" width="200" height="100" fill="#81C784" stroke="#333" strokeWidth="2" />
+          <text x={150 + index * 250} y="100" textAnchor="middle" fill="#333" fontSize="16">Shard {shard}</text>
           
-          <rect x={150 + i * 250} y="220" width="100" height="50" fill="#FFB74D" stroke="#333" strokeWidth="2" />
-          <text x={200 + i * 250} y="250" textAnchor="middle" fill="#333" fontSize="14">Log {String.fromCharCode(65 + i)}</text>
+          {/* Logs */}
+          <rect x={100 + index * 250} y="200" width="100" height="50" fill="#FFB74D" stroke="#333" strokeWidth="2" />
+          <text x={150 + index * 250} y="230" textAnchor="middle" fill="#333" fontSize="14">Log {shard}</text>
+          
+          {/* Arrows from Logs to Shard 0 */}
+          <path d={`M${150 + index * 250} 250 Q ${400} 300, 400 350`} fill="none" stroke="#2196F3" strokeWidth="2" markerEnd="url(#blueArrow)" />
+          
+          {/* Arrows from Shard 0 to Logs */}
+          <path d={`M400 400 Q ${400} 350, ${150 + index * 250} 250`} fill="none" stroke="#4CAF50" strokeWidth="2" markerEnd="url(#greenArrow)" />
         </g>
       ))}
-      
-      <path d="M250 270 Q 400 320, 550 270" fill="none" stroke="#333" strokeWidth="2" markerEnd="url(#arrowhead)" />
-      <path d="M550 270 Q 400 320, 250 270" fill="none" stroke="#333" strokeWidth="2" markerEnd="url(#arrowhead)" />
-      
-      <rect x="350" y="320" width="100" height="50" fill="#F06292" stroke="#333" strokeWidth="2" />
-      <text x="400" y="350" textAnchor="middle" fill="white" fontSize="14">Shard 0</text>
-      
-      <path d="M200 320 L 350 345" fill="none" stroke="#333" strokeWidth="2" markerEnd="url(#arrowhead)" />
-      <path d="M600 320 L 450 345" fill="none" stroke="#333" strokeWidth="2" markerEnd="url(#arrowhead)" />
-      
+
+      {/* Shard 0 */}
+      <rect x="350" y="350" width="100" height="50" fill="#F06292" stroke="#333" strokeWidth="2" />
+      <text x="400" y="380" textAnchor="middle" fill="white" fontSize="14">Shard 0</text>
+
+      {/* Legend */}
+      <g transform="translate(50, 480)">
+        <line x1="0" y1="0" x2="30" y2="0" stroke="#2196F3" strokeWidth="2" markerEnd="url(#blueArrow)" />
+        <text x="50" y="5" fontSize="14">Log Submission</text>
+        
+        <line x1="250" y1="0" x2="280" y2="0" stroke="#4CAF50" strokeWidth="2" markerEnd="url(#greenArrow)" />
+        <text x="300" y="5" fontSize="14">Validation Confirmation</text>
+      </g>
+
+      {/* Arrow Definitions */}
       <defs>
-        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
-          <polygon points="0 0, 10 3.5, 0 7" />
+        <marker id="blueArrow" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#2196F3" />
+        </marker>
+        <marker id="greenArrow" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#4CAF50" />
         </marker>
       </defs>
     </svg>
