@@ -7,6 +7,7 @@ import BlockCreation from './components/BlockCreation';
 import FinalityAndChainSelection from './components/FinalityAndChainSelection';
 import EconomicsFeesAndPenalties from './components/EconomicsFeesAndPenalties/EconomicsFeesAndPenalties';
 import LightClientSyncing from './components/LightClientSyncing';
+import ShardingAndCrossShard from './components/ShardingAndCrossShard';
 
 function Navigation() {
   const handleStakingOverviewNavigation = () => {
@@ -39,6 +40,9 @@ function Navigation() {
         <Button color="inherit" component={Link} to="/light-client-syncing">
           Light Client Syncing
         </Button>
+        <Button color="inherit" component={Link} to="/sharding-and-cross-shard">
+          Sharding & Cross-Shard
+        </Button>
       </Toolbar>
     </AppBar>
   );
@@ -56,6 +60,7 @@ function App() {
           <Route path="/finality-and-chain-selection" element={<FinalityAndChainSelection />} />
           <Route path="/economics-fees-and-penalties" element={<EconomicsFeesAndPenalties />} />
           <Route path="/light-client-syncing" element={<LightClientSyncing />} />
+          <Route path="/sharding-and-cross-shard" element={<ShardingAndCrossShard />} />
         </Routes>
       </Box>
     </Router>

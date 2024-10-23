@@ -227,5 +227,52 @@
         "We'll examine how these penalties work and what actions can lead to slashing of a validator's stake."
       ]
     }
+  },
+  "shardingAndCrossShard": {
+    "step0": {
+      "title": "Shard Model Overview",
+      "content": [
+        "Sharding divides the Ethereum network into smaller parts called shards.",
+        "This allows for parallel processing of transactions, increasing overall network capacity.",
+        {
+          "type": "list",
+          "items": [
+            "Improves scalability",
+            "Maintains decentralization",
+            "Reduces network congestion"
+          ]
+        }
+      ]
+    },
+    "step1": {
+      "title": "Validator Assignment",
+      "content": [
+        "Validators are randomly assigned to different shards.",
+        "Random assignment enhances network security by preventing targeted attacks.",
+        {
+          "type": "list",
+          "items": [
+            "Ensures fair distribution of validators",
+            "Maintains shard integrity",
+            "Prevents shard dominance"
+          ]
+        }
+      ]
+    },
+    "step2": {
+      "title": "Cross-Shard Communication",
+      "content": [
+        "Shards can communicate and share information using a log-based system.",
+        "Shard 0 plays a special role in managing cross-shard finality.",
+        {
+          "type": "list",
+          "items": [
+            "Uses ETHLOG and GETLOG opcodes",
+            "Enables complex multi-shard transactions",
+            "Ensures network cohesion"
+          ]
+        }
+      ]
+    }
   }
 }
