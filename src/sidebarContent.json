@@ -1,4 +1,20 @@
 {
+  "introduction": {
+    "title": "Introduction to Ethereum Proof of Stake",
+    "content": [
+      "Welcome to the Ethereum Proof of Stake (PoS) MVP tutorial.",
+      "This interactive guide will walk you through the key concepts and mechanisms of Ethereum's PoS consensus mechanism.",
+      "By the end, you'll have a solid understanding of how Ethereum secures its network and processes transactions in a decentralized manner."
+    ]
+  },
+  "conclusion": {
+    "title": "Conclusion and Reference List",
+    "content": [
+      "Congratulations on completing the Ethereum Proof of Stake MVP tutorial!",
+      "You've now gained insights into the core components of Ethereum's PoS system, from staking to sharding.",
+      "For further reading and references, please check the list below."
+    ]
+  },
   "step0": {
     "title": "Introduction to Staking",
     "content": [
