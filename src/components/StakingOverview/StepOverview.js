@@ -1,39 +1,8 @@
-// StepOverview.js - Step 1: Overview Component
-import React, { useEffect } from 'react';
-import { Box, Card, CardContent, Typography } from '@mui/material';
-import sidebarContent from '../sidebarContent.json';
+import React from 'react';
+import { Box, Card, CardContent, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Label } from 'recharts';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF', '#FF67A1', '#FF6D00', '#A2FF67', '#67F7FF', '#FFD700'];
-
-function StepOverview() {
-  const [validators, setValidators] = React.useState([]);
-
-  useEffect(() => {
-    const savedValidators = JSON.parse(localStorage.getItem('validators'));
-    if (savedValidators) {
-      setValidators(savedValidators);
-    }
-  }, []);
-
-  const pieData = validators.map((validator) => ({
-    name: `v${validator.id}`,
-    value: validator.stake,
-  }));
-
-  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
-    const RADIAN = Math.PI / 180;
-    const radius = outerRadius * 1.1;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-    return (
-      <text x={x} y={y} fill={COLORS[index % COLORS.length]} textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
-        {`${pieData[index].name} (${(percent * 100).toFixed(0)}%)`}
-      </text>
-    );
-  };
-
+function StepOverview({ validators, allValidators, pieData, COLORS, renderCustomizedLabel }) {
   return (
     <Box>
       <Box sx={{ display: 'flex', gap: 4, mb: 4 }}>
@@ -41,10 +10,10 @@ function StepOverview() {
           <CardContent>
             <Typography variant="h5" gutterBottom>Total Value Locked (TVL)</Typography>
             <Typography variant="h4">
-              {validators.reduce((sum, validator) => sum + validator.stake, 0)} ETH
+              {allValidators.reduce((sum, validator) => sum + validator.stake, 0)} ETH
             </Typography>
             <Typography variant="subtitle1">
-              Staked by {validators.length} validators
+              Staked by {allValidators.length} validators
             </Typography>
           </CardContent>
         </Card>
@@ -64,14 +33,17 @@ function StepOverview() {
                 {pieData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
-                <Label
-                  value="Validator Stakes"
-                  position="center"
-                  fill="white"
-                  style={{
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    filter: 'drop-shadow(0px 0px 3px rgba(0,0,0,0.5))',
+                <Label 
+                  content={({ viewBox }) => {
+                    const { cx, cy } = viewBox;
+                    return (
+                      <g>
+                        <rect x={cx - 70} y={cy - 15} width={140} height={30} fill="rgba(0,0,0,0.3)" rx={15} />
+                        <text x={cx} y={cy} dy={5} textAnchor="middle" fill="white" style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                          Validator Stakes
+                        </text>
+                      </g>
+                    );
                   }}
                 />
               </Pie>
@@ -80,6 +52,30 @@ function StepOverview() {
           </ResponsiveContainer>
         </Box>
       </Box>
+      <TableContainer component={Paper} sx={{ mb: 4, maxWidth: '100%', overflow: 'auto' }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Validator ID</TableCell>
+              <TableCell>Stake (ETH)</TableCell>
+              <TableCell>Validation Code</TableCell>
+              <TableCell>Randao Commitment</TableCell>
+              <TableCell>Withdrawal Address</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {allValidators.map((validator) => (
+              <TableRow key={validator.id}>
+                <TableCell>{validator.id}</TableCell>
+                <TableCell>{validator.stake}</TableCell>
+                <TableCell>{validator.validationCode.substring(0, 10)}...</TableCell>
+                <TableCell>{validator.randaoCommitment.substring(0, 10)}...</TableCell>
+                <TableCell>{validator.withdrawalAddress.substring(0, 10)}...</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Box>
   );
 }

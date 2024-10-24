@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemText, Box, Button } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import Introduction from './components/Introduction';
-import StakingOverview from './components/StakingOverview';
+import StakingOverview from './components/StakingOverview/StakingOverviewMain';
 import ValidatorSelection from './components/ValidatorSelection';
 import BlockCreation from './components/BlockCreation';
 import FinalityAndChainSelection from './components/FinalityAndChainSelection';
