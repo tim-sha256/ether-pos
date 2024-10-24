@@ -4,7 +4,7 @@ import { AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListIt
 import MenuIcon from '@mui/icons-material/Menu';
 import Introduction from './components/Introduction';
 import StakingOverview from './components/StakingOverview/StakingOverviewMain';
-import ValidatorSelection from './components/ValidatorSelection';
+import ValidatorSelection from './components/ValidatorSelection/ValidatorSelection';
 import BlockCreation from './components/BlockCreation';
 import FinalityAndChainSelection from './components/FinalityAndChainSelection';
 import EconomicsFeesAndPenalties from './components/EconomicsFeesAndPenalties/EconomicsFeesAndPenalties';

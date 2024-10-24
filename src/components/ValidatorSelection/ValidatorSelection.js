@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import RandaoUnrolling from './RandaoUnrolling';
 import XorCalculation from './XorCalculation';
 import ValidatorSelectionVisualization from './ValidatorSelectionVisualization';
-import sidebarContent from '../sidebarContent.json';
+import sidebarContent from '../../sidebarContent.json';
 import { InlineMath } from 'react-katex';
 
 function ValidatorSelection() {
