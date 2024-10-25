@@ -1,10 +1,10 @@
 import React from 'react';
 import { Box, Typography, Button, Paper } from '@mui/material';
 import { Link } from 'react-router-dom';
-import sidebarContent from '../sidebarContent.json';
+import sidebarContent from '../sidebarContent_new.json';
 
 function Introduction() {
-  const content = sidebarContent.introduction;
+  const content = sidebarContent.Section_Introduction;
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
