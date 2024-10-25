@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Typography, Paper, Button, Stepper, Step, StepLabel, Card, CardContent } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import sidebarContent from '../../sidebarContent_new.json'; // Updated import
 import TransactionFees from './TransactionFees';
 import BlockRewards from './BlockRewards';
@@ -10,6 +11,7 @@ const steps = ['Introduction', 'Transaction Fees', 'Block Rewards', 'Penalties a
 
 function EconomicsFeesAndPenalties() {
   const [activeStep, setActiveStep] = useState(0);
+  const navigate = useNavigate();
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -138,10 +140,9 @@ function EconomicsFeesAndPenalties() {
           <Button
             variant="contained"
             color="primary"
-            onClick={handleNext}
-            disabled={activeStep === steps.length - 1}
+            onClick={activeStep === steps.length - 1 ? () => navigate('/light-client-syncing') : handleNext}
           >
-            {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+            {activeStep === steps.length - 1 ? 'Go to the next section' : 'Next'}
           </Button>
         </Box>
       </Box>
