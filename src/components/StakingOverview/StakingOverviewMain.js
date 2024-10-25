@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import StepOverview from './StepOverview';
 import StepStakingInput from './StepStakingInput';
 import StepSummary from './StepSummary';
-import sidebarContent from '../../sidebarContent.json';
+import sidebarContent from '../../sidebarContent_new.json';
 import { sha3_256 } from 'js-sha3';
 import { InlineMath } from 'react-katex';
 
@@ -200,11 +200,13 @@ function StakingOverviewMain() {
   };
 
   const renderSidebar = () => {
-    const content = sidebarContent[`step${activeStep}`];
+    const stepContent = sidebarContent.Section_StakingOverview.steps[`Step_${steps[activeStep].replace(/\s+/g, '')}`];
+    if (!stepContent) return null;
+
     return (
       <Box sx={{ p: 2, fontFamily: 'Inter, sans-serif' }}>
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>{content.title}</Typography>
-        {renderSidebarContent(content.content)}
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>{stepContent.title}</Typography>
+        {renderSidebarContent(stepContent.content)}
       </Box>
     );
   };
