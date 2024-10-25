@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import RandaoUnrolling from './RandaoUnrolling';
 import XorCalculation from './XorCalculation';
 import ValidatorSelectionVisualization from './ValidatorSelectionVisualization';
-import sidebarContent from '../../sidebarContent.json';
+import sidebarContent from '../../sidebarContent_new.json'; // Updated import
 import { InlineMath } from 'react-katex';
 
 function ValidatorSelection() {
@@ -159,16 +159,24 @@ function ValidatorSelection() {
           </Box>
         );
       }
-      return null; // Add this line to satisfy the array-callback-return rule
+      return null;
     });
   };
 
   const renderSidebar = () => {
-    const content = sidebarContent[`validatorSelection${currentStep}`];
+    const stepKeyMap = {
+      'RANDao Unrolling': 'Step_RandaoUnrolling',
+      'Global XOR Calculation': 'Step_XorCalculation',
+      'Validator Selection': 'Step_ValidatorSelectionVisualization'
+    };
+    const stepKey = stepKeyMap[steps[currentStep]];
+    const stepContent = sidebarContent.Section_ValidatorSelection.steps[stepKey];
+    if (!stepContent) return null;
+
     return (
       <Box sx={{ p: 2, fontFamily: 'Inter, sans-serif' }}>
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>{content.title}</Typography>
-        {renderSidebarContent(content.content)}
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>{stepContent.title}</Typography>
+        {renderSidebarContent(stepContent.content)}
       </Box>
     );
   };
