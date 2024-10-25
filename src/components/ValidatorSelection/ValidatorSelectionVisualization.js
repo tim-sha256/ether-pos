@@ -10,11 +10,12 @@ function ValidatorSelectionVisualization({ validators, xorResult, onSelect }) {
   const [tvl, setTvl] = useState(0);
   const chartRef = useRef(null);
 
-  const drawChart = useCallback(() => {
-    const margin = { top: 80, right: 120, bottom: 40, left: 180 }; // Increased left margin
-    const width = 1000 - margin.left - margin.right;
-    const height = 500 - margin.top - margin.bottom;
+  // Define margins and dimensions at the top level so they can be used in both functions
+  const margin = { top: 80, right: 120, bottom: 40, left: 180 }; // Increased left margin
+  const width = 1000 - margin.left - margin.right;
+  const height = 500 - margin.top - margin.bottom;
 
+  const drawChart = useCallback(() => {
     d3.select(chartRef.current).selectAll("*").remove();
 
     const svg = d3.select(chartRef.current)
@@ -50,7 +51,7 @@ function ValidatorSelectionVisualization({ validators, xorResult, onSelect }) {
       const startX = x(cumulativeSum);
       const barWidth = x(validator.stake) - x(0);
       const percentage = tvl > 0 ? (validator.stake / tvl) * 100 : 0;
-      
+
       svg.append("rect")
         .attr("x", startX)
         .attr("y", y(`Validator ${validator.id} - ${validator.stake} ETH`))
@@ -97,10 +98,10 @@ function ValidatorSelectionVisualization({ validators, xorResult, onSelect }) {
     const xorNumber = parseInt(xorResult.slice(2), 16);
     const maxSafeInteger = Number.MAX_SAFE_INTEGER; // 2^53 - 1
     const r = xorNumber / maxSafeInteger;
-    
+
     // Ensure r is a valid number between 0 and 1
     const validR = isNaN(r) || r < 0 || r > 1 ? Math.random() : r;
-    
+
     setPseudoRandomValue(validR * tvl);
 
     let selected = null;
@@ -117,15 +118,17 @@ function ValidatorSelectionVisualization({ validators, xorResult, onSelect }) {
     onSelect(selected);
 
     const svg = d3.select(chartRef.current).select("svg g");
+
+    // Use the same x scale as in drawChart
     const x = d3.scaleLinear()
       .domain([0, tvl])
-      .range([0, 1000 - 120 - 120]);
+      .range([0, width]);
 
     svg.append("line")
       .attr("x1", x(validR * tvl))
       .attr("y1", 0)
       .attr("x2", x(validR * tvl))
-      .attr("y2", 500 - 80 - 40)
+      .attr("y2", height)
       .attr("stroke", "red")
       .attr("stroke-width", 2);
 
@@ -147,7 +150,7 @@ function ValidatorSelectionVisualization({ validators, xorResult, onSelect }) {
         The random number (r) between 0 and 1 is calculated as:
       </Typography>
       <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-        <InlineMath>{`r = \\frac{\\text{parseInt(Global Randao, 16)}}{2^{256} - 1}`}</InlineMath>
+        <InlineMath>{`r = \\frac{\\text{parseInt(Global\\ Randao,\\ 16)}}{2^{53} - 1}`}</InlineMath>
       </Box>
       <Typography variant="body1" gutterBottom>
         This number is then multiplied by the TVL to get the pseudorandom value for winner selection:
