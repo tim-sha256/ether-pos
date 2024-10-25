@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Typography, Paper, Stepper, Step, StepLabel, Button } from '@mui/material';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
-import sidebarContent from '../sidebarContent.json';
+import sidebarContent from '../sidebarContent_new.json'; // Updated import
 import { useNavigate } from 'react-router-dom';
 
 const steps = ['Shard Model Overview', 'Validator Assignment to Shards', 'Cross-Shard Communication'];
@@ -179,12 +179,26 @@ function ShardingAndCrossShard() {
             ))}
           </ListComponent>
         );
+      } else if (item.type === 'formula') {
+        return (
+          <Box key={index} sx={{ my: 2, textAlign: 'center' }}>
+            <InlineMath>{item.content}</InlineMath>
+          </Box>
+        );
       }
       return null;
     });
   };
 
-  const currentStepContent = sidebarContent.shardingAndCrossShard?.[`step${activeStep}`];
+  // Mapping between step labels and JSON keys
+  const stepKeyMap = {
+    'Shard Model Overview': 'Step_ShardModelOverview',
+    'Validator Assignment to Shards': 'Step_ValidatorAssignment',
+    'Cross-Shard Communication': 'Step_CrossShardCommunication'
+  };
+
+  const stepKey = stepKeyMap[steps[activeStep]];
+  const currentStepContent = sidebarContent.Section_ShardingAndCrossShard.steps[stepKey];
 
   return (
     <Box sx={{ 
@@ -201,7 +215,7 @@ function ShardingAndCrossShard() {
         mb: { xs: 4, md: 0 }, 
         mr: { md: 4 } 
       }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
           {currentStepContent?.title || `Step ${activeStep + 1}`}
         </Typography>
         {renderSidebarContent(currentStepContent?.content)}

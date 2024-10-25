@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Typography, Paper, Grid, Table, TableBody, TableCell, TableHead, TableRow, Button } from '@mui/material';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
-import sidebarContent from '../sidebarContent.json';
+import sidebarContent from '../sidebarContent_new.json'; // Updated import
 import { useNavigate } from 'react-router-dom';
 
 function LightClientSyncing() {
@@ -147,7 +147,7 @@ function LightClientSyncing() {
     });
   };
 
-  const currentStepContent = sidebarContent.lightClientSyncing;
+  const currentStepContent = sidebarContent.Section_LightClientSyncing;
 
   return (
     <Box sx={{ 
