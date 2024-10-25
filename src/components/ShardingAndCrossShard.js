@@ -3,14 +3,20 @@ import { Box, Typography, Paper, Stepper, Step, StepLabel, Button } from '@mui/m
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
 import sidebarContent from '../sidebarContent.json';
+import { useNavigate } from 'react-router-dom';
 
 const steps = ['Shard Model Overview', 'Validator Assignment to Shards', 'Cross-Shard Communication'];
 
 function ShardingAndCrossShard() {
   const [activeStep, setActiveStep] = useState(0);
+  const navigate = useNavigate();
 
   const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    if (activeStep === steps.length - 1) {
+      navigate('/conclusion');
+    } else {
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    }
   };
 
   const handleBack = () => {
@@ -230,9 +236,8 @@ function ShardingAndCrossShard() {
             variant="contained"
             color="primary"
             onClick={handleNext}
-            disabled={activeStep === steps.length - 1}
           >
-            {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+            {activeStep === steps.length - 1 ? 'Go to next section' : 'Next'}
           </Button>
         </Box>
       </Box>
