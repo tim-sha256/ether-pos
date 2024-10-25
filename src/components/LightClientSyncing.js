@@ -1,10 +1,15 @@
-import React from 'react';
-import { Box, Typography, Paper, Grid, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Typography, Paper, Grid, Table, TableBody, TableCell, TableHead, TableRow, Button } from '@mui/material';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
 import sidebarContent from '../sidebarContent.json';
+import { useNavigate } from 'react-router-dom';
 
 function LightClientSyncing() {
+  const [currentStep, setCurrentStep] = useState(0);
+  const navigate = useNavigate();
+  const steps = ['Step 1', 'Step 2', 'Step 3']; // Replace with actual step names
+
   const renderMerkleTreeDiagram = () => (
     <svg width="100%" height="300" viewBox="0 0 800 300">
       {/* Valid Merkle Tree */}
@@ -235,6 +240,17 @@ function LightClientSyncing() {
             Light clients are crucial in making Ethereum accessible for a broader range of devices and applications. They provide security without the resource needs of a full node, enabling more users to interact with the Ethereum network efficiently. This is particularly important for mobile devices, IoT applications, and other resource-constrained environments where running a full node would be impractical.
           </Typography>
         </Paper>
+
+        {/* Single navigation button */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate('/sharding-and-cross-shard')}
+          >
+            Go to the next section
+          </Button>
+        </Box>
       </Box>
     </Box>
   );
