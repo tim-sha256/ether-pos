@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Box, Typography, Paper, Button, Stepper, Step, StepLabel, Card, CardContent } from '@mui/material';
-import sidebarContent from '../../sidebarContent.json';
+import sidebarContent from '../../sidebarContent_new.json'; // Updated import
 import TransactionFees from './TransactionFees';
 import BlockRewards from './BlockRewards';
 import PenaltiesAndSlashing from './PenaltiesAndSlashing';
+import { InlineMath } from 'react-katex'; // Import for formula rendering
 
 const steps = ['Introduction', 'Transaction Fees', 'Block Rewards', 'Penalties and Slashing'];
 
@@ -66,12 +67,27 @@ function EconomicsFeesAndPenalties() {
             ))}
           </ListComponent>
         );
+      } else if (item.type === 'formula') {
+        return (
+          <Box key={index} sx={{ my: 2, textAlign: 'center' }}>
+            <InlineMath>{item.content}</InlineMath>
+          </Box>
+        );
       }
       return null;
     });
   };
 
-  const currentStepContent = sidebarContent.economicsFeesAndPenalties?.[`step${activeStep}`];
+  // Mapping between step labels and JSON keys
+  const stepKeyMap = {
+    'Introduction': 'Step_Introduction',
+    'Transaction Fees': 'Step_TransactionFees',
+    'Block Rewards': 'Step_BlockRewards',
+    'Penalties and Slashing': 'Step_PenaltiesAndSlashing'
+  };
+
+  const stepKey = stepKeyMap[steps[activeStep]];
+  const currentStepContent = sidebarContent.Section_EconomicsFeesAndPenalties.steps[stepKey];
 
   return (
     <Box sx={{ 
@@ -88,7 +104,7 @@ function EconomicsFeesAndPenalties() {
         mb: { xs: 4, md: 0 }, 
         mr: { md: 4 } 
       }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
           {currentStepContent?.title || `Step ${activeStep + 1}`}
         </Typography>
         {renderSidebarContent(currentStepContent?.content)}
