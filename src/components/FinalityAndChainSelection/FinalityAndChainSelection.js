@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Button, Stepper, Step, StepLabel } from '@mui/material';
-import ForksAndDivergingChains from './FinalityAndChainSelection/ForksAndDivergingChains';
-import ValidatorBettingOverview from './FinalityAndChainSelection/ValidatorBettingOverview';
-import OtherValidatorsParticipate from './FinalityAndChainSelection/OtherValidatorsParticipate';
-import ResultsRewardsAndPenalties from './FinalityAndChainSelection/ResultsRewardsAndPenalties';
-import sidebarContent from '../sidebarContent.json';
+import ForksAndDivergingChains from './ForksAndDivergingChains';
+import ValidatorBettingOverview from './ValidatorBettingOverview';
+import OtherValidatorsParticipate from './OtherValidatorsParticipate';
+import ResultsRewardsAndPenalties from './ResultsRewardsAndPenalties';
+import sidebarContent from '../../sidebarContent.json';
 import { useNavigate } from 'react-router-dom';
 
 const steps = ['Forks & Diverging Chains', 'Validator Betting Overview', 'Other Validators Participate', 'Results, Rewards, and Penalties'];
