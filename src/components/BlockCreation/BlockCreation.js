@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Stepper, Step, StepLabel, Dialog, DialogTitle, DialogContent, DialogActions, Paper, ArrowForwardIcon } from '@mui/material';
+import { Box, Typography, Button, Stepper, Step, StepLabel, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { sha3_256 } from 'js-sha3'; // Import sha3_256 function directly
-import sidebarContent from '../../sidebarContent.json';
+import sidebarContent from '../../sidebarContent_new.json'; // Updated import
 
 // Import sub-components
 import BlockProposal from './BlockProposal';
 import BlockAttestation from './BlockAttestation';
 import IncorporationIntoChain from './IncorporationIntoChain';
+import { InlineMath } from 'react-katex';
 
 function BlockCreation() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -73,27 +74,55 @@ function BlockCreation() {
     handleNext();
   };
 
+  const renderSidebarContent = (content) => {
+    return content.map((item, index) => {
+      if (typeof item === 'string') {
+        return <Typography key={index} variant="body1" sx={{ mb: 2 }}>{item}</Typography>;
+      } else if (item.type === 'list') {
+        return (
+          <ul key={index}>
+            {item.items.map((listItem, listIndex) => (
+              <li key={listIndex}>
+                <Typography variant="body1">{listItem}</Typography>
+              </li>
+            ))}
+          </ul>
+        );
+      } else if (item.type === 'orderedList') {
+        return (
+          <ol key={index}>
+            {item.items.map((listItem, listIndex) => (
+              <li key={listIndex}>
+                <Typography variant="body1">{listItem}</Typography>
+              </li>
+            ))}
+          </ol>
+        );
+      } else if (item.type === 'formula') {
+        return (
+          <Box key={index} sx={{ my: 2, textAlign: 'center' }}>
+            <InlineMath>{item.content}</InlineMath>
+          </Box>
+        );
+      }
+      return null;
+    });
+  };
+
   const renderSidebar = () => {
-    const content = sidebarContent[`blockCreation${currentStep}`];
+    const stepKeyMap = {
+      'Block Proposal': 'Step_BlockProposal',
+      'Block Attestation': 'Step_BlockAttestation',
+      'Incorporation into Chain': 'Step_IncorporationIntoChain'
+    };
+    const stepKey = stepKeyMap[steps[currentStep]];
+    const stepContent = sidebarContent.Section_BlockCreation.steps[stepKey];
+    if (!stepContent) return null;
+
     return (
       <Box sx={{ p: 2, fontFamily: 'Inter, sans-serif' }}>
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>{content.title}</Typography>
-        {content.content.map((item, index) => {
-          if (typeof item === 'string') {
-            return <Typography key={index} variant="body1" sx={{ mb: 2 }}>{item}</Typography>;
-          } else if (item.type === 'list') {
-            return (
-              <ul key={index}>
-                {item.items.map((listItem, listIndex) => (
-                  <li key={listIndex}>
-                    <Typography variant="body1">{listItem}</Typography>
-                  </li>
-                ))}
-              </ul>
-            );
-          }
-          return null;
-        })}
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>{stepContent.title}</Typography>
+        {renderSidebarContent(stepContent.content)}
       </Box>
     );
   };
