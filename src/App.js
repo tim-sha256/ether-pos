@@ -5,7 +5,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Introduction from './components/Introduction';
 import StakingOverview from './components/StakingOverview/StakingOverviewMain';
 import ValidatorSelection from './components/ValidatorSelection/ValidatorSelection';
-import BlockCreation from './components/BlockCreation';
+import BlockCreation from './components/BlockCreation/BlockCreation';
 import FinalityAndChainSelection from './components/FinalityAndChainSelection';
 import EconomicsFeesAndPenalties from './components/EconomicsFeesAndPenalties/EconomicsFeesAndPenalties';
 import LightClientSyncing from './components/LightClientSyncing';

@@ -1,76 +1,182 @@
-import React, { useState } from 'react';
-import { Box, Stepper, Step, StepLabel, Button, Typography } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Button, Stepper, Step, StepLabel, Dialog, DialogTitle, DialogContent, DialogActions, Paper, ArrowForwardIcon } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { sha3_256 } from 'js-sha3'; // Import sha3_256 function directly
+import sidebarContent from '../../sidebarContent.json';
 
-const steps = ['Block Proposal', 'Block Attestation', 'Incorporation into Chain'];
+// Import sub-components
+import BlockProposal from './BlockProposal';
+import BlockAttestation from './BlockAttestation';
+import IncorporationIntoChain from './IncorporationIntoChain';
 
 function BlockCreation() {
-  const [activeStep, setActiveStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [validatorData, setValidatorData] = useState(null);
+  const [transactions, setTransactions] = useState([]);
   const [proposedBlock, setProposedBlock] = useState(null);
+  const [attestedValidators, setAttestedValidators] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  
   const navigate = useNavigate();
+  
+  const steps = ['Block Proposal', 'Block Attestation', 'Incorporation into Chain'];
+
+  useEffect(() => {
+    const storedValidatorData = JSON.parse(localStorage.getItem('userValidatorData'));
+    if (storedValidatorData) {
+      setValidatorData(storedValidatorData);
+    } else {
+      setOpenDialog(true);
+    }
+  }, []);
+
+  const handleDialogClose = () => {
+    setOpenDialog(false);
+    navigate('/validator-selection');
+  };
+
+  const generateTransactions = () => {
+    const numTransactions = Math.floor(Math.random() * 16) + 5; // 5 to 20 transactions
+    const newTransactions = [];
+
+    for (let i = 0; i < numTransactions; i++) {
+      const transaction = {
+        id: i + 1,
+        hash: '0x' + sha3_256(Math.random().toString()),
+        from: '0x' + sha3_256(Math.random().toString()).slice(0, 40),
+        to: '0x' + sha3_256(Math.random().toString()).slice(0, 40),
+        value: (Math.random() * 9.99 + 0.01).toFixed(2), // 0.01 to 10 ETH
+        fee: (Math.random() * 1.9 + 0.1).toFixed(1), // 0.1 to 2 Gwei
+        gasUsed: Math.floor(Math.random() * 79000) + 21000, // 21,000 to 100,000 units
+        timestamp: Date.now() - Math.floor(Math.random() * 60000) // Within the last minute
+      };
+      newTransactions.push(transaction);
+    }
+
+    setTransactions(newTransactions);
+    localStorage.setItem('proposedBlockTransactions', JSON.stringify(newTransactions));
+  };
 
   const handleNext = () => {
-    if (activeStep === 0) {
-      // Simulate block proposal
-      const newBlock = {
-        blockNumber: Math.floor(Math.random() * 1000000),
-        hash: '0x' + Math.random().toString(16).substr(2, 64),
-        parentHash: '0x' + Math.random().toString(16).substr(2, 64),
-        stateRoot: '0x' + Math.random().toString(16).substr(2, 64),
-        transactionsRoot: '0x' + Math.random().toString(16).substr(2, 64),
-        receiptsRoot: '0x' + Math.random().toString(16).substr(2, 64),
-        timestamp: Date.now(),
-      };
-      setProposedBlock(newBlock);
-      navigate('/block-attestation', { state: { proposedBlock: newBlock } });
-    } else if (activeStep === 1) {
-      navigate('/incorporation-into-chain', { state: { proposedBlock } });
+    if (currentStep === 0 && !transactions.length) {
+      generateTransactions();
     }
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    setCurrentStep((prevStep) => prevStep + 1);
   };
 
   const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    setCurrentStep((prevStep) => prevStep - 1);
+  };
+
+  const handleAttestationComplete = (validators) => {
+    setAttestedValidators(validators);
+    handleNext();
+  };
+
+  const renderSidebar = () => {
+    const content = sidebarContent[`blockCreation${currentStep}`];
+    return (
+      <Box sx={{ p: 2, fontFamily: 'Inter, sans-serif' }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>{content.title}</Typography>
+        {content.content.map((item, index) => {
+          if (typeof item === 'string') {
+            return <Typography key={index} variant="body1" sx={{ mb: 2 }}>{item}</Typography>;
+          } else if (item.type === 'list') {
+            return (
+              <ul key={index}>
+                {item.items.map((listItem, listIndex) => (
+                  <li key={listIndex}>
+                    <Typography variant="body1">{listItem}</Typography>
+                  </li>
+                ))}
+              </ul>
+            );
+          }
+          return null;
+        })}
+      </Box>
+    );
+  };
+
+  const handleNextSection = () => {
+    navigate('/finality-and-chain-selection');
   };
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <Stepper activeStep={activeStep}>
-        {steps.map((label, index) => {
-          const stepProps = {};
-          const labelProps = {};
-          return (
-            <Step key={label} {...stepProps}>
-              <StepLabel {...labelProps}>{label}</StepLabel>
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: { xs: 'column', md: 'row' },
+      width: '90%', 
+      maxWidth: '1600px',
+      margin: '0 auto', 
+      mt: 4,
+      px: { xs: 2, sm: 3, md: 4 }
+    }}>
+      <Box sx={{ 
+        width: { xs: '100%', md: '25%' }, 
+        mb: { xs: 4, md: 0 }, 
+        mr: { md: 4 } 
+      }}>
+        {renderSidebar()}
+      </Box>
+      <Box sx={{ width: { xs: '100%', md: '75%' } }}>
+        <Typography variant="h4" gutterBottom>Block Creation</Typography>
+        <Stepper activeStep={currentStep} alternativeLabel sx={{ mb: 4 }}>
+          {steps.map((label, index) => (
+            <Step key={index}>
+              <StepLabel>{label}</StepLabel>
             </Step>
-          );
-        })}
-      </Stepper>
-      {activeStep === steps.length ? (
-        <React.Fragment>
-          <Typography sx={{ mt: 2, mb: 1 }}>
-            All steps completed - you&apos;re finished
-          </Typography>
-        </React.Fragment>
-      ) : (
-        <React.Fragment>
-          <Typography sx={{ mt: 2, mb: 1 }}>Step {activeStep + 1}</Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-            <Button
-              color="inherit"
-              disabled={activeStep === 0}
-              onClick={handleBack}
-              sx={{ mr: 1 }}
-            >
-              Back
-            </Button>
-            <Box sx={{ flex: '1 1 auto' }} />
-            <Button onClick={handleNext}>
-              {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-            </Button>
-          </Box>
-        </React.Fragment>
-      )}
+          ))}
+        </Stepper>
+        
+        {currentStep === 0 && (
+          <BlockProposal 
+            validator={validatorData?.selectedValidator || validatorData}
+            onPropose={setProposedBlock}
+          />
+        )}
+        {currentStep === 1 && (
+          <BlockAttestation 
+            proposedBlock={proposedBlock}
+            onComplete={handleAttestationComplete}
+          />
+        )}
+        {currentStep === 2 && (
+          <IncorporationIntoChain 
+            proposedBlock={proposedBlock}
+            attestedValidators={attestedValidators}
+          />
+        )}
+
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+          <Button
+            variant="contained"
+            onClick={handleBack}
+            disabled={currentStep === 0}
+          >
+            Back
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={currentStep === steps.length - 1 ? handleNextSection : handleNext}
+          >
+            {currentStep === steps.length - 1 ? 'Go to Next Section' : 'Next'}
+          </Button>
+        </Box>
+
+        <Dialog open={openDialog} onClose={handleDialogClose}>
+          <DialogTitle>Validator Data Missing</DialogTitle>
+          <DialogContent>
+            <Typography>
+              Please complete the Validator Selection process before proceeding to Block Creation.
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDialogClose}>Go to Validator Selection</Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
     </Box>
   );
 }
