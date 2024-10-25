@@ -4,8 +4,9 @@ import ForksAndDivergingChains from './ForksAndDivergingChains';
 import ValidatorBettingOverview from './ValidatorBettingOverview';
 import OtherValidatorsParticipate from './OtherValidatorsParticipate';
 import ResultsRewardsAndPenalties from './ResultsRewardsAndPenalties';
-import sidebarContent from '../../sidebarContent.json';
+import sidebarContent from '../../sidebarContent_new.json'; // Updated import
 import { useNavigate } from 'react-router-dom';
+import { InlineMath } from 'react-katex'; // Import for formula rendering
 
 const steps = ['Forks & Diverging Chains', 'Validator Betting Overview', 'Other Validators Participate', 'Results, Rewards, and Penalties'];
 
@@ -78,15 +79,31 @@ function FinalityAndChainSelection() {
             ))}
           </ol>
         );
+      } else if (item.type === 'formula') {
+        return (
+          <Box key={index} sx={{ my: 2, textAlign: 'center' }}>
+            <InlineMath>{item.content}</InlineMath>
+          </Box>
+        );
       }
       return null;
     });
   };
 
   const getSidebarContent = (step) => {
-    const contentKey = Object.keys(sidebarContent.finalityAndChainSelection)[step];
-    return sidebarContent.finalityAndChainSelection[contentKey] || { title: '', content: [] };
+    const stepKeyMap = {
+      'Forks & Diverging Chains': 'Step_ForksAndDivergingChains',
+      'Validator Betting Overview': 'Step_ValidatorBettingOverview',
+      'Other Validators Participate': 'Step_OtherValidatorsParticipate',
+      'Results, Rewards, and Penalties': 'Step_ResultsRewardsAndPenalties'
+    };
+    const stepKey = stepKeyMap[steps[step]];
+    const stepContent = sidebarContent.Section_FinalityAndChainSelection.steps[stepKey];
+    if (!stepContent) return { title: '', content: [] };
+    return stepContent;
   };
+
+  const sidebarContentData = getSidebarContent(activeStep);
 
   return (
     <Box sx={{ 
@@ -103,10 +120,10 @@ function FinalityAndChainSelection() {
         mb: { xs: 4, md: 0 }, 
         mr: { md: 4 } 
       }}>
-        <Typography variant="h6" gutterBottom>
-          {getSidebarContent(activeStep).title}
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+          {sidebarContentData.title}
         </Typography>
-        {renderSidebarContent(getSidebarContent(activeStep).content)}
+        {renderSidebarContent(sidebarContentData.content)}
       </Box>
       <Box sx={{ width: { xs: '100%', md: '75%' } }}>
         <Typography variant="h4" gutterBottom>
