@@ -13,7 +13,7 @@ import ShardingAndCrossShard from './components/ShardingAndCrossShard';
 import Conclusion from './components/Conclusion';
 
 const navItems = [
-  { name: 'Introduction', path: '/' },
+  { name: 'Introduction', path: '/introduction' },
   { name: 'Staking Overview', path: '/staking-overview' },
   { name: 'Validator Selection', path: '/validator-selection' },
   { name: 'Block Creation', path: '/block-creation' },
@@ -94,7 +94,8 @@ function App() {
       <Navigation />
       <Box sx={{ mt: 4, mb: 4 }}>
         <Routes>
-          <Route path="/" element={<Introduction />} />
+          <Route path="/" element={<Navigate to="/introduction" replace />} />
+          <Route path="/introduction" element={<Introduction />} />
           <Route path="/staking-overview" element={<StakingOverview />} />
           <Route path="/validator-selection" element={<ValidatorSelection />} />
           <Route path="/block-creation" element={<BlockCreation />} />

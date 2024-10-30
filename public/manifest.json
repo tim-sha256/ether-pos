@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Ethereum PoS Demo",
+  "name": "Learn how Ethereum PoS works",
   "icons": [
     {
       "src": "favicon.ico",
