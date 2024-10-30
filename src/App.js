@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemText, Box, Button } from '@mui/material';
+import { AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemText, Box } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import Introduction from './components/Introduction';
 import StakingOverview from './components/StakingOverview/StakingOverviewMain';
@@ -36,7 +36,7 @@ function Navigation() {
 
   const handleStakingOverviewNavigation = () => {
     if (window.confirm("Are you sure you want to start over? This will reset all your progress.")) {
-      window.location.href = '/';
+      window.location.href = '/ether-pos/';
     }
     setDrawerOpen(false);
   };
@@ -73,7 +73,7 @@ function Navigation() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Ethereum PoS MVP
+            Ethereum PoS
           </Typography>
         </Toolbar>
       </AppBar>
@@ -90,7 +90,7 @@ function Navigation() {
 
 function App() {
   return (
-    <Router>
+    <Router basename="/ether-pos">
       <Navigation />
       <Box sx={{ mt: 4, mb: 4 }}>
         <Routes>
