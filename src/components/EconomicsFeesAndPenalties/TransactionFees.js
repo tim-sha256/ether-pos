@@ -23,9 +23,12 @@ function TransactionFees() {
 
   const loadTransactionData = () => {
     const storedTransaction = JSON.parse(localStorage.getItem('sampleTransaction') || '{}');
-    const selectedValidatorID = localStorage.getItem('selectedValidatorID');
+    let selectedValidatorID = localStorage.getItem('selectedValidatorID');
     const validators = JSON.parse(localStorage.getItem('validators') || '[]');
     const userValidatorData = JSON.parse(localStorage.getItem('userValidatorData') || '{}');
+    
+    // Convert selectedValidatorID to number for comparison
+    selectedValidatorID = selectedValidatorID ? Number(selectedValidatorID) : null;
     
     const transaction = storedTransaction.from ? storedTransaction : {
       from: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
@@ -37,14 +40,27 @@ function TransactionFees() {
     };
     setSampleTransaction(transaction);
     
+    // Find the selected validator and get their withdrawal address
     let recipientAddress = 'Unknown';
-    if (selectedValidatorID) {
+    let validatorInfo = 'Unknown';
+    
+    if (selectedValidatorID !== null) {
       const selectedValidator = validators.find(v => v.id === selectedValidatorID);
-      recipientAddress = selectedValidator?.withdrawalAddress || 'Unknown';
-    } else if (userValidatorData?.withdrawalAddress) {
-      recipientAddress = userValidatorData.withdrawalAddress;
+      if (selectedValidator) {
+        recipientAddress = selectedValidator.withdrawalAddress;
+        validatorInfo = `#${selectedValidator.id}`;
+      }
     }
+    
     setFeeRecipient(recipientAddress);
+    
+    // Update validator info in the flowchart
+    if (validatorInfo !== 'Unknown') {
+      const validatorText = document.querySelector('text[data-type="validator-info"]');
+      if (validatorText) {
+        validatorText.textContent = `Validator ${validatorInfo}`;
+      }
+    }
 
     const storedPriorityFee = localStorage.getItem('priorityFeePerGas');
     setPriorityFee(storedPriorityFee ? parseFloat(storedPriorityFee) : transaction.priorityFeePerGas);
