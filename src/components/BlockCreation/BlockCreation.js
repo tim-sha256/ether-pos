@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Stepper, Step, StepLabel, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { sha3_256 } from 'js-sha3'; // Import sha3_256 function directly
-import sidebarContent from '../../sidebarContent_new.json'; // Updated import
-
-// Import sub-components
+import { sha3_256 } from 'js-sha3';
+import sidebarContent from '../../sidebarContent_new.json';
 import BlockProposal from './BlockProposal';
 import BlockAttestation from './BlockAttestation';
 import IncorporationIntoChain from './IncorporationIntoChain';
-import { InlineMath } from 'react-katex';
+import ReactMarkdown from 'react-markdown';
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
+import 'katex/dist/katex.min.css';
 
 function BlockCreation() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -75,38 +76,38 @@ function BlockCreation() {
   };
 
   const renderSidebarContent = (content) => {
-    return content.map((item, index) => {
+    if (!content) return null;
+    
+    // Convert array of content items to markdown string
+    const markdownContent = content.map(item => {
       if (typeof item === 'string') {
-        return <Typography key={index} variant="body1" sx={{ mb: 2 }}>{item}</Typography>;
+        return item;
       } else if (item.type === 'list') {
-        return (
-          <ul key={index}>
-            {item.items.map((listItem, listIndex) => (
-              <li key={listIndex}>
-                <Typography variant="body1">{listItem}</Typography>
-              </li>
-            ))}
-          </ul>
-        );
+        return item.items.map(listItem => `- ${listItem}`).join('\n');
       } else if (item.type === 'orderedList') {
-        return (
-          <ol key={index}>
-            {item.items.map((listItem, listIndex) => (
-              <li key={listIndex}>
-                <Typography variant="body1">{listItem}</Typography>
-              </li>
-            ))}
-          </ol>
-        );
+        return item.items.map((listItem, index) => `${index + 1}. ${listItem}`).join('\n');
       } else if (item.type === 'formula') {
-        return (
-          <Box key={index} sx={{ my: 2, textAlign: 'center' }}>
-            <InlineMath>{item.content}</InlineMath>
-          </Box>
-        );
+        return `$$${item.content}$$`;
       }
-      return null;
-    });
+      return '';
+    }).join('\n\n');
+
+    return (
+      <ReactMarkdown
+        remarkPlugins={[remarkMath]}
+        rehypePlugins={[rehypeKatex]}
+        components={{
+          p: ({node, ...props}) => <Typography variant="body1" sx={{ mb: 2 }} {...props} />,
+          li: ({node, ...props}) => (
+            <li>
+              <Typography variant="body1" component="span" {...props} />
+            </li>
+          )
+        }}
+      >
+        {markdownContent}
+      </ReactMarkdown>
+    );
   };
 
   const renderSidebar = () => {
@@ -121,7 +122,9 @@ function BlockCreation() {
 
     return (
       <Box sx={{ p: 2, fontFamily: 'Inter, sans-serif' }}>
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>{stepContent.title}</Typography>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+          {stepContent.title}
+        </Typography>
         {renderSidebarContent(stepContent.content)}
       </Box>
     );
@@ -149,7 +152,7 @@ function BlockCreation() {
         {renderSidebar()}
       </Box>
       <Box sx={{ width: { xs: '100%', md: '70%' } }}>
-        <Typography variant="h4" gutterBottom>Block Creation</Typography>
+        {/* <Typography variant="h4" gutterBottom>Block Creation</Typography> */}
         <Stepper activeStep={currentStep} alternativeLabel sx={{ mb: 4 }}>
           {steps.map((label, index) => (
             <Step key={index}>

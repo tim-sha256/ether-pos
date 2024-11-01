@@ -269,7 +269,7 @@ function BlockAttestation({ proposedBlock, onComplete }) {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', width: '100%' }}>
-      <Typography variant="h5" gutterBottom>Block Attestation</Typography>
+      {/* <Typography variant="h5" gutterBottom>Block Attestation</Typography> */}
       
       {proposedBlock && (
         <Paper elevation={3} sx={{ p: 2, mt: 2, mb: 4, width: '100%' }}>

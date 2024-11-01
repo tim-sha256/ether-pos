@@ -150,7 +150,7 @@ function BlockProposal({ validator, onPropose }) {
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>Block Proposal</Typography>
+      {/* <Typography variant="h5" gutterBottom>Block Proposal</Typography> */}
       {currentStep === 0 && (
         <Button variant="contained" onClick={generateTransactions}>
           Generate Transactions

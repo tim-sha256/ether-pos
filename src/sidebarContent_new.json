@@ -162,39 +162,44 @@
       "Step_BlockProposal": {
         "title": "Block Proposal",
         "content": [
-          "Block proposal is the first step in creating a new block in the Ethereum blockchain. Here's what happens during this phase:",
+          "Now when we've selected the validator, it's time for him to propose a block - an aggregation of transactions that took place after the previous block and are present in mempool, selected by the validator, coupled with values calculated from the previous block.",
+          "This process ensures that new transactions are added to the blockchain in an orderly and secure manner. There are still nuances in the selection of transactions from the mempool - if you're interested in it, check out this [article about MEV](https://ethereum.org/en/developers/docs/mev/). But we won't touch this topic.",
+          "For the purpose of demonstrating how the block is created, we'll generate some reasonable amount of transactions, and then calculate their root using a Merkle Tree.",
+          "Merkle tree is an another simple yet powerful cryptographic operation which is used in many places in Ethereum (you'll also see it in the \"Light Client Syncing\" section later).",
+          "Imagine you have a list of values, - in our case, transactions data, - that others want to validate in the most optimal way. Merkle Tree allows us to validate a single value (it's called \"Merkle Root\") to know if the list of transactions on our side is exactly the same as on validator's side.",
+          "But most importantly, if there's a difference between your Merkle Root and the one provided, you can find transaction(s) that do not match with $O(log n)$ speed - that's extremely fast!",
+          "It might sound like nonsense to you - don't worry, we'll get back to the way it works quite soon. If you want to understand it right now - here's a very good and short [youtube video](https://www.youtube.com/watch?v=n6nEPaE7HNk) that explains how merkle trees work in a detailed and intuitive way.",
+          "Finally, after we have all necessary values, we can propose a block in it's full form. A block is actually just a JSON with:",
           {
             "type": "list",
             "items": [
-              "The selected validator prepares a new block.",
-              "Transactions from the mempool are selected and included in the block.",
-              "The validator calculates the new state root after applying these transactions.",
-              "A block header is created, including metadata like the block number, timestamp, and previous block's hash.",
-              "The proposed block is then broadcast to other validators for attestation."
+              "All transactions in the block",
+              "Block header (including the Transactions Root - notice that it's the result of Merkle Root calculation above)",
+              "Reference to previous block and to submitting validator."
             ]
           },
-          "This process ensures that new transactions are added to the blockchain in an orderly and secure manner."
+          "We won't cover every single field that is present in the block, - believe me, it's not that interesting or important. If you still want to learn about it - read [this article](https://ethereum.org/en/developers/docs/blocks/) that explains all values, and take a look at some real block data on etherscan.io - [this one, for example](https://etherscan.io/block/21095658)."
         ]
       },
       "Step_BlockAttestation": {
         "title": "Block Attestation and Aggregation",
         "content": [
-          "Block attestation is the process where other validators confirm the validity of the proposed block. Key points include:",
+          "Before reading this, scroll down to see the voting animation - it's a visual representation of the process.",
+          "**Block attestation** is the process where other validators confirm the validity of the proposed block. **Key points include:**",
           {
             "type": "list",
             "items": [
               "Validators check that the block proposal follows the protocol rules.",
-              "They verify the transactions and state transitions in the block.",
+              "They verify the transactions and state transitions in the block via calculating the Merkle Root themselves and comparing it to the one submitted.",
               "If valid, validators sign an attestation to the block.",
               "These attestations are collected and will be included in future blocks."
             ]
           },
-          "Block aggregation involves collecting and combining attestations from multiple validators. This step is crucial for efficiency and scalability:",
+          "**Block aggregation** involves collecting and combining attestations from multiple validators. This step is crucial for efficiency and scalability:",
           {
             "type": "list",
             "items": [
-              "Attestations from different validators are gathered.",
-              "These attestations are compressed and aggregated into a single signature.",
+              "Attestations from different validators are gathered, and then compressed and aggregated into a single signature.",
               "This aggregation significantly reduces the amount of data that needs to be stored on the blockchain.",
               "It allows for a large number of validators to participate without overwhelming the network."
             ]
@@ -209,12 +214,14 @@
             "type": "list",
             "items": [
               "Once a block has received sufficient attestations, it's considered confirmed.",
-              "The block is added to the canonical chain.",
+              "The block is added to the canonical chain, but is not finalised yet. More on this in the next section.",
               "The network state is updated to reflect the new block.",
-              "Validators start working on the next block, building on top of this newly added one."
+              "Next validator is selected to start working on the next block, building on top of this newly added one."
             ]
           },
-          "This process ensures the continuous growth and security of the Ethereum blockchain."
+          "This process ensures the continuous growth and security of the Ethereum blockchain.",
+          "**Congratulations!**",
+          "We're almost half the way through, and this was the tougher part.", "Now you know how new blocks appear on the blockchain, and how the validator is selected to submit it.","Let's proceed and get into more nuances that appear in decentralised networks."
         ]
       }
     }

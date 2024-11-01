@@ -119,7 +119,7 @@ function IncorporationIntoChain() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh' }}>
-      <Typography variant="h5" gutterBottom>Incorporation into Chain</Typography>
+      {/* <Typography variant="h5" gutterBottom>Incorporation into Chain</Typography> */}
       
       {newBlock && (
         <Paper elevation={3} sx={{ p: 2, mt: 2, mb: 4, width: '100%' }}>
