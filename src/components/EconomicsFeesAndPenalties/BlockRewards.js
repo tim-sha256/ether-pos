@@ -106,9 +106,9 @@ function BlockRewards() {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
+      {/* <Typography variant="h4" gutterBottom>
         Block Rewards
-      </Typography>
+      </Typography> */}
       <Typography variant="body1" paragraph>
         In Ethereum's Proof of Stake system, block rewards incentivize validators to participate in the network and maintain its security.
         Here, we'll explore how much the selected validator earned from proposing the block.

@@ -170,12 +170,12 @@ function LightClientSyncing() {
         {renderSidebarContent(currentStepContent?.content)}
       </Box>
       <Box sx={{ width: { xs: '100%', md: '75%' } }}>
-        <Typography variant="h4" gutterBottom>
+        {/* <Typography variant="h4" gutterBottom>
           Light-Client Syncing Overview
-        </Typography>
-        <Typography variant="body1" paragraph>
+        </Typography> */}
+        {/* <Typography variant="body1" paragraph>
           In Ethereum's Proof of Stake system, light clients play an essential role in maintaining network efficiency. This section explains how light clients operate and why they are critical for the network, particularly when syncing to the blockchain using finalized blocks. We'll also explore Merkle trees and their importance for verifying data integrity in light clients.
-        </Typography>
+        </Typography> */}
 
         <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
           <Typography variant="h5" gutterBottom>How Light Clients Work</Typography>

@@ -101,9 +101,9 @@ function PenaltiesAndSlashing() {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
+      {/* <Typography variant="h4" gutterBottom>
         Penalties and Slashing
-      </Typography>
+      </Typography> */}
       <Typography variant="body1" paragraph>
         In Ethereum's Proof of Stake system, penalties and slashing mechanisms are crucial for maintaining network security and incentivizing proper validator behavior. Penalties are applied for minor infractions, while slashing is a more severe punishment for significant protocol violations.
       </Typography>

@@ -171,9 +171,9 @@ function TransactionFees() {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
+      {/* <Typography variant="h4" gutterBottom>
         Transaction Fees Breakdown
-      </Typography>
+      </Typography> */}
       <Typography variant="body1" paragraph>
         In Ethereum's economic model, transaction fees play a crucial role in managing network congestion and incentivizing validators. Let's break down a sample transaction to understand how fees are calculated and distributed.
       </Typography>

@@ -309,43 +309,27 @@
   },
   "Section_EconomicsFeesAndPenalties": {
     "steps": {
-      "Step_Introduction": {
-        "title": "Introduction to Economics, Fees, and Penalties",
-        "content": [
-          "In this section, we'll explore the economic aspects of Ethereum's Proof of Stake system, including transaction fees, block rewards, and penalties for misbehaving validators.",
-          "Understanding these economic incentives is crucial for grasping how Ethereum maintains its security and efficiency in a decentralized manner.",
-          "We'll cover three main topics:",
-          {
-            "type": "list",
-            "items": [
-              "Transaction Fees: How users pay for network usage",
-              "Block Rewards: Incentives for validators to secure the network",
-              "Penalties and Slashing: Consequences for malicious or negligent behavior"
-            ]
-          },
-          "Each of these components plays a vital role in Ethereum's economic model, ensuring the network remains secure, efficient, and decentralized."
-        ]
-      },
       "Step_TransactionFees": {
         "title": "Transaction Fees",
         "content": [
+          "In this section, we'll explore the economic aspects of Ethereum's Proof of Stake system, starting from transaction fees, and then covering block rewards and penalties for misbehaving validators.",
+          "This is a very important aspect: if you'd heard of **staking** before, you might've imagined it as some mysterious way of earning passive income.",
+          "From the previous section, you learned that Stakers can earn and loose from betting on Chain Finality, but that's not the only source of income in staking.",
+          "Most is earned through block validation, that we've seen before. The reason we only come back to it now is that the Validator Selection section is hard enough to understand even without the money aspect. Now that you know a bit about how the network works, it's time to talk money.",
+          "First thing we're going to talk about are transaction fees. If you ever sent any crypto to anybody, you might have wondered - why do I have to pay fees, sometimes quite high? Here's the answer!",
           "Transaction fees in Ethereum consist of two parts:",
-          {
-            "type": "list",
-            "items": [
-              "Base Fee: This is burned (removed from circulation), reducing ETH supply.",
-              "Priority Fee (Tip): This goes to the validator as an incentive for faster processing."
-            ]
-          },
-          "The fee structure helps maintain network security and manage congestion.",
-          "Validators are incentivized to include transactions with higher tips, ensuring efficient processing of high-priority transactions."
+          
+              "**Base Fee**: This is burned (removed from circulation), reducing ETH supply.", "This is a very important feature of Ethereum (and also one of the reasons it's price grows with time) - it's **deflational** by design, meaning that every transaction slightly reduces the amount of ETH in the network.",
+              "**Priority Fee (Tip)**: This goes to the validator as an incentive for faster processing.", "What's the point of it? We've mentioned the **mempool** before - in simple words, it's a list of all submitted transactions, sorted by time of submission. Usually, not all of the transactions can fit into the current block - some will need to wait until the next one. Validators \"choose\" transactions from mempool based on the Priority Fee - the more it is, the more they'll get by including it in the block."
+            
+          
         ]
       },
       "Step_BlockRewards": {
         "title": "Block Rewards",
         "content": [
           "Block rewards are the primary incentive for validators to participate in the Ethereum network.",
-          "Key points about block rewards:",
+          "**Key points about block rewards:**",
           {
             "type": "list",
             "items": [
@@ -354,30 +338,39 @@
               "Rewards help offset the costs of running validator hardware and encourage long-term network security"
             ]
           },
-          "Understanding block rewards is crucial for potential validators to assess the economic viability of participating in the network."
+          "Let's see how much the selected validator earned from the last block.",
+          "For illustration purposes, we've increased the priority fee of each transaction in the block, so that the reward would be visible.", "In reality, the reward would be much smaller in our tiny network of 16 validators."
         ]
       },
       "Step_PenaltiesAndSlashing": {
         "title": "Penalties and Slashing",
         "content": [
           "To maintain network security and incentivize proper behavior, Ethereum implements a system of penalties and slashing for validators.",
-          "Key aspects of this system include:",
+          "**Key aspects of this system include:**",
           {
             "type": "list",
             "items": [
               "Minor penalties for being offline or missing attestations",
-              "Severe slashing penalties for provably malicious behavior, such as double signing",
+              "Severe slashing penalties for proved malicious behavior, such as double signing",
               "Correlation penalties that increase slashing severity if multiple validators are slashed at once"
             ]
           },
-          "This system of penalties and slashing is designed to make attacks on the network economically infeasible and to encourage validators to maintain high uptime and follow the protocol rules."
+          "This system of penalties and slashing is designed to make attacks on the network economically infeasible and to encourage validators to maintain high uptime and follow the protocol rules.", 
+          "It's worth noticing that slashing is extremely rare in Ethereum - you can read more about it [here](https://consensys.io/blog/understanding-slashing-in-ethereum-staking-its-importance-and-consequences)."
+    
         ]
       }
     }
   },
   "Section_LightClientSyncing": {
-    "title": " ",
-    "content": []
+    "title": "Light-Client Syncing",
+    "content": [
+      "We're almost done with the PoS tutorial!",
+      "There are two more things we'll cover before we finish - Light-Client Syncing, and Sharding.",
+      "Both of them are not interactive as the previous sections, since they are more theorethical design aspects of Ethereum, but they are still important to understand.",
+      "This section explains how light clients operate and why they are critical for the network, particularly when syncing to the blockchain using finalized blocks.",
+      "We'll also get back to Merkle trees and their importance for verifying data integrity in light clients."
+    ]
   },
   "Section_ShardingAndCrossShard": {
     "steps": {

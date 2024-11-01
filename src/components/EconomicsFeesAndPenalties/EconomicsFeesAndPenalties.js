@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { Box, Typography, Paper, Button, Stepper, Step, StepLabel, Card, CardContent } from '@mui/material';
+import { Box, Typography, Paper, Button, Stepper, Step, StepLabel } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import sidebarContent from '../../sidebarContent_new.json'; // Updated import
+import sidebarContent from '../../sidebarContent_new.json';
 import TransactionFees from './TransactionFees';
 import BlockRewards from './BlockRewards';
 import PenaltiesAndSlashing from './PenaltiesAndSlashing';
-import { InlineMath } from 'react-katex'; // Import for formula rendering
+import ReactMarkdown from 'react-markdown';
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
+import 'katex/dist/katex.min.css';
 
 const steps = ['Transaction Fees', 'Block Rewards', 'Penalties and Slashing'];
 
@@ -36,32 +39,39 @@ function EconomicsFeesAndPenalties() {
 
   const renderSidebarContent = (content) => {
     if (!content) return null;
-    return content.map((item, index) => {
+    
+    // Convert array of content items to markdown string
+    const markdownContent = content.map(item => {
       if (typeof item === 'string') {
-        return <Typography key={index} variant="body1" sx={{ mb: 2 }}>{item}</Typography>;
-      } else if (item.type === 'list' || item.type === 'orderedList') {
-        const ListComponent = item.type === 'list' ? 'ul' : 'ol';
-        return (
-          <ListComponent key={index}>
-            {item.items.map((listItem, listIndex) => (
-              <li key={listIndex}>
-                <Typography variant="body1">{listItem}</Typography>
-              </li>
-            ))}
-          </ListComponent>
-        );
+        return item;
+      } else if (item.type === 'list') {
+        return item.items.map(listItem => `- ${listItem}`).join('\n');
+      } else if (item.type === 'orderedList') {
+        return item.items.map((listItem, index) => `${index + 1}. ${listItem}`).join('\n');
       } else if (item.type === 'formula') {
-        return (
-          <Box key={index} sx={{ my: 2, textAlign: 'center' }}>
-            <InlineMath>{item.content}</InlineMath>
-          </Box>
-        );
+        return `$$${item.content}$$`;
       }
-      return null;
-    });
+      return '';
+    }).join('\n\n');
+
+    return (
+      <ReactMarkdown
+        remarkPlugins={[remarkMath]}
+        rehypePlugins={[rehypeKatex]}
+        components={{
+          p: ({node, ...props}) => <Typography variant="body1" sx={{ mb: 2 }} {...props} />,
+          li: ({node, ...props}) => (
+            <li>
+              <Typography variant="body1" component="span" {...props} />
+            </li>
+          )
+        }}
+      >
+        {markdownContent}
+      </ReactMarkdown>
+    );
   };
 
-  // Mapping between step labels and JSON keys
   const stepKeyMap = {
     'Transaction Fees': 'Step_TransactionFees',
     'Block Rewards': 'Step_BlockRewards',
@@ -92,10 +102,6 @@ function EconomicsFeesAndPenalties() {
         {renderSidebarContent(currentStepContent?.content)}
       </Box>
       <Box sx={{ width: { xs: '100%', md: '70%' } }}>
-        <Typography variant="h4" gutterBottom>
-          Economics, Fees and Penalties
-        </Typography>
-
         <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
           {steps.map((label) => (
             <Step key={label}>
