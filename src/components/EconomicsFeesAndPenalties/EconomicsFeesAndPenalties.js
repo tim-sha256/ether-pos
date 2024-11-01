@@ -7,7 +7,7 @@ import BlockRewards from './BlockRewards';
 import PenaltiesAndSlashing from './PenaltiesAndSlashing';
 import { InlineMath } from 'react-katex'; // Import for formula rendering
 
-const steps = ['Introduction', 'Transaction Fees', 'Block Rewards', 'Penalties and Slashing'];
+const steps = ['Transaction Fees', 'Block Rewards', 'Penalties and Slashing'];
 
 function EconomicsFeesAndPenalties() {
   const [activeStep, setActiveStep] = useState(0);
@@ -24,29 +24,10 @@ function EconomicsFeesAndPenalties() {
   const renderStepContent = (step) => {
     switch (step) {
       case 0:
-        return (
-          <Card>
-            <CardContent>
-              <Typography variant="h5" gutterBottom>Introduction</Typography>
-              <Typography variant="body1" paragraph>
-                That's very cool, but I haven't seen anybody earning anything yet. Are the validators acting as charities?
-              </Typography>
-              <Typography variant="body1" paragraph>
-                No. It's time to talk money!
-              </Typography>
-              <Typography variant="body1" paragraph>
-                In this section, we'll break down all fees and penalties which are present in the Ethereum network.
-                For the reasons of clean visualization and simpler explanations, we didn't include this before.
-                After understanding the fees, you might see more clearly how voting works, why everybody can't just produce their own blocks, and why they sign up for this at all.
-              </Typography>
-            </CardContent>
-          </Card>
-        );
-      case 1:
         return <TransactionFees />;
-      case 2:
+      case 1:
         return <BlockRewards />;
-      case 3:
+      case 2:
         return <PenaltiesAndSlashing />;
       default:
         return null;
@@ -82,7 +63,6 @@ function EconomicsFeesAndPenalties() {
 
   // Mapping between step labels and JSON keys
   const stepKeyMap = {
-    'Introduction': 'Step_Introduction',
     'Transaction Fees': 'Step_TransactionFees',
     'Block Rewards': 'Step_BlockRewards',
     'Penalties and Slashing': 'Step_PenaltiesAndSlashing'
