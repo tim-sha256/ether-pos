@@ -18,7 +18,7 @@
       "Step_Overview": {
         "title": "Introduction to Staking",
         "content": [
-          "The topic of this project is the __Proof of Stake (PoS)__ - a consensus mechanism in Ethereum 2.0.", 
+          "The topic of this project is the **Proof of Stake (PoS)** - a consensus mechanism in Ethereum 2.0.", 
           "A consensus mechanism is a way to ensure trust and decisionmaking in a decentralised network like Ethereum - where there’s no authority, regulator or governor.",
           "Staking in Ethereum 2.0 is the process of actively participating in transaction validation (similar to mining) on the Ethereum blockchain.",
           {
@@ -29,7 +29,7 @@
               "In this demo, I’ve pre-generated 15 validators to show how the network might look. The pie chart and table show the distribution of stakes among these validators. Please note that in the real ETH blockchain there are dozens of thousands validators, not 15."
             ]
           },
-          "Each validator has a list of features:",
+          "**Each validator has a list of features:**",
           {
             "type": "list",
             "items": [
@@ -54,7 +54,8 @@
               "Generate a validation code"
             ]
           },
-          "The RANDAO commitment is a pseudo-random value based on a secret phrase of your choice. The chosen phrase is hashed repeatedly for a number of times equal to the amount of blocks you’d like to validate. We’ll explain its meaning in the next section.",
+          "The RANDAO commitment is a pseudo-random value based on a secret phrase of your choice.",
+          "The chosen phrase is hashed repeatedly for a number of times equal to the amount of blocks you’d like to validate. We’ll explain its meaning in the next section.",
           "Each step in the animation represents one round of hashing, demonstrating how the final result is derived from your initial input.",
           {
             "type": "formula",
@@ -66,7 +67,9 @@
       "Step_Summary": {
         "title": "Summary",
         "content": [
-          "Congratulations! You've successfully become a validator. Your contribution helps secure the Ethereum network and maintain its decentralized nature. You can now find yourself in the pie chart and table below it.",
+          "**Congratulations!**",
+          "You've successfully become a validator. Your contribution helps secure the Ethereum network and maintain its decentralized nature.",
+          "You can now find yourself in the pie chart and table below it.",
           "The values you've generated (RANDAO commitment, validation code, etc.) were sent to the Casper Contract, one of the main contracts in Ethereum that keeps the list of validators, and are used in the validation process to ensure the integrity and security of the network. But more on that in the next section!"
         ]
       }

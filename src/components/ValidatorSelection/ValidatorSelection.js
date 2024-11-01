@@ -6,8 +6,10 @@ import { useNavigate } from 'react-router-dom';
 import RandaoUnrolling from './RandaoUnrolling';
 import XorCalculation from './XorCalculation';
 import ValidatorSelectionVisualization from './ValidatorSelectionVisualization';
-import sidebarContent from '../../sidebarContent_new.json'; // Updated import
-import { InlineMath } from 'react-katex';
+import sidebarContent from '../../sidebarContent_new.json';
+import ReactMarkdown from 'react-markdown';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 
 function ValidatorSelection() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -129,38 +131,37 @@ function ValidatorSelection() {
   );
 
   const renderSidebarContent = (content) => {
-    return content.map((item, index) => {
+    if (!content) return null;
+    
+    // Convert array of content items to markdown string
+    const markdownContent = content.map(item => {
       if (typeof item === 'string') {
-        return <Typography key={index} variant="body1" sx={{ mb: 2 }}>{item}</Typography>;
+        return item;
       } else if (item.type === 'list') {
-        return (
-          <ul key={index}>
-            {item.items.map((listItem, listIndex) => (
-              <li key={listIndex}>
-                <Typography variant="body1">{listItem}</Typography>
-              </li>
-            ))}
-          </ul>
-        );
+        return item.items.map(listItem => `- ${listItem}`).join('\n');
       } else if (item.type === 'orderedList') {
-        return (
-          <ol key={index}>
-            {item.items.map((listItem, listIndex) => (
-              <li key={listIndex}>
-                <Typography variant="body1">{listItem}</Typography>
-              </li>
-            ))}
-          </ol>
-        );
+        return item.items.map((listItem, index) => `${index + 1}. ${listItem}`).join('\n');
       } else if (item.type === 'formula') {
-        return (
-          <Box key={index} sx={{ my: 2, textAlign: 'center' }}>
-            <InlineMath>{item.content}</InlineMath>
-          </Box>
-        );
+        return `$${item.content}$`;
       }
-      return null;
-    });
+      return '';
+    }).join('\n\n');
+
+    return (
+      <ReactMarkdown
+        rehypePlugins={[rehypeKatex]}
+        components={{
+          p: ({node, ...props}) => <Typography variant="body1" sx={{ mb: 2 }} {...props} />,
+          li: ({node, ...props}) => (
+            <li>
+              <Typography variant="body1" component="span" {...props} />
+            </li>
+          )
+        }}
+      >
+        {markdownContent}
+      </ReactMarkdown>
+    );
   };
 
   const renderSidebar = () => {
@@ -175,7 +176,9 @@ function ValidatorSelection() {
 
     return (
       <Box sx={{ p: 2, fontFamily: 'Inter, sans-serif' }}>
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>{stepContent.title}</Typography>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+          {stepContent.title}
+        </Typography>
         {renderSidebarContent(stepContent.content)}
       </Box>
     );
