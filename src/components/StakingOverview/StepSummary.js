@@ -16,7 +16,7 @@ function StepSummary({
 }) {
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>Staking Summary</Typography>
+      {/* <Typography variant="h5" gutterBottom>Staking Summary</Typography> */}
       <Card sx={{ mb: 4 }}>
         <CardContent>
           <Typography variant="h6">Your Validator Details</Typography>

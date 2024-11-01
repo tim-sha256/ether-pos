@@ -229,7 +229,7 @@ function ValidatorSelection() {
         {renderSidebar()}
       </Box>
       <Box sx={{ width: { xs: '100%', md: '70%' } }}>
-        <Typography variant="h4" gutterBottom>Validator Selection Process</Typography>
+        {/* <Typography variant="h4" gutterBottom>Validator Selection Process</Typography> */}
         {validatorData && renderUserValidatorDetails()}
         <Stepper activeStep={currentStep} alternativeLabel sx={{ mb: 4 }}>
           {steps.map((label, index) => (

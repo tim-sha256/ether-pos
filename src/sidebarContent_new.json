@@ -411,7 +411,7 @@
         "title": "Cross-Shard Communication",
         "content": [
           "Now that we have all these shards working independently, they still need to talk to each other. Imagine different departments in a company—each working on its own projects, but often needing to collaborate. This is where cross-shard communication comes into play.",
-          "Shards communicate using a **log-based system**, managed by a special shard called **Shard 0**. Shard 0 plays the role of a coordinator:",
+          "Shards communicate using a **log-based system**, managed by a special shard called **Shard 0**.","Shard 0 plays the role of a coordinator:",
           {
             "type": "list",
             "items": [

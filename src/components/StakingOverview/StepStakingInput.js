@@ -85,9 +85,9 @@ function StepStakingInput({
     <Box>
       <Card sx={{ width: '100%', mb: 4 }}>
         <CardContent>
-          <Typography variant="h5" gutterBottom>
+          {/* <Typography variant="h5" gutterBottom>
             Staking Overview
-          </Typography>
+          </Typography> */}
           <TextField
             label="Amount of ETH to Stake"
             type="text"
