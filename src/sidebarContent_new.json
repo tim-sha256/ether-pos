@@ -377,46 +377,51 @@
       "Step_ShardModelOverview": {
         "title": "Shard Model Overview",
         "content": [
-          "Sharding divides the Ethereum network into smaller parts called shards.",
-          "This allows for parallel processing of transactions, increasing overall network capacity.",
+          "Finally, let's review the important innovation of Ethereum 2.0 - Sharding.",
+          "Think of sharding as a way to divide a large workload across multiple teams so that each one can work independently, speeding everything up.",
+          "Sharding helps Ethereum scale by allowing transactions to be processed in parallel, rather than one at a time. With this:",
           {
             "type": "list",
             "items": [
-              "Improves scalability",
-              "Maintains decentralization",
-              "Reduces network congestion"
+              "**Scalability** improves dramatically. Each shard processes its own transactions, contributing to overall network throughput.",
+              "**Decentralization** is maintained. Shards ensure that no one needs to run the entire network on a single node—each shard is smaller, more manageable.",
+              "**Congestion** reduces significantly. Imagine splitting a busy highway into multiple smaller roads—traffic flows much better."
             ]
-          }
+          },
+          "Ethereum 1.0 struggled with scalability, as every single node had to process every single transaction. Sharding is part of the answer, ensuring we don't repeat those old bottlenecks."
         ]
       },
       "Step_ValidatorAssignment": {
         "title": "Validator Assignment",
         "content": [
-          "Validators are randomly assigned to different shards.",
-          "Random assignment enhances network security by preventing targeted attacks.",
+          "So, how does Ethereum make sure every shard stays secure? It does this by assigning validators randomly to different shards. This random assignment is like drawing lots—no one knows in advance where they'll end up, making it difficult for anyone to plan a targeted attack.",
+          "Random validator assignment has three key benefits:",
           {
             "type": "list",
             "items": [
-              "Ensures fair distribution of validators",
-              "Maintains shard integrity",
-              "Prevents shard dominance"
+              "It ensures **fair distribution**. Every shard gets a mix of validators, no one gets overloaded, and each shard remains trustworthy.",
+              "It **maintains shard integrity** by making sure each shard has enough validators to verify its transactions reliably.",
+              "It **prevents shard dominance**. No group of validators can collude to control a shard because they can't predict or influence where they'll end up."
             ]
-          }
+          },
+          "In our demo, you can see how validators are drawn from the pool and assigned to specific shards. The randomness in this process makes the whole network more resilient and secure."
         ]
       },
       "Step_CrossShardCommunication": {
         "title": "Cross-Shard Communication",
         "content": [
-          "Shards can communicate and share information using a log-based system.",
-          "Shard 0 plays a special role in managing cross-shard finality.",
+          "Now that we have all these shards working independently, they still need to talk to each other. Imagine different departments in a company—each working on its own projects, but often needing to collaborate. This is where cross-shard communication comes into play.",
+          "Shards communicate using a **log-based system**, managed by a special shard called **Shard 0**. Shard 0 plays the role of a coordinator:",
           {
             "type": "list",
             "items": [
-              "Uses ETHLOG and GETLOG opcodes",
-              "Enables complex multi-shard transactions",
-              "Ensures network cohesion"
+              "It uses **ETHLOG and GETLOG opcodes** to enable shards to log events and fetch data from each other.",
+              "This mechanism allows for **multi-shard transactions**. For example, if one shard needs to transfer data or assets to another, Shard 0 ensures it happens seamlessly.",
+              "It ensures **network cohesion**, tying all the shards together into a single, coherent blockchain system."
             ]
-          }
+          },
+          "While sharding has taken Ethereum's capacity to a new level, it still doesn't solve all scalability issues—which is why **Layer 2 solutions** have emerged as another exciting way to scale Ethereum even further. To learn more about these, check out this [Ledger article](https://www.ledger.com/academy/topics/blockchain/what-are-ethereum-layer-2-blockchains-and-how-do-they-work).",
+          "With that, we've completed our sharding journey! Let's move on and sum everything up in the final section."
         ]
       }
     }

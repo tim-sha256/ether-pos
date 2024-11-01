@@ -4,6 +4,9 @@ import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
 import sidebarContent from '../sidebarContent_new.json'; // Updated import
 import { useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
 
 const steps = ['Shard Model Overview', 'Validator Assignment to Shards', 'Cross-Shard Communication'];
 
@@ -111,7 +114,7 @@ function ShardingAndCrossShard() {
       case 0:
         return (
           <>
-            <Typography variant="h5" gutterBottom>Shard Model Overview</Typography>
+            {/* <Typography variant="h5" gutterBottom>Shard Model Overview</Typography> */}
             <Typography variant="body1" paragraph>
               Sharding is a scaling solution that divides the Ethereum network into smaller, parallel-operating parts called shards. This division allows the network to process multiple transactions simultaneously, significantly increasing its overall capacity and efficiency.
             </Typography>
@@ -124,7 +127,7 @@ function ShardingAndCrossShard() {
       case 1:
         return (
           <>
-            <Typography variant="h5" gutterBottom>Validator Assignment to Shards</Typography>
+            {/* <Typography variant="h5" gutterBottom>Validator Assignment to Shards</Typography> */}
             <Typography variant="body1" paragraph>
               Validators are randomly assigned to different shards to ensure the security and integrity of the network. This random assignment prevents predictable attacks on specific shards and maintains the decentralized nature of the network.
             </Typography>
@@ -137,7 +140,7 @@ function ShardingAndCrossShard() {
       case 2:
         return (
           <>
-            <Typography variant="h5" gutterBottom>Cross-Shard Communication</Typography>
+            {/* <Typography variant="h5" gutterBottom>Cross-Shard Communication</Typography> */}
             <Typography variant="body1" paragraph>
               Cross-shard communication allows different shards to interact and share information, maintaining the cohesiveness of the Ethereum network. This is achieved through a log-based system using ETHLOG and GETLOG opcodes.
             </Typography>
@@ -148,14 +151,14 @@ function ShardingAndCrossShard() {
             <Typography variant="body2" sx={{ mt: 2 }}>
               The diagram depicts how shards communicate using logs and how Shard 0 manages cross-shard finality.
             </Typography>
-            <Typography variant="body1" sx={{ mt: 2 }}>
+            {/* <Typography variant="body1" sx={{ mt: 2 }}>
               Cross-shard finality is achieved through a betting mechanism, where validators place bets on the finality of cross-shard transactions. This can be represented mathematically as:
             </Typography>
             <BlockMath>
               {`
                 \\text{Finality Probability} = \\frac{\\text{Total Stake of Agreeing Validators}}{\\text{Total Stake of All Validators}}
               `}
-            </BlockMath>
+            </BlockMath> */}
           </>
         );
       default:
@@ -165,29 +168,50 @@ function ShardingAndCrossShard() {
 
   const renderSidebarContent = (content) => {
     if (!content) return null;
-    return content.map((item, index) => {
+    
+    // Convert array of content items to markdown string
+    const markdownContent = content.map(item => {
       if (typeof item === 'string') {
-        return <Typography key={index} variant="body1" sx={{ mb: 2 }}>{item}</Typography>;
-      } else if (item.type === 'list' || item.type === 'orderedList') {
-        const ListComponent = item.type === 'list' ? 'ul' : 'ol';
-        return (
-          <ListComponent key={index}>
-            {item.items.map((listItem, listIndex) => (
-              <li key={listIndex}>
-                <Typography variant="body1">{listItem}</Typography>
-              </li>
-            ))}
-          </ListComponent>
-        );
+        return item;
+      } else if (item.type === 'list') {
+        return item.items.map(listItem => `- ${listItem}`).join('\n');
+      } else if (item.type === 'orderedList') {
+        return item.items.map((listItem, index) => `${index + 1}. ${listItem}`).join('\n');
       } else if (item.type === 'formula') {
-        return (
-          <Box key={index} sx={{ my: 2, textAlign: 'center' }}>
-            <InlineMath>{item.content}</InlineMath>
-          </Box>
-        );
+        return `$$${item.content}$$`;
       }
-      return null;
-    });
+      return '';
+    }).join('\n\n');
+
+    return (
+      <ReactMarkdown
+        remarkPlugins={[remarkMath]}
+        rehypePlugins={[rehypeKatex]}
+        components={{
+          p: ({node, ...props}) => <Typography variant="body1" sx={{ mb: 2 }} {...props} />,
+          li: ({node, ...props}) => (
+            <li>
+              <Typography variant="body1" component="span" {...props} />
+            </li>
+          ),
+          a: ({node, ...props}) => (
+            <Typography 
+              component="a" 
+              sx={{ 
+                color: 'primary.main',
+                textDecoration: 'none',
+                '&:hover': {
+                  textDecoration: 'underline'
+                }
+              }} 
+              {...props} 
+            />
+          )
+        }}
+      >
+        {markdownContent}
+      </ReactMarkdown>
+    );
   };
 
   // Mapping between step labels and JSON keys
@@ -204,14 +228,14 @@ function ShardingAndCrossShard() {
     <Box sx={{ 
       display: 'flex', 
       flexDirection: { xs: 'column', md: 'row' },
-      width: '90%', 
+      width: '95%', 
       maxWidth: '1600px',
       margin: '0 auto', 
       mt: 4,
       px: { xs: 2, sm: 3, md: 4 }
     }}>
       <Box sx={{ 
-        width: { xs: '100%', md: '25%' }, 
+        width: { xs: '100%', md: '30%' }, 
         mb: { xs: 4, md: 0 }, 
         mr: { md: 4 } 
       }}>
@@ -221,9 +245,9 @@ function ShardingAndCrossShard() {
         {renderSidebarContent(currentStepContent?.content)}
       </Box>
       <Box sx={{ width: { xs: '100%', md: '75%' } }}>
-        <Typography variant="h4" gutterBottom>
+        {/* <Typography variant="h4" gutterBottom>
           Sharding and Cross-Shard Communication
-        </Typography>
+        </Typography> */}
 
         <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
           {steps.map((label) => (
