@@ -135,20 +135,20 @@ function BlockCreation() {
     <Box sx={{ 
       display: 'flex', 
       flexDirection: { xs: 'column', md: 'row' },
-      width: '90%', 
+      width: '95%',
       maxWidth: '1600px',
       margin: '0 auto', 
       mt: 4,
       px: { xs: 2, sm: 3, md: 4 }
     }}>
       <Box sx={{ 
-        width: { xs: '100%', md: '25%' }, 
-        mb: { xs: 4, md: 0 }, 
-        mr: { md: 4 } 
+        width: { xs: '100%', md: '30%' },
+        mb: { xs: 4, md: 0 },
+        mr: { md: 4 }
       }}>
         {renderSidebar()}
       </Box>
-      <Box sx={{ width: { xs: '100%', md: '75%' } }}>
+      <Box sx={{ width: { xs: '100%', md: '70%' } }}>
         <Typography variant="h4" gutterBottom>Block Creation</Typography>
         <Stepper activeStep={currentStep} alternativeLabel sx={{ mb: 4 }}>
           {steps.map((label, index) => (
