@@ -102,36 +102,57 @@
       "Step_XorCalculation": {
         "title": "Global XOR Calculation",
         "content": [
-          "The Global XOR (eXclusive OR) calculation is a crucial step in combining individual validator randomness with the global randomness of the Ethereum network.",
-          "The process involves:",
+          "This is a very important step that shows another purpose of the RANDAO commitment.",
+          "The thing is, you can't ensure real randomness inside of the blockchain, because it's state is fully deterministic: the code in the smart contracts, which the Ethereum is built with, can't google or secretly generate some value without others knowing the source of randomness.",
+          "You can read more about randomness in blockchains [here](https://chain.link/education-hub/randomness-web3).",
+          "The only way to use real randomness in the blockchain is by using an oracle, or a network of oracles.",
+          "But let's not dive in it, since Ethereum relies on another kind of randomness - the **pseudo-randomness**.",
+          "The idea behind using pseudo-random values to make \"random\" decisions in Ethereum is quite logical:",
           {
-            "type": "orderedList",
+            "type": "list",
             "items": [
-              "Taking the final RANDao commitment from the previous step",
-              "XORing it with the current global randomness value",
-              "The result becomes the seed for validator selection"
+              "Every time they are selected to validate a block, validators can provide a new pseudorandom Unrolled RANDAO, which is unpredictable to others since they don't know the secret phrase. This is the first source of (pseudo) randomness.",
+              "The casper contract holds a Global Randao value in it, initially set to 0. The Global Randao is known to everyone and changes with every block created. This is an another source of pseudo-randomness. It is calculated by combining the previous Global Randao with validator's Unrolled Randao, using a XOR function: [read more about XOR here](https://en.wikipedia.org/wiki/XOR_gate)."
             ]
           },
-          "XOR operation ensures that even if one input is predictable, the output remains random as long as the other input is random.",
-          "For illustration purposes, we're showing the XOR process with shortened hashes. In practice, the full 256-bit (64 hexadecimal characters) hashes are used.",
-          "The color coding in the binary representation shows where the bits match (green) or differ (red). The XOR result has a '1' wherever the inputs differ, and '0' where they match.",
-          "This method of combining randomness sources helps prevent any single validator from manipulating the selection process, as they cannot predict or control the global RANDAO value."
+          "XOR is very simple:",
+              "- Two values in binary form are compared bit-by-bit",
+              "- If the bits are same (1 and 1 or 0 and 0), the resulting bit is 0, otherwise it's 1.",
+              "XORing is also a one-side operation - you can't derive the two original values from it.",
+          "This method of combining randomness sources helps prevent any single validator from manipulating the selection process, as they cannot predict or control the global RANDAO value.",
+          "Note:",
+          {
+            "type": "list",
+            "items": [
+              "For illustration purposes, we're showing the XOR process with shortened hashes. In practice, the full 256-bit (64 hexadecimal characters) hashes are used.",
+              "The color coding in the binary representation shows where the bits match (green) or differ (red). The XOR result has a '1' wherever the inputs differ, and '0' where they match."
+            ]
+          }
         ]
       },
       "Step_ValidatorSelectionVisualization": {
         "title": "Validator Selection",
         "content": [
-          "The final step in the process is selecting a validator based on the random seed generated in the previous steps.",
-          "Key points of this process:",
+          "Finally, we can now select a validator of the next block, using the psedo-random value from the previous step.",
+          "**How it works:**",
+          {
+            "type": "orderedList",
+            "items": [
+              "New Global Randao from the previous step is used to generate a pseudo-random number, valued between 0 and 1. This is done by simply dividing the Global Randao in decimal form by $2^{53} - 1$. The resulting value is abbreviated as $r$.", "This $2^{53} - 1$ value ensures that the resulting r is always a probabilistic measure between 0 and 1. If you are interested in the reason for choosing the specific value - read about it [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER). Spoiler: it's complex and not necessary to know in the Ethereum context.",
+              "This new number $r$ is then multiplied by the TVL - the total amount of Ethereum staked by all validators.",
+              "Each validator's stake is presented on the chart in a \"ladder\" format - the whole TVL is broken down into separate stakes. To choose the validator, we place the $r*TVL$ value on the chart, and then check which validator's stake it falls into."
+            ]
+          },
+          "**Key points of this process:**",
           {
             "type": "list",
             "items": [
               "Validators are selected probabilistically based on their stake",
               "Higher stake increases the chance of selection, but doesn't guarantee it",
-              "This method ensures fairness while also incentivizing higher stakes"
+              "This method ensures fairness while also incentivising higher stakes",
+              "The selection process maintains the security and decentralization of the Ethereum network by preventing any single entity from controlling the validation process."
             ]
-          },
-          "The selection process maintains the security and decentralization of the Ethereum network by preventing any single entity from controlling the validation process."
+          }
         ]
       }
     }
