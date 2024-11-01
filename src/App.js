@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemText, Box } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import Introduction from './components/Introduction';
@@ -26,6 +26,7 @@ const navItems = [
 
 function Navigation() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const location = useLocation();
 
   const toggleDrawer = (open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -34,11 +35,9 @@ function Navigation() {
     setDrawerOpen(open);
   };
 
-  const handleStakingOverviewNavigation = () => {
-    if (window.confirm("Are you sure you want to start over? This will reset all your progress.")) {
-      window.location.href = '/ether-pos/';
-    }
-    setDrawerOpen(false);
+  const getCurrentSectionName = () => {
+    const currentItem = navItems.find(item => item.path === location.pathname);
+    return currentItem ? currentItem.name : '';
   };
 
   const list = () => (
@@ -73,7 +72,7 @@ function Navigation() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Ethereum PoS
+            Ethereum PoS | {getCurrentSectionName()}
           </Typography>
         </Toolbar>
       </AppBar>

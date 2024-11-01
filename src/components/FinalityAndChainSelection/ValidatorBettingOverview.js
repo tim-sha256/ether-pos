@@ -82,9 +82,9 @@ function ValidatorBettingOverview({ onNextStep }) {
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>
+      {/* <Typography variant="h5" gutterBottom>
         Validator Betting Overview
-      </Typography>
+      </Typography> */}
       <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
         <Typography variant="body1" paragraph>
           You, as a validator, will now decide how much you're willing to bet on your proposed chain. Remember, you need to be strategic, as the risk (V_LOSS) and reward (V_GAIN) depend on your confidence level in the chain being finalized.

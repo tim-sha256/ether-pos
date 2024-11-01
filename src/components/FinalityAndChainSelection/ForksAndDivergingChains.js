@@ -166,9 +166,9 @@ function ForksAndDivergingChains() {
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>
+      {/* <Typography variant="h5" gutterBottom>
         Forks &amp; Diverging Chains
-      </Typography>
+      </Typography> */}
       <Typography variant="body1" paragraph>
         During the block creation process, multiple validators may propose blocks simultaneously,
         leading to forks in the chain.

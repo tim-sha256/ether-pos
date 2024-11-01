@@ -231,8 +231,10 @@
       "Step_ForksAndDivergingChains": {
         "title": "Forks & Diverging Chains",
         "content": [
-          "In blockchain networks, forks can occur when two or more blocks are produced at the same height, creating diverging chains.",
-          "Key points about forks:",
+          "In blockchains, which are decentralised networks, **forks** can occur when two or more blocks are produced at the same height, creating diverging chains.",
+          "Now, in a centralised system, there would be an authority responsible for deciding which block is right. However, in the decentralised system there needs to be a Consensus Mechanism for this task - in Ethereum, the Proof of Stake is the mechanism used.",
+          "In this section, you'll learn how consensus is reached to decide which block is the legit one.",
+          "**Key points about forks:**",
           {
             "type": "list",
             "items": [
@@ -241,14 +243,15 @@
               "Ethereum's consensus mechanism is designed to resolve these forks quickly"
             ]
           },
-          "The visualization shows how chains can diverge and how the network eventually agrees on a single canonical chain."
+          "The visualizations in this and next steps show how chains can diverge and how the network eventually agrees on a single canonical chain."
         ]
       },
       "Step_ValidatorBettingOverview": {
         "title": "Validator Betting Overview",
         "content": [
-          "In Ethereum's Proof of Stake, validators 'bet' on which chain they believe will become the canonical chain.",
-          "This betting process:",
+          "In Ethereum's Proof of Stake, validators 'bet' on which chain they believe will become the canonical (trusted) chain.",
+          "The chain that wins is the one with more value bet on it - this way we make sure that any attempt of manipulation is extremely costly and economically senseless.",
+          "**This betting process:**",
           {
             "type": "list",
             "items": [
@@ -257,39 +260,49 @@
               "Penalizes validators who bet on the wrong chain"
             ]
           },
-          "The betting mechanism is a key part of Ethereum's security model, ensuring that it's economically advantageous for validators to act honestly."
+          "There are a bunch of formulas on this step - sorry it's not that good-looking as others, I didn't know how to put it otherwise.",
+          "What you need to understand is that you only control the **odds** - your willingness to risk while betting on one of the chains. The more you're assured in the single chain being correct, the more you will gain if it gets finalised.",
+          "Values written in caps - like FINALITY_REWARD_COEFFICIENT, - are constants, pre-defined in the mauve paper. Most of them were multiplied by 1000-100000 to enhance the numbers and make the difference visible in a tiny 16 validator network. But the principles and formulas are left unchanged.",
+          "$V_{GAIN}$ and $V_{LOSS}$ are the calculated values that depend on constants and user input. You'll also notice that $V_{GAIN}$ is always less than $V_{LOSS}$ - it shows the overall way Ethereum network treats malicious actors and jokers - penalties for misbehaviour are always bigger than rewards for acting good.",
+          "It stimulates all nodes to act good, or be ready to pay an inadequate price for any possible attack.",
+          "Validators follow a fork choice rule, specifically the \"LMD GHOST\" (Latest Message Driven Greediest Heaviest Observed Subtree). This rule helps each validator choose the head of the chain by observing the heaviest subtree, which represents the chain with the most accumulated support.",
+          "For now, let's say you're voting for the proposed chain"
         ]
       },
       "Step_OtherValidatorsParticipate": {
         "title": "Other Validators Participate",
         "content": [
-          "Once a validator has placed their bet, other validators in the network also participate in the betting process.",
-          "This step demonstrates:",
+          "At this step, all validators decide between 2 options:",
           {
             "type": "list",
             "items": [
-              "How multiple validators contribute to the consensus",
-              "The accumulation of bets on different chain possibilities",
-              "The emergence of a clear 'winner' as more validators bet"
+              "Abstain from the finality betting - this way they don't rick losing money, but also are guaranteed not to gain anything",
+              "Take part in the betting by submitting their odds and selecting the chain they believe will win"
             ]
           },
-          "This collective decision-making process helps ensure the network's security and stability."
+          "This process is visualised via cards that appear one-by-one on the screen, and the changes in both Chains Stake, pictured in the bar chart.", "In reality, the betting happens in a decentralised (not ordered) way, but it was much harder to visualise.",
+          "One more thing that was incredibly hard to visualise is the DECAY coefficient as a part of $V_{GAIN}$ and $V_{LOSS}$ calculation.","With time, the $V_{GAIN}$ and $V_{LOSS}$ should decrease. This stimulates nodes to bet faster.",
+          "When all the validators made their decision, go to the next step - let's see the result of the betting.",
+          "As the result of the betting, you'll see which chain is leading, and how much each validator has bet on it."
         ]
       },
       "Step_ResultsRewardsAndPenalties": {
         "title": "Results, Rewards, and Penalties",
         "content": [
           "After the betting process, the network determines the canonical chain and distributes rewards and penalties.",
-          "Key aspects of this step:",
+          "In order for the chain to be finalised, it must reach a **supermajority** quorum, - at least $2/3$, or $67\\%$ of total bets value.",
+          "If supermajority is reached, the winning chain is considered finalised, and becomes the canonical one.",
+          "**Key aspects of this step:**",
           {
             "type": "list",
             "items": [
               "Validators who bet on the correct chain receive rewards",
               "Those who bet on incorrect chains may face penalties",
-              "The size of rewards and penalties depends on various factors, including stake size and network conditions"
+              "The size of rewards and penalties depends on the $V_{GAIN}$ and $V_{LOSS}$ of each validator, calculated at the previous step"
             ]
           },
-          "This system of rewards and penalties is crucial for maintaining the integrity of the Ethereum network, as it provides strong economic incentives for honest behavior."
+          "In the bar chart and the table you can see the changes in stakes - sorry that they are tiny and black, I tried making the chart more clear, but it turned out to be stronger than me. Hover over the individual bars to see the actual values for each validator.",
+          "To sum up, the **finality system** is crucial for Ethereum Network and Proof of Stake in general.","There will always be forks and bad actors - and finality is the way to only bet and argue over the new blocks, and be assured that the rest of the chain can't be changed or questioned by anyone in the network."
         ]
       }
     }

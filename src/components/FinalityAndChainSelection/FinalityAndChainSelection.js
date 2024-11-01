@@ -4,9 +4,12 @@ import ForksAndDivergingChains from './ForksAndDivergingChains';
 import ValidatorBettingOverview from './ValidatorBettingOverview';
 import OtherValidatorsParticipate from './OtherValidatorsParticipate';
 import ResultsRewardsAndPenalties from './ResultsRewardsAndPenalties';
-import sidebarContent from '../../sidebarContent_new.json'; // Updated import
+import sidebarContent from '../../sidebarContent_new.json';
 import { useNavigate } from 'react-router-dom';
-import { InlineMath } from 'react-katex'; // Import for formula rendering
+import ReactMarkdown from 'react-markdown';
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
+import 'katex/dist/katex.min.css';
 
 const steps = ['Forks & Diverging Chains', 'Validator Betting Overview', 'Other Validators Participate', 'Results, Rewards, and Penalties'];
 
@@ -56,38 +59,38 @@ function FinalityAndChainSelection() {
   };
 
   const renderSidebarContent = (content) => {
-    return content.map((item, index) => {
+    if (!content) return null;
+    
+    // Convert array of content items to markdown string
+    const markdownContent = content.map(item => {
       if (typeof item === 'string') {
-        return <Typography key={index} variant="body1" sx={{ mb: 2 }}>{item}</Typography>;
+        return item;
       } else if (item.type === 'list') {
-        return (
-          <ul key={index}>
-            {item.items.map((listItem, listIndex) => (
-              <li key={listIndex}>
-                <Typography variant="body1">{listItem}</Typography>
-              </li>
-            ))}
-          </ul>
-        );
+        return item.items.map(listItem => `- ${listItem}`).join('\n');
       } else if (item.type === 'orderedList') {
-        return (
-          <ol key={index}>
-            {item.items.map((listItem, listIndex) => (
-              <li key={listIndex}>
-                <Typography variant="body1">{listItem}</Typography>
-              </li>
-            ))}
-          </ol>
-        );
+        return item.items.map((listItem, index) => `${index + 1}. ${listItem}`).join('\n');
       } else if (item.type === 'formula') {
-        return (
-          <Box key={index} sx={{ my: 2, textAlign: 'center' }}>
-            <InlineMath>{item.content}</InlineMath>
-          </Box>
-        );
+        return `$$${item.content}$$`;
       }
-      return null;
-    });
+      return '';
+    }).join('\n\n');
+
+    return (
+      <ReactMarkdown
+        remarkPlugins={[remarkMath]}
+        rehypePlugins={[rehypeKatex]}
+        components={{
+          p: ({node, ...props}) => <Typography variant="body1" sx={{ mb: 2 }} {...props} />,
+          li: ({node, ...props}) => (
+            <li>
+              <Typography variant="body1" component="span" {...props} />
+            </li>
+          )
+        }}
+      >
+        {markdownContent}
+      </ReactMarkdown>
+    );
   };
 
   const getSidebarContent = (step) => {
@@ -126,9 +129,9 @@ function FinalityAndChainSelection() {
         {renderSidebarContent(sidebarContentData.content)}
       </Box>
       <Box sx={{ width: { xs: '100%', md: '70%' } }}>
-        <Typography variant="h4" gutterBottom>
+        {/* <Typography variant="h4" gutterBottom>
           Finality & Chain Selection
-        </Typography>
+        </Typography> */}
         <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
           {steps.map((label) => (
             <Step key={label}>

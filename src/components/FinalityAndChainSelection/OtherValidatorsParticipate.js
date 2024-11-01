@@ -256,7 +256,7 @@ function OtherValidatorsParticipate() {
                   <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                     <CasinoIcon sx={{ mr: 1 }} />
                     <Typography variant="body2">
-                      Randomness Result: {validator.chosenChain ? validator.chosenChain.charAt(0).toUpperCase() + validator.chosenChain.slice(1) : 'N/A'}
+                      Chosen Chain: {validator.chosenChain ? validator.chosenChain.charAt(0).toUpperCase() + validator.chosenChain.slice(1) : 'N/A'}
                     </Typography>
                   </Box>
                 </Tooltip>
@@ -293,9 +293,9 @@ function OtherValidatorsParticipate() {
 
   return (
     <Box ref={componentRef}>
-      <Typography variant="h5" gutterBottom>
+      {/* <Typography variant="h5" gutterBottom>
         Chain Selection & Finality - Other Validators Participate
-      </Typography>
+      </Typography> */}
       <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
         <Typography variant="body1" paragraph>
           Now, other validators will also participate in the betting process. You will see their decisions in real-time.
