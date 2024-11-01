@@ -1,10 +1,16 @@
 {
   "Section_Introduction": {
-    "title": "Introduction to Ethereum Proof of Stake",
+    "title": "Introduction to Ethereum Proof of Stake Demo",
     "content": [
-      "Welcome to the Ethereum Proof of Stake (PoS) demo.",
-      "This interactive guide will walk you through the key concepts and mechanisms of Ethereum's PoS consensus mechanism.",
-      "By the end, you'll have a solid understanding of how Ethereum secures its network and processes transactions in a decentralized manner."
+      "Hello!",
+      "This project is an interactive demonstration of key principles behind Ethereum 2.0 Proof of Stake mechanism.",
+      "It is based on the Ethereum Mauve Paper by Vitalik Buterin and includes almost all its sections, ideas and formulas.",
+      "**How to use?**",
+      "- The project is designed to be viewed in an ordered way, section by section. Press “Next” and “Go to next section” buttons in the bottom right corner when you’ve finished the step.\n- The text in the sidebar contains my notes that I hope help understand what’s going on at every stage. Make sure to read through it any time you didn’t get something from the visualisations.",
+      "**Before you press start, please note:**",
+      "1. This is an educational website. It is not decentralised, or scalable, or realistic. It’s goal is to explain how Ethereum works to almost anyone interested.\n2. This website is frontend-only. All data is generated and calculated right in your browser.\n3. It should be adaptive, but because it features lots of JS and is built in horizontal format, I recommend viewing it on your computer.\n4. This website is a first pet project of mine. So it might break occasionally (though I tested it), or feature some bugs, or be displayed not in the best way on your screen resolution. Sorry!",
+      "If you’d like to learn more about the project, follow the links below:",
+      "- [Medium blog post about how and why this was made](#)\n- [A GitHub repo](#)\n- if you want to suggest an edit, donate or ask me anything: tim.sha256@gmail.com"
     ]
   },
   "Section_StakingOverview": {
@@ -12,29 +18,27 @@
       "Step_Overview": {
         "title": "Introduction to Staking",
         "content": [
-          "Staking in Ethereum 2.0 is the process of actively participating in transaction validation (similar to mining) on the Ethereum blockchain. Here's what you need to know:",
+          "The topic of this project is the __Proof of Stake (PoS)__ - a consensus mechanism in Ethereum 2.0.", 
+          "A consensus mechanism is a way to ensure trust and decisionmaking in a decentralised network like Ethereum - where there’s no authority, regulator or governor.",
+          "Staking in Ethereum 2.0 is the process of actively participating in transaction validation (similar to mining) on the Ethereum blockchain.",
           {
             "type": "list",
             "items": [
-              "Validators are chosen to create new blocks and validate transactions.",
-              "To become a validator, you need to stake at least 32 ETH.",
-              "Validators earn rewards for helping to secure the network."
+              "Validators are nodes in the blockchain chosen to create new blocks and validate transactions.",
+              "Validators earn rewards for helping to secure the network - this is Staking.",
+              "In this demo, I’ve pre-generated 15 validators to show how the network might look. The pie chart and table show the distribution of stakes among these validators. Please note that in the real ETH blockchain there are dozens of thousands validators, not 15."
             ]
           },
-          "In this demo, we've pre-generated 15 validators to show how the network might look. The pie chart and table show the distribution of stakes among these validators.",
-          "Reward Calculation:",
-          "The validator's reward is calculated based on several factors:",
+          "Each validator has a list of features:",
           {
             "type": "list",
             "items": [
-              "The validator's effective balance (capped at 32 ETH)",
-              "The total value locked (TVL) in the network",
-              "A base reward rate",
-              "Additional rewards for finality",
-              "Potential penalties for misbehavior"
+              "Stake amount (in ETH)",
+              "Validation code - a mix of public keys and other parameters, used to verify the validator.",
+              "Randao commitment - a pseudo-random value. More about it in the next step",
+              "Withdrawal address - validator’s wallet address"
             ]
-          },
-          "The actual reward can vary based on network conditions and validator performance. The simulation below gives an estimate of potential earnings over time."
+          }
         ]
       },
       "Step_StakingInput": {
@@ -44,31 +48,31 @@
           {
             "type": "orderedList",
             "items": [
-              "Stake at least 32 ETH",
-              "Generate a withdrawal address",
+              "Stake at least 32 ETH (for best visualisation, set it to 100-500)",
+              "Get a withdrawal address (we’ll generate a random one)",
               "Create a RANDAO commitment",
               "Generate a validation code"
             ]
           },
-          "The RANDAO commitment is calculated as:",
+          "The RANDAO commitment is a pseudo-random value based on a secret phrase of your choice. The chosen phrase is hashed repeatedly for a number of times equal to the amount of blocks you’d like to validate. We’ll explain its meaning in the next section.",
+          "Each step in the animation represents one round of hashing, demonstrating how the final result is derived from your initial input.",
           {
             "type": "formula",
             "content": "R = H^n(\\text{secret phrase})"
           },
-          "Where H is the hash function, and n is the number of blocks to validate.",
-          "RANDAO Generation Process:",
-          "The RANDAO commitment is calculated through repeated hashing of your secret phrase. Each step in the animation represents one round of hashing, demonstrating how the final commitment is derived from your initial input."
+          "Where H is the hash function, and n is the number of blocks to validate."
         ]
       },
       "Step_Summary": {
         "title": "Summary",
         "content": [
-          "You've successfully become a validator. Your contribution helps secure the Ethereum network and maintain its decentralized nature.",
-          "The values you've generated (RANDAO commitment, validation code, etc.) are used in the validation process to ensure the integrity and security of the network."
+          "Congratulations! You've successfully become a validator. Your contribution helps secure the Ethereum network and maintain its decentralized nature. You can now find yourself in the pie chart and table below it.",
+          "The values you've generated (RANDAO commitment, validation code, etc.) were sent to the Casper Contract, one of the main contracts in Ethereum that keeps the list of validators, and are used in the validation process to ensure the integrity and security of the network. But more on that in the next section!"
         ]
       }
     }
   },
+
   "Section_ValidatorSelection": {
     "steps": {
       "Step_RandaoUnrolling": {
