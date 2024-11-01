@@ -81,17 +81,22 @@
       "Step_RandaoUnrolling": {
         "title": "RANDao Unrolling",
         "content": [
-          "RANDao (Random Decentralized Autonomous Organization) is a mechanism used in Ethereum 2.0 to generate randomness for validator selection.",
-          "The process of RANDao unrolling involves:",
+          "Remember how you'd created your own RANDAO value?",
+          "The idea behind it is that hash function is a one-side function: you can't derive the original secret phrase or even a value from the previous hashing step from the final value.",
+          "You can read more about hashing functions [here](https://www.geeksforgeeks.org/introduction-to-hashing-2/).",
+          "But, if you have the value from the previous step, and hash it once again - it will be equal to the final value.",
+          "RANDAO is a way for the Ethereum Casper Contract and other nodes to validate that **you are really you**: with each block you validate, you submit the value from the previous hashing step (Unrolled RANDAO), and by hashing it and comparing it to your RANDAO commitment, others can check if you're legit without knowing your secret phrase.",
+          "Now you know why you needed to set the number of steps in the previous section - this process is not endless, and when you unroll your Randao for the last time, you can't validate new blocks anymore - there's only the secret phrase left.",
+          "That's why validators in the real network hash the secret phrase for thousands of times in order to validate more blocks with time.",
+          "Let's unroll your RANDAO by re-calculating it from scratch:",
           {
             "type": "orderedList",
             "items": [
-              "Starting with a secret phrase provided by the validator",
-              "Repeatedly hashing this phrase a specified number of times",
-              "The final hash becomes the RANDao commitment"
+              "Starting with a secret phrase you provided",
+              "Repeatedly hashing this phrase $N-1$ times, where $N$ is the number of steps you chose previously."
             ]
           },
-          "This process ensures that the randomness is unpredictable and cannot be manipulated by validators."
+          "With each next block, we'll be doing one step less: $N-2$, $N-3$, …"
         ]
       },
       "Step_XorCalculation": {

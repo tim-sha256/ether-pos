@@ -9,6 +9,7 @@ import ValidatorSelectionVisualization from './ValidatorSelectionVisualization';
 import sidebarContent from '../../sidebarContent_new.json';
 import ReactMarkdown from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
 import 'katex/dist/katex.min.css';
 
 function ValidatorSelection() {
@@ -142,13 +143,14 @@ function ValidatorSelection() {
       } else if (item.type === 'orderedList') {
         return item.items.map((listItem, index) => `${index + 1}. ${listItem}`).join('\n');
       } else if (item.type === 'formula') {
-        return `$${item.content}$`;
+        return `$$${item.content}$$`;
       }
       return '';
     }).join('\n\n');
 
     return (
       <ReactMarkdown
+        remarkPlugins={[remarkMath]}
         rehypePlugins={[rehypeKatex]}
         components={{
           p: ({node, ...props}) => <Typography variant="body1" sx={{ mb: 2 }} {...props} />,
