@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemText, Box } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -23,6 +23,16 @@ const navItems = [
   { name: 'Sharding & Cross-Shard', path: '/sharding-and-cross-shard' },
   { name: 'Conclusion and Reference List', path: '/conclusion' },
 ];
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
 
 function Navigation() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -90,6 +100,7 @@ function Navigation() {
 function App() {
   return (
     <Router basename="/ether-pos">
+      <ScrollToTop />
       <Navigation />
       <Box sx={{ mt: 4, mb: 4 }}>
         <Routes>
