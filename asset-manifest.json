@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/ether-pos/static/css/main.8f367868.css",
-    "main.js": "/ether-pos/static/js/main.dff137fb.js",
+    "main.js": "/ether-pos/static/js/main.39b907b4.js",
     "static/js/453.d945ead0.chunk.js": "/ether-pos/static/js/453.d945ead0.chunk.js",
     "static/media/KaTeX_AMS-Regular.ttf": "/ether-pos/static/media/KaTeX_AMS-Regular.853be92419a6c3766b9a.ttf",
     "static/media/KaTeX_Main-Regular.ttf": "/ether-pos/static/media/KaTeX_Main-Regular.9eba1d77abcf2aa6e94e.ttf",
@@ -65,11 +65,11 @@
     "static/media/KaTeX_Size3-Regular.woff2": "/ether-pos/static/media/KaTeX_Size3-Regular.e1951519f6f0596f7356.woff2",
     "index.html": "/ether-pos/index.html",
     "main.8f367868.css.map": "/ether-pos/static/css/main.8f367868.css.map",
-    "main.dff137fb.js.map": "/ether-pos/static/js/main.dff137fb.js.map",
+    "main.39b907b4.js.map": "/ether-pos/static/js/main.39b907b4.js.map",
     "453.d945ead0.chunk.js.map": "/ether-pos/static/js/453.d945ead0.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.8f367868.css",
-    "static/js/main.dff137fb.js"
+    "static/js/main.39b907b4.js"
   ]
 }
