@@ -10,7 +10,7 @@
       "**Before you press start, please note:**",
       "1. This is an educational website. It is not decentralised, or scalable, or realistic. It’s goal is to explain how Ethereum works to almost anyone interested.\n2. This website is frontend-only. All data is generated and calculated right in your browser.\n3. It should be adaptive, but because it features lots of JS and is built in horizontal format, I recommend viewing it on your computer.\n4. This website is a first pet project of mine. So it might break occasionally (though I tested it), or feature some bugs, or be displayed not in the best way on your screen resolution. Sorry!",
       "If you’d like to learn more about the project, follow the links below:",
-      "- [Medium blog post about how and why this was made](#)\n- [A GitHub repo](https://github.com/tim-sha256/ether-pos)\n- if you want to suggest an edit, donate or ask me anything: [tim.sha256@gmail.com](mailto:tim.sha256@gmail.com)"
+      "- [Medium blog post about why this was made](https://medium.com/@tim.sh/why-i-created-ethereum-proof-of-stake-demo-3e469ecfbe8e)\n- [Medium blog post about how it was made entirely using AI (coming soon)](#)\n- [A GitHub repo](https://github.com/tim-sha256/ether-pos)\n- if you want to suggest an edit, donate or ask me anything: [tim.sha256@gmail.com](mailto:tim.sha256@gmail.com)"
     ]
   },
   "Section_StakingOverview": {
@@ -448,7 +448,8 @@
       "Thanks for finishing the tutorial! I'd be glad if you let me know your overall opinion of the project - it's my first time doing interactive educative websites, so there's definitely some room for improvement.", 
       "If you have questions, want to suggest an improvement, or just want to share your thoughts, feel free to reach out: [tim.sha256@gmail.com](mailto:tim.sha256@gmail.com).", 
       "And if you'd like to follow more of my work, check out the links below:",
-      "- [Medium blog post about how and why this was made](#)",
+      "- [Medium blog post about why this was made](https://medium.com/@tim.sh/why-i-created-ethereum-proof-of-stake-demo-3e469ecfbe8e)",
+      "- [Medium blog post about how it was made entirely using AI (coming soon)](#)",
       "- [A GitHub repo](https://github.com/tim-sha256/ether-pos)",
       "- My telegram blog [@linksfromme](https://t.me/linksfromme)"
     ]
