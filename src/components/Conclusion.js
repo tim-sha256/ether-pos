@@ -1,51 +1,85 @@
 import React from 'react';
 import { Box, Typography, Paper } from '@mui/material';
-import sidebarContent from '../sidebarContent_new.json'; // Updated import
+import sidebarContent from '../sidebarContent_new.json';
+import ReactMarkdown from 'react-markdown';
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
+import 'katex/dist/katex.min.css';
 
 function Conclusion() {
-  const content = sidebarContent.Section_Conclusion; // Updated to use Section_Conclusion
-
-  const renderContent = (contentArray) => {
-    return contentArray.map((item, index) => {
+  const renderContent = (content) => {
+    if (!content) return null;
+    
+    // Convert array of content items to markdown string
+    const markdownContent = content.map(item => {
       if (typeof item === 'string') {
-        return (
-          <Typography key={index} paragraph>
-            {item}
-          </Typography>
-        );
+        return item;
       } else if (item.type === 'list') {
-        return (
-          <ul key={index}>
-            {item.items.map((listItem, listIndex) => (
-              <li key={listIndex}>
-                <Typography variant="body1">{listItem}</Typography>
-              </li>
-            ))}
-          </ul>
-        );
+        return item.items.map(listItem => `- ${listItem}`).join('\n');
       } else if (item.type === 'orderedList') {
-        return (
-          <ol key={index}>
-            {item.items.map((listItem, listIndex) => (
-              <li key={listIndex}>
-                <Typography variant="body1">{listItem}</Typography>
-              </li>
-            ))}
-          </ol>
-        );
+        return item.items.map((listItem, index) => `${index + 1}. ${listItem}`).join('\n');
+      } else if (item.type === 'formula') {
+        return `$$${item.content}$$`;
       }
-      return null;
-    });
+      return '';
+    }).join('\n\n');
+
+    return (
+      <ReactMarkdown
+        remarkPlugins={[remarkMath]}
+        rehypePlugins={[rehypeKatex]}
+        components={{
+          p: ({node, ...props}) => <Typography variant="body1" sx={{ mb: 2 }} {...props} />,
+          li: ({node, ...props}) => (
+            <li>
+              <Typography variant="body1" component="span" {...props} />
+            </li>
+          ),
+          a: ({node, ...props}) => (
+            <Typography 
+              component="a" 
+              sx={{ 
+                color: 'primary.main',
+                textDecoration: 'none',
+                '&:hover': {
+                  textDecoration: 'underline'
+                }
+              }} 
+              {...props} 
+              target="_blank"
+              rel="noopener noreferrer"
+            />
+          )
+        }}
+      >
+        {markdownContent}
+      </ReactMarkdown>
+    );
   };
 
+  const content = sidebarContent.Section_Conclusion;
+
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-      <Paper elevation={3} sx={{ width: '70%', p: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          {content.title}
-        </Typography>
-        {renderContent(content.content)}
-      </Paper>
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: { xs: 'column', md: 'row' },
+      width: '95%',
+      maxWidth: '1600px',
+      margin: '0 auto', 
+      mt: 4,
+      px: { xs: 2, sm: 3, md: 4 }
+    }}>
+      <Box sx={{ 
+        width: { xs: '100%', md: '70%' },
+        margin: '0 auto'
+      }}>
+        <Paper elevation={3} sx={{ p: 4 }}>
+          <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
+            {content.title}
+          </Typography>
+          {renderContent(content.content)}
+        </Paper>
+      </Box>
     </Box>
   );
 }

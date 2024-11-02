@@ -10,7 +10,7 @@
       "**Before you press start, please note:**",
       "1. This is an educational website. It is not decentralised, or scalable, or realistic. It’s goal is to explain how Ethereum works to almost anyone interested.\n2. This website is frontend-only. All data is generated and calculated right in your browser.\n3. It should be adaptive, but because it features lots of JS and is built in horizontal format, I recommend viewing it on your computer.\n4. This website is a first pet project of mine. So it might break occasionally (though I tested it), or feature some bugs, or be displayed not in the best way on your screen resolution. Sorry!",
       "If you’d like to learn more about the project, follow the links below:",
-      "- [Medium blog post about how and why this was made](#)\n- [A GitHub repo](#)\n- if you want to suggest an edit, donate or ask me anything: tim.sha256@gmail.com"
+      "- [Medium blog post about how and why this was made](#)\n- [A GitHub repo](https://github.com/tim-sha256/ether-pos)\n- if you want to suggest an edit, donate or ask me anything: [tim.sha256@gmail.com](mailto:tim.sha256@gmail.com)"
     ]
   },
   "Section_StakingOverview": {
@@ -426,24 +426,33 @@
       }
     }
   },
-  "Section_Conclusion": {
+"Section_Conclusion": {
     "title": "Conclusion and Reference List",
     "content": [
-      "Congratulations on completing the Ethereum Proof of Stake MVP tutorial!",
-      "You've now gained insights into the core components of Ethereum's PoS system, from staking to sharding.",
-      "For further reading and references, please check the list below:",
+      "Hello again! You've made it to the end of the Ethereum Proof of Stake tutorial!",
+      "Throughout this journey, we've explored the intricate workings of Ethereum 2.0, diving deep into the concepts of staking, validator selection, finality, sharding, and more. It's been an in-depth look at how Ethereum keeps its promise of a secure and scalable blockchain, using some pretty clever mechanisms that Vitalik Buterin and the Ethereum research community put forward in the Mauve Paper.",
+      "This tutorial aimed to make these complex ideas more approachable, with visual aids, interactive elements, and sidebar notes to guide you through each concept. I hope you've found it informative and maybe even a bit fun!",
+      "**References and resources used:**",
       {
         "type": "list",
         "items": [
-          "Ethereum 2.0 Specifications: https://github.com/ethereum/consensus-specs",
-          "Ethereum Foundation Blog: https://blog.ethereum.org/",
-          "Ethereum Improvement Proposals (EIPs): https://eips.ethereum.org/",
-          "Vitalik Buterin's Website: https://vitalik.ca/",
-          "Ethereum Research Forum: https://ethresear.ch/",
-          "Ethereum Stack Exchange: https://ethereum.stackexchange.com/"
+          "Most important - the [Mauve Paper](https://cdn.hackaday.io/files/10879465447136/Mauve%20Paper%20Vitalik.pdf)",
+          "Ethereum 2.0 Specifications [https://github.com/ethereum/consensus-specs](https://github.com/ethereum/consensus-specs)",
+          "Ethereum Foundation Blog [https://blog.ethereum.org/](https://blog.ethereum.org/)",
+          "Ethereum Improvement Proposals (EIPs) [https://eips.ethereum.org/](https://eips.ethereum.org/)",
+          "Vitalik Buterin's Website [https://vitalik.ca/](https://vitalik.ca/)",
+          "Ethereum Research Forum [https://ethresear.ch/](https://ethresear.ch/)",
+          "Ethereum Stack Exchange [https://ethereum.stackexchange.com/](https://ethereum.stackexchange.com/)"
         ]
       },
-      "We hope this tutorial has been informative and has helped you understand the intricacies of Ethereum's Proof of Stake system. As the Ethereum ecosystem continues to evolve, stay curious and keep learning!"
+      "Thanks for finishing the tutorial! I'd be glad if you let me know your overall opinion of the project - it's my first time doing interactive educative websites, so there's definitely some room for improvement.", 
+      "If you have questions, want to suggest an improvement, or just want to share your thoughts, feel free to reach out: [tim.sha256@gmail.com](mailto:tim.sha256@gmail.com).", 
+      "And if you'd like to follow more of my work, check out the links below:",
+      "- [Medium blog post about how and why this was made](#)",
+      "- [A GitHub repo](https://github.com/tim-sha256/ether-pos)",
+      "- My telegram blog [@linksfromme](https://t.me/linksfromme)"
     ]
   }
+
+
 }
