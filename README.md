@@ -1,10 +1,10 @@
 # Ethereum PoS demo
 
-This project is an attempt to explain Ethereum Mauve Paper (https://cdn.hackaday.io/files/10879465447136/Mauve%20Paper%20Vitalik.pdf) in an interactive and hopefully easy-to-understand way. 
+This project is an attempt to explain [Ethereum Mauve Paper](https://cdn.hackaday.io/files/10879465447136/Mauve%20Paper%20Vitalik.pdf) in an interactive and hopefully easy-to-understand way.\
 You can read about why I made it [here](https://medium.com/@tim.sh/why-i-created-ethereum-proof-of-stake-demo-3e469ecfbe8e).\
-It was created entirely using React, with Cursor in a role of coder and ChatGPT 4o as a technical project manager that wrote instructions and documentation for Cursor. 
-I (almost) haven't wrote a single line of code myself. 
-You can read about how I did it in detail here (coming soon).
+It was created entirely using React, with Cursor in a role of coder and ChatGPT 4o as a technical project manager that wrote instructions and documentation for Cursor.\
+I (almost) haven't wrote a single line of code myself. \
+You can read about how I did it in detail here (coming soon).\
 
 Information below is +- copied from a basic react app README:
 ## Available Scripts
