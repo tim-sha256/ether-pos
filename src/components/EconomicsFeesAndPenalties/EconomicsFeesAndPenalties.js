@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Button, Stepper, Step, StepLabel } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import sidebarContent from '../../sidebarContent_new.json';
@@ -15,6 +15,10 @@ const steps = ['Transaction Fees', 'Block Rewards', 'Penalties and Slashing'];
 function EconomicsFeesAndPenalties() {
   const [activeStep, setActiveStep] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeStep]);
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);

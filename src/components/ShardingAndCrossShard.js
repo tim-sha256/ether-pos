@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Stepper, Step, StepLabel, Button } from '@mui/material';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
@@ -13,6 +13,10 @@ const steps = ['Shard Model Overview', 'Validator Assignment to Shards', 'Cross-
 function ShardingAndCrossShard() {
   const [activeStep, setActiveStep] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeStep]);
 
   const handleNext = () => {
     if (activeStep === steps.length - 1) {

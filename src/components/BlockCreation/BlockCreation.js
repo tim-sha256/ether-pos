@@ -32,6 +32,10 @@ function BlockCreation() {
     }
   }, []);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentStep]);
+
   const handleDialogClose = () => {
     setOpenDialog(false);
     navigate('/validator-selection');

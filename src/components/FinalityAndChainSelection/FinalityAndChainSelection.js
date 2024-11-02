@@ -31,6 +31,10 @@ function FinalityAndChainSelection() {
     setBlockAggregationData(storedBlockAggregationData);
   }, []);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeStep]);
+
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };

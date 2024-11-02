@@ -42,6 +42,10 @@ function ValidatorSelection() {
     localStorage.setItem('globalRandao', storedGlobalRandao);
   }, []);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentStep]);
+
   const handleDialogClose = (option) => {
     setOpenDialog(false);
     if (option === 'goBack') {
