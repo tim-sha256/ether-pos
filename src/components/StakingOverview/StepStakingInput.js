@@ -32,13 +32,13 @@ function StepStakingInput({
           margin="normal"
         />
         <TextField
-          label="Number of Blocks to Validate (1-32)"
+          label="Number of Blocks to Validate (5-15)"
           type="number"
           value={blocksToValidate}
           onChange={handleBlocksToValidateChange}
           fullWidth
           margin="normal"
-          InputProps={{ inputProps: { min: 1, max: 32 } }}
+          InputProps={{ inputProps: { min: 5, max: 15 } }}
         />
         <Button variant="contained" onClick={generateRandao} disabled={isAnimating} sx={{ mt: 2 }}>
           Generate RANDao
