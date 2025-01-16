@@ -2,7 +2,6 @@
   "name": "ethereum-pos",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://tim-sha256.github.io/ether-pos",
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
